@@ -1,5 +1,5 @@
 import path from "node:path";
-import { writeFileSync } from "node:fs";
+import { writeFileSync, mkdirSync } from "node:fs";
 import { Command } from "commander";
 import { scan } from "./scan.js";
 import type { Diagnostic, DiffInfo, ScanOptions } from "./types.js";
@@ -194,8 +194,10 @@ const program = new Command()
         // #4: Report and AI-prompt file I/O belongs in the CLI layer, not in scan().
         // #3: Wrapped in try-catch so a bad path doesn't crash after all the expensive scan work.
         if (flags.report) {
-          const markdownReport = generateMarkdownReport(scanResult.diagnostics, projectDirectory);
+          const projectName = path.basename(path.resolve(projectDirectory));
+          const markdownReport = generateMarkdownReport(scanResult.diagnostics, projectName);
           try {
+            mkdirSync(path.dirname(flags.report), { recursive: true });
             writeFileSync(flags.report, markdownReport);
             logger.break();
             logger.success(`Report written to ${flags.report}`);
@@ -211,6 +213,7 @@ const program = new Command()
           try {
             if (isMarkdown) {
               const markdownContent = generateAIPromptsMarkdown(scanResult.diagnostics);
+              mkdirSync(path.dirname(flags.aiPrompts), { recursive: true });
               writeFileSync(flags.aiPrompts, markdownContent);
               logger.break();
               logger.success(`AI prompts (Markdown) written to ${flags.aiPrompts}`);
@@ -222,6 +225,7 @@ const program = new Command()
               const promptsObject = Object.fromEntries(
                 aiPrompts.map(({ key, prompt }) => [key, prompt]),
               );
+              mkdirSync(path.dirname(flags.aiPrompts), { recursive: true });
               writeFileSync(flags.aiPrompts, JSON.stringify(promptsObject, null, 2));
               logger.break();
               logger.success(`AI prompts (JSON) written to ${flags.aiPrompts}`);

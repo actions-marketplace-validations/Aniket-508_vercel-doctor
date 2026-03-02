@@ -56,7 +56,10 @@ describe("groupDiagnosticsByCategory", () => {
     const diagnostics = [
       makeDiagnostic({ category: "Vercel" }),
       makeDiagnostic({ category: "Vercel" }),
-      makeDiagnostic({ category: "Next.js", rule: "nextjs-link-prefetch-default" }),
+      makeDiagnostic({
+        category: "Next.js",
+        rule: "nextjs-link-prefetch-default",
+      }),
     ];
     const sections = groupDiagnosticsByCategory(diagnostics);
     expect(sections).toHaveLength(2);
@@ -92,24 +95,46 @@ describe("generateAIPrompts", () => {
   it("produces one entry per diagnostic (no key collision)", () => {
     // Two diagnostics with the same rule but different files — both must be preserved
     const diagnostics = [
-      makeDiagnostic({ filePath: "/app/page.tsx", line: 1 }),
-      makeDiagnostic({ filePath: "/app/page.tsx", line: 1 }), // same key as above
-      makeDiagnostic({ filePath: "/app/layout.tsx", line: 5 }),
+      makeDiagnostic({ filePath: "/app/page.tsx", line: 1, column: 1 }),
+      makeDiagnostic({ filePath: "/app/page.tsx", line: 1, column: 2 }), // different column
+      makeDiagnostic({ filePath: "/app/layout.tsx", line: 5, column: 1 }),
     ];
     const result = generateAIPrompts(diagnostics);
-    // All three entries preserved — no silent overwrite
     expect(result).toHaveLength(3);
+    expect(result[0].key).not.toBe(result[1].key);
   });
 
-  it("key format is plugin/rule::filePath:line", () => {
+  it("filters for fixable issues only", () => {
+    const diagnostics = [
+      makeDiagnostic({ rule: "vercel-no-force-dynamic" }), // fixable
+      makeDiagnostic({ rule: "unknown-rule" }), // not fixable
+    ];
+    const result = generateAIPrompts(diagnostics);
+    expect(result).toHaveLength(1);
+    expect(result[0].key).toContain("vercel-no-force-dynamic");
+  });
+
+  it("includes column number in prompt content", () => {
+    const diag = makeDiagnostic({
+      rule: "vercel-no-force-dynamic",
+      filePath: "src/app/page.tsx",
+      line: 10,
+      column: 5,
+    });
+    const [entry] = generateAIPrompts([diag]);
+    expect(entry.prompt).toContain("**File:** src/app/page.tsx:10:5");
+  });
+
+  it("key format is plugin/rule::filePath:line:column", () => {
     const diag = makeDiagnostic({
       plugin: "vercel",
       rule: "vercel-no-force-dynamic",
       filePath: "/app/page.tsx",
       line: 42,
+      column: 10,
     });
     const [entry] = generateAIPrompts([diag]);
-    expect(entry.key).toBe("vercel/vercel-no-force-dynamic::/app/page.tsx:42");
+    expect(entry.key).toBe("vercel/vercel-no-force-dynamic::/app/page.tsx:42:10");
   });
 
   it("returns empty array for empty input", () => {

@@ -19,6 +19,7 @@ export interface AIPromptContext {
   issue: string;
   filePath: string;
   line: number;
+  column: number;
   severity: "error" | "warning";
   fixStrategy: string;
 }
@@ -205,7 +206,7 @@ const generateAIPrompt = (context: AIPromptContext): string => {
   return `Fix this Vercel optimization issue:
 
 **Rule:** ${context.rule}
-**File:** ${context.filePath}:${context.line}
+**File:** ${context.filePath}:${context.line}:${context.column}
 **Severity:** ${context.severity}
 **Issue:** ${context.issue}
 
@@ -328,16 +329,17 @@ export const generateAIPromptsMarkdown = (
     report += `- **Rule:** \`${diagnostic.plugin}/${diagnostic.rule}\`\n`;
     report += `- **Issue:** ${diagnostic.message}\n\n`;
     report += `### Prompt\n\n`;
-    report += "\`\`\`\n";
+    report += "```\n";
     report += generateAIPrompt({
       rule: diagnostic.rule,
       issue: diagnostic.message,
       filePath: diagnostic.filePath,
       line: diagnostic.line,
+      column: diagnostic.column,
       severity: diagnostic.severity,
       fixStrategy: diagnostic.help,
     });
-    report += "\n\`\`\`\n\n";
+    report += "\n```\n\n";
     report += `---\n\n`;
   }
 
@@ -352,20 +354,23 @@ export interface AIPromptEntry {
 }
 
 export const generateAIPrompts = (diagnostics: Diagnostic[]): AIPromptEntry[] => {
-  return diagnostics.map((diagnostic) => {
-    const context: AIPromptContext = {
-      rule: diagnostic.rule,
-      issue: diagnostic.message,
-      filePath: diagnostic.filePath,
-      line: diagnostic.line,
-      severity: diagnostic.severity,
-      fixStrategy: diagnostic.help,
-    };
-    return {
-      key: `${diagnostic.plugin}/${diagnostic.rule}::${diagnostic.filePath}:${diagnostic.line}`,
-      prompt: generateAIPrompt(context),
-    };
-  });
+  return diagnostics
+    .filter((d) => RULE_FIX_STRATEGIES[d.rule])
+    .map((diagnostic) => {
+      const context: AIPromptContext = {
+        rule: diagnostic.rule,
+        issue: diagnostic.message,
+        filePath: diagnostic.filePath,
+        line: diagnostic.line,
+        column: diagnostic.column,
+        severity: diagnostic.severity,
+        fixStrategy: diagnostic.help,
+      };
+      return {
+        key: `${diagnostic.plugin}/${diagnostic.rule}::${diagnostic.filePath}:${diagnostic.line}:${diagnostic.column}`,
+        prompt: generateAIPrompt(context),
+      };
+    });
 };
 
 export const generateMarkdownReport = (
@@ -408,16 +413,17 @@ export const generateMarkdownReport = (
       const fix = RULE_FIX_STRATEGIES[diagnostic.rule];
       if (fix) {
         report += `\n<details>\n<summary>🤖 AI Fix Prompt (Click to expand)</summary>\n\n`;
-        report += "\`\`\`\n";
+        report += "```\n";
         report += generateAIPrompt({
           rule: diagnostic.rule,
           issue: diagnostic.message,
           filePath: diagnostic.filePath,
           line: diagnostic.line,
+          column: diagnostic.column,
           severity: diagnostic.severity,
           fixStrategy: diagnostic.help,
         });
-        report += "\n\`\`\`\n\n</details>\n";
+        report += "\n```\n\n</details>\n";
       }
 
       report += "\n";
