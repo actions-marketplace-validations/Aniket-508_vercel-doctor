@@ -1,0 +1,35 @@
+---
+icon: FilePlusCorner
+title: Reports
+description: Generate markdown reports and AI-compatible fix prompts for Cursor, Claude, Windsurf, etc.
+---
+
+Generate detailed reports and AI-compatible fix prompts:
+
+```bash
+# Generate a markdown report
+npx vercel-doctor . --output markdown --report report.md
+
+# Export AI prompts for fixing issues
+npx vercel-doctor . --ai-prompts fixes.json
+```
+
+The `--ai-prompts` flag generates ready-to-use prompts for AI coding tools. It only exports issues that have a known fix strategy. The format is auto-detected from the file extension:
+
+- **`.json`** — Structured format for programmatic use and automation
+- **`.md` or `.markdown`** — Human-readable format, easy to copy-paste into AI chats
+
+```bash
+# Export as JSON (for scripts, automation)
+npx vercel-doctor . --ai-prompts fixes.json
+
+# Export as Markdown (for manual copy-paste into Cursor/Claude/Windsurf)
+npx vercel-doctor . --ai-prompts fixes.md
+```
+
+Each prompt includes:
+
+- The specific rule violation
+- File location, line, and column number
+- Before/after code examples
+- Step-by-step fix instructions
