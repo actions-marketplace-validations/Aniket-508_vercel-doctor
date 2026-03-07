@@ -19,7 +19,7 @@ writeTestFile(
     name: "vercel-checks-fixture",
     dependencies: {
       react: "^19.0.0",
-      next: "^15.0.0",
+      next: "^16.0.0",
     },
   }),
 );
@@ -195,6 +195,21 @@ describe("runVercelChecks", () => {
     expect(reportedRules).toContain("vercel-sequential-database-await");
     expect(reportedRules).toContain("vercel-suggest-turbopack-build-cache");
     expect(reportedRules).toContain("vercel-get-static-props-consider-isr");
+
+    const noStoreDiagnostic = diagnostics.find(
+      (diagnostic) => diagnostic.rule === "vercel-no-no-store-fetch",
+    );
+    expect(noStoreDiagnostic?.help).toContain('"use cache"');
+
+    const edgeAwaitDiagnostic = diagnostics.find(
+      (diagnostic) => diagnostic.rule === "vercel-edge-sequential-await",
+    );
+    expect(edgeAwaitDiagnostic?.help).toContain("Promise.all()");
+
+    const databaseAwaitDiagnostic = diagnostics.find(
+      (diagnostic) => diagnostic.rule === "vercel-sequential-database-await",
+    );
+    expect(databaseAwaitDiagnostic?.help).toContain("Promise.all()");
   });
 
   it("respects includePaths filtering", () => {

@@ -29,6 +29,12 @@ describe("discoverProject", () => {
   it("throws when package.json is missing", () => {
     expect(() => discoverProject("/nonexistent/path")).toThrow("No package.json found");
   });
+
+  it("detects Next.js version metadata when available", () => {
+    const projectInfo = discoverProject(path.join(FIXTURES_DIRECTORY, "nextjs-app"));
+    expect(projectInfo.nextVersion).toBe("^15.0.0");
+    expect(projectInfo.nextMajorVersion).toBe(15);
+  });
 });
 
 describe("formatFrameworkName", () => {

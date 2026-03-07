@@ -7,6 +7,8 @@ import {
   FLUID_COMPUTE_ROUTE_THRESHOLD_COUNT,
   LARGE_PROJECT_FILE_COUNT_THRESHOLD,
   MAX_STATIC_ASSET_CDN_DIAGNOSTICS_COUNT,
+  NEXT_MAJOR_VERSION_15,
+  NEXT_MAJOR_VERSION_16,
   SEQUENTIAL_DATABASE_AWAIT_WARNING_THRESHOLD_COUNT,
   STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES,
   STATIC_ASSET_SIZE_DECIMAL_PLACES_COUNT,
@@ -21,6 +23,7 @@ import type {
   VercelConfigCron,
   VercelConfigFunctionConfig,
 } from "../types.js";
+import { getSemverMajorVersion } from "./get-semver-major-version.js";
 import { readPackageJson } from "./read-package-json.js";
 
 const IGNORED_DIRECTORY_NAMES = new Set([
@@ -285,6 +288,51 @@ const readVercelConfig = (rootDirectory: string): VercelConfig | null => {
   return parsedVercelConfig;
 };
 
+const readNextVersion = (rootDirectory: string): string | null => {
+  const packageJsonPath = path.join(rootDirectory, PACKAGE_JSON_PATH);
+  if (!fs.existsSync(packageJsonPath)) return null;
+
+  try {
+    const packageJson = readPackageJson(packageJsonPath);
+    const dependencies = packageJson.dependencies ?? {};
+    const devDependencies = packageJson.devDependencies ?? {};
+    const peerDependencies = packageJson.peerDependencies ?? {};
+    return dependencies.next ?? devDependencies.next ?? peerDependencies.next ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const buildNoStoreFetchHelp = (nextMajorVersion: number | null): string => {
+  if (nextMajorVersion !== null && nextMajorVersion >= NEXT_MAJOR_VERSION_16) {
+    return `For Next.js ${NEXT_MAJOR_VERSION_16}+, prefer \`"use cache"\` with \`cacheLife\`, \`cacheTag\`, and targeted revalidation. Keep \`no-store\` only for truly per-request data.`;
+  }
+
+  if (nextMajorVersion === NEXT_MAJOR_VERSION_15) {
+    return `Next.js ${NEXT_MAJOR_VERSION_15} defaults fetches to uncached. Add \`cache: "force-cache"\` or \`next: { revalidate: ... }\` for cacheable data.`;
+  }
+
+  return "Use cacheable fetches (`force-cache`) or incremental revalidation when real-time data is not required.";
+};
+
+const buildMissingCachePolicyHelp = (nextMajorVersion: number | null): string => {
+  if (nextMajorVersion !== null && nextMajorVersion >= NEXT_MAJOR_VERSION_16) {
+    return `For cacheable GET routes on Next.js ${NEXT_MAJOR_VERSION_16}+, add \`Cache-Control\` headers or adopt \`"use cache"\` + cache tags to avoid repeated origin work.`;
+  }
+
+  if (nextMajorVersion === NEXT_MAJOR_VERSION_15) {
+    return `Next.js ${NEXT_MAJOR_VERSION_15} GET handlers are uncached by default. Add \`Cache-Control\`, \`revalidate\`, or cacheable fetch directives.`;
+  }
+
+  return "Add `Cache-Control` headers or `revalidate` directives for cacheable GET responses.";
+};
+
+const buildEdgeSequentialAwaitHelp = (): string =>
+  "Use `Promise.all()` for independent I/O operations in edge handlers.";
+
+const buildSequentialDatabaseAwaitHelp = (): string =>
+  "Use `Promise.all()` for independent queries, or consolidate related Prisma reads into a single relational query.";
+
 const collectLargeStaticAssetCandidates = (
   rootDirectory: string,
   projectFilePaths: string[],
@@ -320,6 +368,7 @@ const collectLargeStaticAssetCandidates = (
 const collectSsgDiagnostics = (
   relativeFilePath: string,
   fileContent: string,
+  nextMajorVersion: number | null,
   diagnostics: Diagnostic[],
 ): void => {
   if (APP_PAGE_OR_LAYOUT_FILE_PATTERN.test(relativeFilePath)) {
@@ -344,7 +393,7 @@ const collectSsgDiagnostics = (
           relativeFilePath,
           VERCEL_RULE_IDS.NO_NO_STORE_FETCH,
           "Server fetch disables caching with `no-store` or `revalidate: 0` — this increases uncached bandwidth and compute costs",
-          "Use cacheable fetches (`force-cache`) or incremental revalidation when real-time data is not required.",
+          buildNoStoreFetchHelp(nextMajorVersion),
           getLineNumberForPattern(
             fileContent,
             hasNoStoreFetch ? NO_STORE_FETCH_PATTERN : ZERO_REVALIDATE_PATTERN,
@@ -415,7 +464,7 @@ const collectEdgeDiagnostics = (
         relativeFilePath,
         VERCEL_RULE_IDS.EDGE_SEQUENTIAL_AWAIT,
         "Edge handler appears to run async calls sequentially — parallelizing independent work reduces billed execution time",
-        "Use `Promise.all()` for independent I/O operations in edge handlers.",
+        buildEdgeSequentialAwaitHelp(),
         getLineNumberForPattern(fileContent, AWAIT_LINE_PATTERN),
       ),
     );
@@ -425,6 +474,7 @@ const collectEdgeDiagnostics = (
 const collectCachingDiagnostics = (
   relativeFilePath: string,
   fileContent: string,
+  nextMajorVersion: number | null,
   diagnostics: Diagnostic[],
 ): void => {
   if (!isApiRoutePath(relativeFilePath)) return;
@@ -445,7 +495,7 @@ const collectCachingDiagnostics = (
         relativeFilePath,
         VERCEL_RULE_IDS.MISSING_CACHE_POLICY,
         "GET route handler has no explicit cache policy — responses may miss CDN caching opportunities",
-        "Add `Cache-Control` headers or `revalidate` directives for cacheable GET responses.",
+        buildMissingCachePolicyHelp(nextMajorVersion),
         getLineNumberForPattern(fileContent, APP_ROUTE_GET_HANDLER_PATTERN),
       ),
     );
@@ -471,9 +521,11 @@ const collectCachingDiagnostics = (
 const collectBuildOptimizationDiagnostics = (
   relativeFilePath: string,
   fileContent: string,
+  nextMajorVersion: number | null,
   diagnostics: Diagnostic[],
 ): void => {
   if (!NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath)) return;
+  if (nextMajorVersion !== null && nextMajorVersion < NEXT_MAJOR_VERSION_16) return;
 
   const hasExperimental = /\bexperimental\s*:\s*\{/m.test(fileContent);
   const hasTurbopackCache = TURBOPACK_CACHE_PATTERN.test(fileContent);
@@ -593,7 +645,7 @@ const collectDatabaseAwaitDiagnostics = (
       relativeFilePath,
       VERCEL_RULE_IDS.SEQUENTIAL_DATABASE_AWAIT,
       "API route appears to run multiple database calls sequentially — this can inflate function duration and cost",
-      "Use `Promise.all()` for independent queries, or consolidate related Prisma reads into a single relational query.",
+      buildSequentialDatabaseAwaitHelp(),
       getLineNumberForPattern(fileContent, SEQUENTIAL_DATABASE_AWAIT_LINE_PATTERN),
     ),
   );
@@ -687,6 +739,8 @@ export const runVercelChecks = (
   const diagnostics: Diagnostic[] = [];
   const includedPathSet = buildIncludedPathSet(rootDirectory, options.includePaths);
   const projectFilePaths = collectProjectFilePaths(rootDirectory);
+  const nextVersion = readNextVersion(rootDirectory);
+  const nextMajorVersion = getSemverMajorVersion(nextVersion);
 
   const largeStaticAssetCandidates = collectLargeStaticAssetCandidates(
     rootDirectory,
@@ -713,11 +767,16 @@ export const runVercelChecks = (
     const fileContent = readTextFileSafely(absoluteFilePath);
     if (!fileContent) continue;
 
-    collectSsgDiagnostics(relativeFilePath, fileContent, diagnostics);
+    collectSsgDiagnostics(relativeFilePath, fileContent, nextMajorVersion, diagnostics);
     collectEdgeDiagnostics(relativeFilePath, fileContent, diagnostics);
-    collectCachingDiagnostics(relativeFilePath, fileContent, diagnostics);
+    collectCachingDiagnostics(relativeFilePath, fileContent, nextMajorVersion, diagnostics);
     collectImageOptimizationDiagnostics(relativeFilePath, fileContent, diagnostics);
-    collectBuildOptimizationDiagnostics(relativeFilePath, fileContent, diagnostics);
+    collectBuildOptimizationDiagnostics(
+      relativeFilePath,
+      fileContent,
+      nextMajorVersion,
+      diagnostics,
+    );
     collectDatabaseAwaitDiagnostics(relativeFilePath, fileContent, diagnostics);
 
     if (isApiRoutePath(relativeFilePath)) {

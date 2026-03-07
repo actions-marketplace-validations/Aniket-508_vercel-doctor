@@ -33,6 +33,7 @@ import { highlighter } from "./utils/highlighter.js";
 import { indentMultilineText } from "./utils/indent-multiline-text.js";
 import { loadConfig } from "./utils/load-config.js";
 import { logger } from "./utils/logger.js";
+import { getNextVersionCostGuidance } from "./utils/get-next-version-cost-guidance.js";
 import { runKnip } from "./utils/run-knip.js";
 import { runOxlint } from "./utils/run-oxlint.js";
 import { runVercelChecks } from "./utils/run-vercel-checks.js";
@@ -191,6 +192,16 @@ const printCompletedSteps = (messages: string[]): void => {
     spinner(message).start().succeed(message);
   }
 
+  logger.break();
+};
+
+const printVersionAwareGuidance = (guidanceLines: string[]): void => {
+  if (guidanceLines.length === 0) return;
+
+  logger.log(`Version-aware cost guidance:`);
+  for (const guidanceLine of guidanceLines) {
+    logger.dim(`  - ${guidanceLine}`);
+  }
   logger.break();
 };
 
@@ -378,8 +389,14 @@ export const scan = async (
   if (!options.scoreOnly) {
     const frameworkLabel = formatFrameworkName(projectInfo.framework);
     const languageLabel = projectInfo.hasTypeScript ? "TypeScript" : "JavaScript";
+    const nextVersionLabel = projectInfo.nextVersion
+      ? `Next.js ${projectInfo.nextVersion}`
+      : "Next.js version unknown";
     const projectStepMessages = [
       `Detecting framework. Found ${highlighter.info(frameworkLabel)}.`,
+      ...(projectInfo.framework === "nextjs"
+        ? [`Detecting Next.js version. Found ${highlighter.info(nextVersionLabel)}.`]
+        : []),
       `Detecting React version. Found ${highlighter.info(`React ${projectInfo.reactVersion}`)}.`,
       `Detecting language. Found ${highlighter.info(languageLabel)}.`,
       isDiffMode
@@ -389,6 +406,7 @@ export const scan = async (
     ];
 
     printCompletedSteps(projectStepMessages);
+    printVersionAwareGuidance(getNextVersionCostGuidance(projectInfo));
   }
 
   const jsxIncludePaths = isDiffMode

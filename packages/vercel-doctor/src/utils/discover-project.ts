@@ -9,6 +9,7 @@ import type {
   ProjectInfo,
   WorkspacePackage,
 } from "../types.js";
+import { getSemverMajorVersion } from "./get-semver-major-version.js";
 import { readPackageJson } from "./read-package-json.js";
 
 const FRAMEWORK_PACKAGES: Record<string, Framework> = {
@@ -64,9 +65,12 @@ const detectFramework = (dependencies: Record<string, string>): Framework => {
 
 const extractDependencyInfo = (packageJson: PackageJson): DependencyInfo => {
   const allDependencies = collectAllDependencies(packageJson);
+  const nextVersion = allDependencies.next ?? null;
   return {
     reactVersion: allDependencies.react ?? null,
     framework: detectFramework(allDependencies),
+    nextVersion,
+    nextMajorVersion: getSemverMajorVersion(nextVersion),
   };
 };
 
@@ -156,7 +160,14 @@ const findMonorepoRoot = (startDirectory: string): string | null => {
 
 const findDependencyInfoFromMonorepoRoot = (directory: string): DependencyInfo => {
   const monorepoRoot = findMonorepoRoot(directory);
-  if (!monorepoRoot) return { reactVersion: null, framework: "unknown" };
+  if (!monorepoRoot) {
+    return {
+      reactVersion: null,
+      framework: "unknown",
+      nextVersion: null,
+      nextMajorVersion: null,
+    };
+  }
 
   const rootPackageJson = readPackageJson(path.join(monorepoRoot, "package.json"));
   const rootInfo = extractDependencyInfo(rootPackageJson);
@@ -165,12 +176,19 @@ const findDependencyInfoFromMonorepoRoot = (directory: string): DependencyInfo =
   return {
     reactVersion: rootInfo.reactVersion ?? workspaceInfo.reactVersion,
     framework: rootInfo.framework !== "unknown" ? rootInfo.framework : workspaceInfo.framework,
+    nextVersion: rootInfo.nextVersion ?? workspaceInfo.nextVersion,
+    nextMajorVersion: rootInfo.nextMajorVersion ?? workspaceInfo.nextMajorVersion,
   };
 };
 
 const findReactInWorkspaces = (rootDirectory: string, packageJson: PackageJson): DependencyInfo => {
   const patterns = getWorkspacePatterns(rootDirectory, packageJson);
-  const result: DependencyInfo = { reactVersion: null, framework: "unknown" };
+  const result: DependencyInfo = {
+    reactVersion: null,
+    framework: "unknown",
+    nextVersion: null,
+    nextMajorVersion: null,
+  };
 
   for (const pattern of patterns) {
     const directories = resolveWorkspaceDirectories(rootDirectory, pattern);
@@ -185,8 +203,19 @@ const findReactInWorkspaces = (rootDirectory: string, packageJson: PackageJson):
       if (info.framework !== "unknown" && result.framework === "unknown") {
         result.framework = info.framework;
       }
+      if (info.nextVersion && !result.nextVersion) {
+        result.nextVersion = info.nextVersion;
+      }
+      if (info.nextMajorVersion !== null && result.nextMajorVersion === null) {
+        result.nextMajorVersion = info.nextMajorVersion;
+      }
 
-      if (result.reactVersion && result.framework !== "unknown") {
+      if (
+        result.reactVersion &&
+        result.framework !== "unknown" &&
+        result.nextVersion &&
+        result.nextMajorVersion !== null
+      ) {
         return result;
       }
     }
@@ -259,9 +288,10 @@ export const discoverProject = (directory: string): ProjectInfo => {
   }
 
   const packageJson = readPackageJson(packageJsonPath);
-  let { reactVersion, framework } = extractDependencyInfo(packageJson);
+  let { reactVersion, framework, nextVersion, nextMajorVersion } =
+    extractDependencyInfo(packageJson);
 
-  if (!reactVersion || framework === "unknown") {
+  if (!reactVersion || framework === "unknown" || !nextVersion || nextMajorVersion === null) {
     const workspaceInfo = findReactInWorkspaces(directory, packageJson);
     if (!reactVersion && workspaceInfo.reactVersion) {
       reactVersion = workspaceInfo.reactVersion;
@@ -269,15 +299,30 @@ export const discoverProject = (directory: string): ProjectInfo => {
     if (framework === "unknown" && workspaceInfo.framework !== "unknown") {
       framework = workspaceInfo.framework;
     }
+    if (!nextVersion && workspaceInfo.nextVersion) {
+      nextVersion = workspaceInfo.nextVersion;
+    }
+    if (nextMajorVersion === null && workspaceInfo.nextMajorVersion !== null) {
+      nextMajorVersion = workspaceInfo.nextMajorVersion;
+    }
   }
 
-  if ((!reactVersion || framework === "unknown") && !isMonorepoRoot(directory)) {
+  if (
+    (!reactVersion || framework === "unknown" || !nextVersion || nextMajorVersion === null) &&
+    !isMonorepoRoot(directory)
+  ) {
     const monorepoInfo = findDependencyInfoFromMonorepoRoot(directory);
     if (!reactVersion) {
       reactVersion = monorepoInfo.reactVersion;
     }
     if (framework === "unknown") {
       framework = monorepoInfo.framework;
+    }
+    if (!nextVersion) {
+      nextVersion = monorepoInfo.nextVersion;
+    }
+    if (nextMajorVersion === null) {
+      nextMajorVersion = monorepoInfo.nextMajorVersion;
     }
   }
 
@@ -290,6 +335,8 @@ export const discoverProject = (directory: string): ProjectInfo => {
     projectName,
     reactVersion,
     framework,
+    nextVersion,
+    nextMajorVersion,
     hasTypeScript,
     sourceFileCount,
   };

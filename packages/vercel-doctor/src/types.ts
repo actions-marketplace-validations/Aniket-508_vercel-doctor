@@ -5,6 +5,8 @@ export interface ProjectInfo {
   projectName: string;
   reactVersion: string | null;
   framework: Framework;
+  nextVersion: string | null;
+  nextMajorVersion: number | null;
   hasTypeScript: boolean;
   sourceFileCount: number;
 }
@@ -64,6 +66,8 @@ export interface PackageJson {
 export interface DependencyInfo {
   reactVersion: string | null;
   framework: Framework;
+  nextVersion: string | null;
+  nextMajorVersion: number | null;
 }
 
 export interface KnipIssue {
