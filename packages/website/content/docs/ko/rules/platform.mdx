@@ -89,6 +89,8 @@ API/서버 라우트가 3개 이상인 프로젝트를 감지합니다.
 
 <Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
 
+This check is version-aware and only applies to Next.js 16+ projects.
+
 `experimental` 설정은 있지만 `turbopackFileSystemCacheForBuild`가 없는 `next.config` 파일을 감지합니다.
 
 **이유:** Next.js 16+는 Turbopack 빌드 캐시를 지원하며, 빌드 시간을 크게 줄일 수 있습니다.

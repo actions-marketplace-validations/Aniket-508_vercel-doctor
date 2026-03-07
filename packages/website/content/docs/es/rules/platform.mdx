@@ -89,6 +89,8 @@ Detecta proyectos con 3 o más rutas API/servidor.
 
 <Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
 
+This check is version-aware and only applies to Next.js 16+ projects.
+
 Detecta archivos `next.config` con configuración `experimental` pero sin `turbopackFileSystemCacheForBuild`.
 
 **Por qué importa:** Next.js 16+ soporta la caché de compilación de Turbopack, que puede reducir significativamente los tiempos de compilación.

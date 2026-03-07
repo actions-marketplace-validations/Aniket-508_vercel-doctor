@@ -5,6 +5,14 @@ description: Aturan yang mendeteksi pola yang mencegah caching efektif di Vercel
 
 Aturan-aturan ini mengidentifikasi pola yang melewati CDN dan caching ISR Vercel, memaksa rendering sisi server yang tidak perlu dan meningkatkan biaya komputasi.
 
+## Version-aware behavior
+
+Caching diagnostics adapt to the detected Next.js major version:
+
+- **Next.js 15**: warnings emphasize that fetch and GET handlers are uncached by default.
+- **Next.js 16+**: warnings prioritize Cache Components guidance (`"use cache"`, cache tags, targeted revalidation).
+- **Other/unknown versions**: warnings use framework-agnostic cache policy guidance.
+
 ## nextjs-no-side-effect-in-get-handler
 
 <Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>

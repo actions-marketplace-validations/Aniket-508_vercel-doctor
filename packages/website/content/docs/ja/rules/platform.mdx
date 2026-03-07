@@ -89,6 +89,8 @@ Bun runtime 向けに設定されていないプロジェクト（`package.json`
 
 <Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
 
+This check is version-aware and only applies to Next.js 16+ projects.
+
 `experimental` 設定があり、`turbopackFileSystemCacheForBuild` がない `next.config` ファイルを検出します。
 
 **Why it matters:** Next.js 16+ は Turbopack ビルドキャッシュに対応しており、ビルド時間を大幅に短縮できます。

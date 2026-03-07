@@ -89,6 +89,8 @@ const [users, posts, tags] = await Promise.all([
 
 <Callout type="warn">Warning · `vercel-doctor/vercel-suggest-turbopack-build-cache`</Callout>
 
+This check is version-aware and only applies to Next.js 16+ projects.
+
 检测 `next.config` 中有 `experimental` 配置但未启用 `turbopackFileSystemCacheForBuild` 的情况。
 
 **为何重要：** Next.js 16+ 支持 Turbopack 构建缓存，可显著缩短构建时间。

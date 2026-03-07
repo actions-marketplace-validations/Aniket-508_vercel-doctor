@@ -70,3 +70,13 @@ Vercel Doctor exécute deux passes d'analyse en parallèle :
 - **Compatible CI** — mode non interactif pour les pipelines automatisés
 - **Configurable** — ignorer des règles ou fichiers via un fichier de config
 - **AI skill** — installation en tant que skill pour Claude Code, Cursor, Codex et plus
+
+- **Version-aware guidance** — recommendations adjust to the detected Next.js major version
+
+## Version-aware checks
+
+Vercel Doctor detects your Next.js major version and adapts guidance automatically:
+
+- **Next.js 15**: highlights that fetch and GET handlers are uncached by default, so explicit cache policies matter more.
+- **Next.js 16+**: recommends Cache Components patterns (`"use cache"`, cache tags) and surfaces Turbopack build cache guidance.
+- **Unknown version**: falls back to generic caching guidance and asks for an explicit `next` semver range.

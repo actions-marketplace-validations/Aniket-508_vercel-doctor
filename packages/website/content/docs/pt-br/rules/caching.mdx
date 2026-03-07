@@ -5,6 +5,14 @@ description: Regras que detectam padrões que impedem o cache efetivo na Vercel.
 
 Essas regras identificam padrões que ignoram o CDN da Vercel e o cache ISR, forçando renderização desnecessária no lado do servidor e aumentando os custos de computação.
 
+## Version-aware behavior
+
+Caching diagnostics adapt to the detected Next.js major version:
+
+- **Next.js 15**: warnings emphasize that fetch and GET handlers are uncached by default.
+- **Next.js 16+**: warnings prioritize Cache Components guidance (`"use cache"`, cache tags, targeted revalidation).
+- **Other/unknown versions**: warnings use framework-agnostic cache policy guidance.
+
 ## nextjs-no-side-effect-in-get-handler
 
 <Callout type="error">Error · `vercel-doctor/nextjs-no-side-effect-in-get-handler`</Callout>
