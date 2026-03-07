@@ -91,7 +91,7 @@ Detects projects with 3 or more API/server routes.
 
 Detects `next.config` files with `experimental` settings but without `turbopackFileSystemCacheForBuild`.
 
-**Why it matters:** Next.js 16+ supports Turbopack build cache, which can significantly reduce build times.
+**Why it matters:** Next.js 16+ supports Turbopack build cache, which can significantly reduce build times. This check is version-aware and only applies to Next.js 16+ projects.
 
 ```js title="Good"
 // next.config.js
