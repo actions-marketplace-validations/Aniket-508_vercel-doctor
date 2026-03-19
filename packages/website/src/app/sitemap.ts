@@ -14,12 +14,15 @@ const STATIC_PATHS: { path: `/${string}`; priority: number }[] = [
   { path: ROUTES.SPONSORS, priority: 0.6 },
 ];
 
-const buildAlternates = (path: `/${string}`): { languages: Record<string, string> } => {
+const buildAlternates = (
+  path: `/${string}`,
+): { languages: Record<string, string> } => {
   const languages: Record<string, string> = {};
   for (const lang of i18n.languages) {
     languages[lang] = `${SITE.URL}${withLocalePrefix(lang, path)}`;
   }
-  languages["x-default"] = `${SITE.URL}${withLocalePrefix(i18n.defaultLanguage, path)}`;
+  languages["x-default"] =
+    `${SITE.URL}${withLocalePrefix(i18n.defaultLanguage, path)}`;
   return { languages };
 };
 
@@ -41,7 +44,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...new Map(
       source
         .getPages()
-        .filter((page) => page.locale === i18n.defaultLanguage && page.slugs.length > 0)
+        .filter(
+          (page) =>
+            page.locale === i18n.defaultLanguage && page.slugs.length > 0,
+        )
         .map((page) => [page.slugs.join("/"), page.slugs]),
     ).values(),
   ];

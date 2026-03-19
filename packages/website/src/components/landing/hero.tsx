@@ -2,7 +2,7 @@
 
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { GithubIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -29,11 +29,11 @@ interface HeroProps {
 const SkillsCommand = ({ translation }: { translation: Translation }) => {
   const [didCopy, setDidCopy] = useState(false);
 
-  const copyCommand = async () => {
+  const copyCommand = useCallback(async () => {
     await navigator.clipboard.writeText(SKILLS_COMMAND);
     setDidCopy(true);
     setTimeout(() => setDidCopy(false), 2000);
-  };
+  }, []);
 
   return (
     <button
@@ -68,12 +68,14 @@ const CommandBlock = ({ translation }: { translation: Translation }) => {
     (packageManager) => packageManager.id === selectedPackageManager,
   );
 
-  const copyCommand = async () => {
-    if (!activeManager) return;
+  const copyCommand = useCallback(async () => {
+    if (!activeManager) {
+      return;
+    }
     await navigator.clipboard.writeText(activeManager.command);
     setDidCopy(true);
     setTimeout(() => setDidCopy(false), 2000);
-  };
+  }, [activeManager]);
 
   return (
     <div className="relative flex w-full max-w-md items-center p-px">
@@ -125,56 +127,54 @@ const CommandBlock = ({ translation }: { translation: Translation }) => {
   );
 };
 
-export const Hero = ({ translation, lang }: HeroProps) => {
-  return (
-    <SectionContainer>
-      <SectionContent className="flex flex-col gap-8 border-t-0 px-4 py-8 md:flex-row md:items-center md:gap-12 md:px-12 md:py-24">
-        <div className="flex flex-col items-center gap-6 text-center md:w-1/2 md:items-start md:text-left">
-          <SkillsCommand translation={translation} />
+export const Hero = ({ translation, lang }: HeroProps) => (
+  <SectionContainer>
+    <SectionContent className="flex flex-col gap-8 border-t-0 px-4 py-8 md:flex-row md:items-center md:gap-12 md:px-12 md:py-24">
+      <div className="flex flex-col items-center gap-6 text-center md:w-1/2 md:items-start md:text-left">
+        <SkillsCommand translation={translation} />
 
-          <div className="space-y-2">
-            <h1 className="font-pixel text-fd-foreground text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-              {translation.hero.headingLine1}
-              <br />
-              {translation.hero.headingLine2}
-            </h1>
+        <div className="space-y-2">
+          <h1 className="font-pixel text-fd-foreground text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            {translation.hero.headingLine1}
+            <br />
+            {translation.hero.headingLine2}
+          </h1>
 
-            <p className="text-fd-muted-foreground text-base sm:text-lg">
-              {translation.hero.subtitle}
-            </p>
-          </div>
-
-          <CommandBlock translation={translation} />
-
-          <div className="flex items-center gap-4">
-            <Button asChild>
-              <Link href={withLocalePrefix(lang, ROUTES.DOCS)}>
-                {translation.hero.fixCosts}
-                <ArrowRightIcon />
-              </Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <a href={LINK.GITHUB} target="_blank" rel="noopener noreferrer">
-                <GithubIcon />
-                {translation.hero.github}
-              </a>
-            </Button>
-          </div>
+          <p className="text-fd-muted-foreground text-base sm:text-lg">
+            {translation.hero.subtitle}
+          </p>
         </div>
 
-        <div className="md:w-1/2">
-          <div className="border-fd-border bg-fd-muted/30 aspect-video w-full overflow-hidden border shadow-2xl">
-            <video
-              src={LINK.DEMO_VIDEO}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full"
-            />
-          </div>
+        <CommandBlock translation={translation} />
+
+        <div className="flex items-center gap-4">
+          <Button asChild>
+            <Link href={withLocalePrefix(lang, ROUTES.DOCS)}>
+              {translation.hero.fixCosts}
+              <ArrowRightIcon />
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <a href={LINK.GITHUB} target="_blank" rel="noopener noreferrer">
+              <GithubIcon />
+              {translation.hero.github}
+            </a>
+          </Button>
         </div>
-      </SectionContent>
-    </SectionContainer>
-  );
-};
+      </div>
+
+      <div className="md:w-1/2">
+        <div className="border-fd-border bg-fd-muted/30 aspect-video w-full overflow-hidden border shadow-2xl">
+          <video
+            src={LINK.DEMO_VIDEO}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full"
+          />
+        </div>
+      </div>
+    </SectionContent>
+  </SectionContainer>
+);

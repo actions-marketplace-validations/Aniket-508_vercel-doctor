@@ -45,10 +45,10 @@ export const TerminalTyping = () => {
     >
       <div
         style={{
+          color: TEXT_COLOR,
           fontFamily,
           fontSize: TYPING_FONT_SIZE_PX,
           lineHeight: 1.7,
-          color: TEXT_COLOR,
           whiteSpace: "nowrap",
         }}
       >

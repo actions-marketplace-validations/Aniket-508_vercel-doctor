@@ -28,18 +28,18 @@ export const GET = (request: Request): ImageResponse => {
   return new ImageResponse(
     <div
       style={{
-        width: "100%",
-        height: "100%",
+        backgroundColor: "#0a0a0a",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "#0a0a0a",
         fontFamily: "monospace",
-        padding: "60px 80px",
+        height: "100%",
         justifyContent: "center",
+        padding: "60px 80px",
+        width: "100%",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+      <div style={{ alignItems: "center", display: "flex", gap: "24px" }}>
+        <div style={{ alignItems: "center", display: "flex", gap: "12px" }}>
           <img
             src={logoUrl}
             width={OG_ICON_SIZE_PX}
@@ -48,9 +48,9 @@ export const GET = (request: Request): ImageResponse => {
           />
           <span
             style={{
+              color: "#fafafa",
               fontSize: "28px",
               fontWeight: 700,
-              color: "#fafafa",
             }}
           >
             Vercel Doctor
@@ -59,10 +59,10 @@ export const GET = (request: Request): ImageResponse => {
         {projectName && (
           <div
             style={{
-              display: "flex",
-              marginLeft: "auto",
-              fontSize: "36px",
               color: "#a3a3a3",
+              display: "flex",
+              fontSize: "36px",
+              marginLeft: "auto",
             }}
           >
             {projectName}
@@ -72,29 +72,29 @@ export const GET = (request: Request): ImageResponse => {
 
       <div
         style={{
-          display: "flex",
           alignItems: "baseline",
+          display: "flex",
           gap: "16px",
           marginTop: "48px",
         }}
       >
         <span
           style={{
-            fontSize: "120px",
             color: scoreColor,
+            fontSize: "120px",
             fontWeight: 700,
             lineHeight: 1,
           }}
         >
           {score}
         </span>
-        <span style={{ fontSize: "40px", color: "#525252", lineHeight: 1 }}>
+        <span style={{ color: "#525252", fontSize: "40px", lineHeight: 1 }}>
           / {PERFECT_SCORE}
         </span>
         <span
           style={{
-            fontSize: "40px",
             color: scoreColor,
+            fontSize: "40px",
             lineHeight: 1,
             marginLeft: "8px",
           }}
@@ -105,21 +105,21 @@ export const GET = (request: Request): ImageResponse => {
 
       <div
         style={{
-          display: "flex",
-          width: "100%",
-          height: "16px",
           backgroundColor: "#1a1a1a",
           borderRadius: "8px",
+          display: "flex",
+          height: "16px",
           marginTop: "32px",
           overflow: "hidden",
+          width: "100%",
         }}
       >
         <div
           style={{
-            width: `${scoreBarPercent}%`,
-            height: "100%",
             backgroundColor: scoreColor,
             borderRadius: "8px",
+            height: "100%",
+            width: `${scoreBarPercent}%`,
           }}
         />
       </div>
@@ -128,9 +128,9 @@ export const GET = (request: Request): ImageResponse => {
         <div
           style={{
             display: "flex",
+            fontSize: "24px",
             gap: "24px",
             marginTop: "36px",
-            fontSize: "24px",
           }}
         >
           {errorCount > 0 && (
@@ -151,6 +151,6 @@ export const GET = (request: Request): ImageResponse => {
         </div>
       )}
     </div>,
-    { width: IMAGE_WIDTH_PX, height: IMAGE_HEIGHT_PX },
+    { height: IMAGE_HEIGHT_PX, width: IMAGE_WIDTH_PX },
   );
 };

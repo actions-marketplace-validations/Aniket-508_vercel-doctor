@@ -24,9 +24,11 @@ interface DocsPageProps {
 export default async function Page({ params }: DocsPageProps) {
   const { slug, lang } = await params;
   const page = source.getPage(slug, lang);
-  if (!page) notFound();
+  if (!page) {
+    notFound();
+  }
 
-  const MDX = page.data.body;
+  const MdxPageContent = page.data.body;
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -42,7 +44,7 @@ export default async function Page({ params }: DocsPageProps) {
         />
       </div>
       <DocsBody>
-        <MDX
+        <MdxPageContent
           components={getMDXComponents({
             a: createRelativeLink(source, page),
           })}
@@ -66,16 +68,16 @@ export default async function Page({ params }: DocsPageProps) {
   );
 }
 
-export function generateStaticParams() {
-  return source.generateParams();
-}
+export const generateStaticParams = () => source.generateParams();
 
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: DocsPageProps): Promise<Metadata> {
+}: DocsPageProps): Promise<Metadata> => {
   const { slug, lang } = await params;
   const page = source.getPage(slug, lang);
-  if (!page) notFound();
+  if (!page) {
+    notFound();
+  }
 
   const docPath = `/docs/${page.slugs.join("/")}` as `/${string}`;
   const canonical = withLocalePrefix(lang, docPath);
@@ -87,31 +89,31 @@ export async function generateMetadata({
   const ogLocale = lang.replace("-", "_");
 
   return {
-    title: page.data.title,
-    description: page.data.description,
     alternates: {
       canonical,
       languages,
     },
+    description: page.data.description,
     openGraph: {
-      title: page.data.title,
       description: page.data.description,
-      type: "article",
-      locale: ogLocale,
       images: [
         {
+          alt: page.data.title,
+          height: 630,
           url: getPageImage(page).url,
           width: 1200,
-          height: 630,
-          alt: page.data.title,
         },
       ],
+      locale: ogLocale,
+      title: page.data.title,
+      type: "article",
     },
+    title: page.data.title,
     twitter: {
       card: "summary_large_image",
-      title: page.data.title,
       description: page.data.description,
       images: [getPageImage(page).url],
+      title: page.data.title,
     },
   };
-}
+};

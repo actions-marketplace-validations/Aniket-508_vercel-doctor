@@ -197,7 +197,7 @@ export const dynamic = "force-static";
 export const GET = (): Response =>
   new Response(INSTALL_SCRIPT, {
     headers: {
-      "Content-Type": "text/plain; charset=utf-8",
       "Content-Disposition": 'attachment; filename="install.sh"',
+      "Content-Type": "text/plain; charset=utf-8",
     },
   });

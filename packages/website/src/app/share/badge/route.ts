@@ -1,4 +1,8 @@
-import { PERFECT_SCORE, SCORE_GOOD_THRESHOLD, SCORE_OK_THRESHOLD } from "@/constants/score";
+import {
+  PERFECT_SCORE,
+  SCORE_GOOD_THRESHOLD,
+  SCORE_OK_THRESHOLD,
+} from "@/constants/score";
 
 const BADGE_HEIGHT_PX = 20;
 const LABEL_TEXT = "vercel doctor";
@@ -11,7 +15,7 @@ const SLASH_WIDTH_10X = 38;
 const FONT_SIZE_10X = 110;
 const TEXT_Y_10X = 140;
 const SHADOW_Y_10X = 150;
-const CACHE_MAX_AGE_SECONDS = 86400;
+const CACHE_MAX_AGE_SECONDS = 86_400;
 
 const LOGO_SIZE_PX = 14;
 const LOGO_X_PX = 6;
@@ -22,25 +26,35 @@ const WHITE_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="40" heigh
 const LOGO_DATA_URI = `data:image/svg+xml,${encodeURIComponent(WHITE_LOGO_SVG)}`;
 
 const getBadgeScoreColor = (score: number): string => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "#2ea043";
-  if (score >= SCORE_OK_THRESHOLD) return "#d29922";
+  if (score >= SCORE_GOOD_THRESHOLD) {
+    return "#2ea043";
+  }
+  if (score >= SCORE_OK_THRESHOLD) {
+    return "#d29922";
+  }
   return "#cf222e";
 };
 
-const computeScoreTextLength = (scoreText: string): number =>
-  scoreText.split("").reduce((totalWidth, character) => {
-    if (character === "/") return totalWidth + SLASH_WIDTH_10X;
-    return totalWidth + DIGIT_WIDTH_10X;
-  }, 0);
+const computeScoreTextLength = (scoreText: string): number => {
+  let totalWidth = 0;
+  for (const character of scoreText) {
+    totalWidth += character === "/" ? SLASH_WIDTH_10X : DIGIT_WIDTH_10X;
+  }
+  return totalWidth;
+};
 
 export const GET = (request: Request): Response => {
   const { searchParams } = new URL(request.url);
-  const score = Math.max(0, Math.min(PERFECT_SCORE, Number(searchParams.get("s")) || 0));
+  const score = Math.max(
+    0,
+    Math.min(PERFECT_SCORE, Number(searchParams.get("s")) || 0),
+  );
 
   const scoreText = `${score}/${PERFECT_SCORE}`;
   const scoreColor = getBadgeScoreColor(score);
   const scoreTextLength = computeScoreTextLength(scoreText);
-  const valueRectWidth = Math.round(scoreTextLength / 10) + SECTION_PADDING_PX * 2;
+  const valueRectWidth =
+    Math.round(scoreTextLength / 10) + SECTION_PADDING_PX * 2;
   const totalWidth = LABEL_RECT_WIDTH_PX + valueRectWidth;
 
   const valueCenterX = (LABEL_RECT_WIDTH_PX + valueRectWidth / 2) * 10;
@@ -70,8 +84,8 @@ export const GET = (request: Request): Response => {
 
   return new Response(svg, {
     headers: {
-      "Content-Type": "image/svg+xml",
       "Cache-Control": `public, max-age=${CACHE_MAX_AGE_SECONDS}, s-maxage=${CACHE_MAX_AGE_SECONDS}`,
+      "Content-Type": "image/svg+xml",
     },
   });
 };

@@ -11,16 +11,8 @@ export const baseOptions = (locale: string): BaseLayoutProps => {
   const translation = getTranslation(locale);
 
   return {
+    githubUrl: LINK.GITHUB,
     i18n,
-    nav: {
-      title: (
-        <>
-          <LogoMark className="h-6" />
-          Vercel Doctor
-        </>
-      ),
-      url: withLocalePrefix(locale, ROUTES.HOME),
-    },
     links: [
       {
         text: translation.nav.docs,
@@ -35,6 +27,14 @@ export const baseOptions = (locale: string): BaseLayoutProps => {
         url: withLocalePrefix(locale, ROUTES.SPONSORS),
       },
     ],
-    githubUrl: LINK.GITHUB,
+    nav: {
+      title: (
+        <>
+          <LogoMark className="h-6" />
+          Vercel Doctor
+        </>
+      ),
+      url: withLocalePrefix(locale, ROUTES.HOME),
+    },
   };
 };

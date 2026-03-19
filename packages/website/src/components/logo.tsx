@@ -1,12 +1,15 @@
-import { SVGProps } from "react";
+import type { SVGProps } from "react";
 
-export const LogoMark = ({ ...props }: SVGProps<SVGSVGElement>) => {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="currentColor" {...props}>
-      <path
-        fillRule="evenodd"
-        d="m20 6 16 28H4zm-1.25 10.75a1.25 1.25 0 0 1 2.5 0v2.75H24a1.25 1.25 0 0 1 0 2.5h-2.75v2.75a1.25 1.25 0 0 1-2.5 0V22H16a1.25 1.25 0 0 1 0-2.5h2.75z"
-      />
-    </svg>
-  );
-};
+export const LogoMark = ({ ...props }: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 40 40"
+    fill="currentColor"
+    {...props}
+  >
+    <path
+      fillRule="evenodd"
+      d="m20 6 16 28H4zm-1.25 10.75a1.25 1.25 0 0 1 2.5 0v2.75H24a1.25 1.25 0 0 1 0 2.5h-2.75v2.75a1.25 1.25 0 0 1-2.5 0V22H16a1.25 1.25 0 0 1 0-2.5h2.75z"
+    />
+  </svg>
+);

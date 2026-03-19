@@ -1,5 +1,4 @@
-import { HomeIcon } from "lucide-react";
-import { BookOpenIcon } from "lucide-react";
+import { BookOpenIcon, HomeIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -16,8 +15,8 @@ const NotFoundPage = () => (
     <EmptyHeader>
       <EmptyTitle className="font-mono text-8xl font-black">404</EmptyTitle>
       <EmptyDescription className="text-nowrap">
-        The page you're looking for might have been <br />
-        moved or doesn't exist.
+        The page you&apos;re looking for might have been <br />
+        moved or doesn&apos;t exist.
       </EmptyDescription>
     </EmptyHeader>
     <EmptyContent>

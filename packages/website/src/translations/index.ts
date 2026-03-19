@@ -108,23 +108,23 @@ export interface Translation {
 }
 
 const translations: Record<string, Translation> = {
+  ar,
+  da,
+  de,
   en,
   es,
-  zh,
-  ja,
   fr,
-  de,
+  hi,
+  id,
+  it,
+  ja,
+  ko,
   pt,
   "pt-br": ptBr,
-  ko,
-  ar,
-  hi,
-  it,
-  id,
-  tr,
   ru,
-  da,
+  tr,
   uk,
+  zh,
 };
 
 export const getTranslation = (locale: string): Translation =>

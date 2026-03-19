@@ -8,37 +8,38 @@ import { loadFontsForLocale } from "@/utils/load-og-fonts";
 
 export const revalidate = false;
 
-export async function GET(
+export const GET = async (
   _req: Request,
   { params }: RouteContext<"/og/docs/[...slug]">,
-) {
+) => {
   const { slug } = await params;
   const slugWithoutExt = slug.slice(0, -1);
-  const firstSegment = slugWithoutExt[0];
+  const [firstSegment] = slugWithoutExt;
   const parsedLocale = i18n.languages.find((lang) => lang === firstSegment);
   const locale = parsedLocale ?? i18n.defaultLanguage;
   const docSlug = parsedLocale ? slugWithoutExt.slice(1) : slugWithoutExt;
   const page = source.getPage(docSlug, locale);
-  if (!page) notFound();
+  if (!page) {
+    notFound();
+  }
 
   const localeFonts = await loadFontsForLocale(locale);
 
   return new ImageResponse(
     <DocsOgImage title={page.data.title} description={page.data.description} />,
     {
-      width: 1200,
-      height: 630,
       format: "webp",
+      height: 630,
+      width: 1200,
       ...(localeFonts.length > 0 && {
         fonts: localeFonts,
         loadDefaultFonts: true,
       }),
     },
   );
-}
+};
 
-export function generateStaticParams() {
-  return source.getPages().map((page) => ({
+export const generateStaticParams = () =>
+  source.getPages().map((page) => ({
     slug: getPageImage(page).segments,
   }));
-}

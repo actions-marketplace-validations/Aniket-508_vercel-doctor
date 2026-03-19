@@ -29,9 +29,9 @@ export const ScoreReveal = () => {
     [0, SCORE_ANIMATION_FRAMES],
     [0, 1],
     {
+      easing: Easing.linear,
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.linear,
     },
   );
 
@@ -46,24 +46,24 @@ export const ScoreReveal = () => {
   return (
     <AbsoluteFill
       style={{
+        alignItems: "center",
         backgroundColor: BACKGROUND_COLOR,
         justifyContent: "center",
-        alignItems: "center",
       }}
     >
       <div
         style={{
+          alignItems: "flex-start",
           display: "flex",
           gap: 48,
-          alignItems: "flex-start",
         }}
       >
         <pre
           style={{
             color: scoreColor,
-            lineHeight: 1.2,
-            fontSize: SCORE_FACE_FONT_SIZE_PX,
             fontFamily,
+            fontSize: SCORE_FACE_FONT_SIZE_PX,
+            lineHeight: 1.2,
             margin: 0,
           }}
         >
@@ -75,9 +75,9 @@ export const ScoreReveal = () => {
             <span
               style={{
                 color: scoreColor,
-                fontWeight: 500,
-                fontSize: SCORE_FONT_SIZE_PX,
                 fontFamily,
+                fontSize: SCORE_FONT_SIZE_PX,
+                fontWeight: 500,
               }}
             >
               {currentScore}
@@ -85,8 +85,8 @@ export const ScoreReveal = () => {
             <span
               style={{
                 color: MUTED_COLOR,
-                fontSize: SCORE_LABEL_FONT_SIZE_PX,
                 fontFamily,
+                fontSize: SCORE_LABEL_FONT_SIZE_PX,
               }}
             >
               {` / ${PERFECT_SCORE}  `}
@@ -94,8 +94,8 @@ export const ScoreReveal = () => {
             <span
               style={{
                 color: scoreColor,
-                fontSize: SCORE_LABEL_FONT_SIZE_PX,
                 fontFamily,
+                fontSize: SCORE_LABEL_FONT_SIZE_PX,
               }}
             >
               {getScoreLabel(currentScore)}
@@ -103,10 +103,10 @@ export const ScoreReveal = () => {
           </div>
           <div
             style={{
-              marginTop: 8,
-              letterSpacing: 2,
-              fontSize: SCORE_BAR_FONT_SIZE_PX,
               fontFamily,
+              fontSize: SCORE_BAR_FONT_SIZE_PX,
+              letterSpacing: 2,
+              marginTop: 8,
             }}
           >
             <span style={{ color: scoreColor }}>

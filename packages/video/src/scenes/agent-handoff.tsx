@@ -35,9 +35,9 @@ export const AgentHandoff = () => {
   const frame = useCurrentFrame();
 
   const headerOpacity = interpolate(frame, [0, HEADER_FADE_FRAMES], [0, 1], {
+    easing: Easing.out(Easing.cubic),
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
   });
 
   const promptOpacity = interpolate(
@@ -45,9 +45,9 @@ export const AgentHandoff = () => {
     [PROMPT_DELAY_FRAMES, PROMPT_DELAY_FRAMES + PROMPT_FADE_FRAMES],
     [0, 1],
     {
+      easing: Easing.out(Easing.cubic),
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
     },
   );
 
@@ -75,9 +75,9 @@ export const AgentHandoff = () => {
     [allFixedFrame, allFixedFrame + 10],
     [0, 1],
     {
+      easing: Easing.out(Easing.cubic),
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
     },
   );
 
@@ -94,8 +94,8 @@ export const AgentHandoff = () => {
           fontSize: LOGO_FONT_SIZE_PX,
           lineHeight: 1.4,
           margin: 0,
-          opacity: headerOpacity,
           marginBottom: 24,
+          opacity: headerOpacity,
           whiteSpace: "pre",
         }}
       >
@@ -115,12 +115,12 @@ export const AgentHandoff = () => {
 
       <div
         style={{
+          borderTop: "1px solid rgba(255,255,255,0.15)",
+          color: TEXT_COLOR,
           fontFamily,
           fontSize: PROMPT_FONT_SIZE_PX,
-          color: TEXT_COLOR,
-          opacity: promptOpacity,
           marginBottom: 16,
-          borderTop: "1px solid rgba(255,255,255,0.15)",
+          opacity: promptOpacity,
           padding: "12px 0",
         }}
       >
@@ -131,9 +131,9 @@ export const AgentHandoff = () => {
       {allIssuesShown && !allFixed && (
         <div
           style={{
+            color: MUTED_COLOR,
             fontFamily,
             fontSize: STATUS_FONT_SIZE_PX,
-            color: MUTED_COLOR,
             marginBottom: 12,
             opacity: 1,
           }}
@@ -146,9 +146,9 @@ export const AgentHandoff = () => {
       {allFixed && (
         <div
           style={{
+            color: GREEN_COLOR,
             fontFamily,
             fontSize: STATUS_FONT_SIZE_PX,
-            color: GREEN_COLOR,
             marginBottom: 12,
             opacity: doneOpacity,
           }}
@@ -167,9 +167,9 @@ export const AgentHandoff = () => {
             [0, ISSUES_FADE_FRAMES],
             [0, 1],
             {
+              easing: Easing.out(Easing.cubic),
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
-              easing: Easing.out(Easing.cubic),
             },
           );
 
@@ -180,9 +180,9 @@ export const AgentHandoff = () => {
             [0, FIX_FADE_FRAMES],
             [0, 1],
             {
+              easing: Easing.out(Easing.cubic),
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
-              easing: Easing.out(Easing.cubic),
             },
           );
 
@@ -190,11 +190,11 @@ export const AgentHandoff = () => {
             <div
               key={diagnostic.message}
               style={{
+                color:
+                  isItemFixed && fixProgress > 0.3 ? MUTED_COLOR : TEXT_COLOR,
                 fontFamily,
                 fontSize: DIAGNOSTIC_FONT_SIZE_PX,
                 lineHeight: 1.7,
-                color:
-                  isItemFixed && fixProgress > 0.3 ? MUTED_COLOR : TEXT_COLOR,
                 opacity: itemOpacity,
                 textDecoration:
                   isItemFixed && fixProgress > 0.3 ? "line-through" : "none",

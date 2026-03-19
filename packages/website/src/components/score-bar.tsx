@@ -7,7 +7,11 @@ interface ScoreBarProps {
   emptyColorClass?: string;
 }
 
-const ScoreBar = ({ score, barWidth, emptyColorClass = "text-neutral-600" }: ScoreBarProps) => {
+const ScoreBar = ({
+  score,
+  barWidth,
+  emptyColorClass = "text-neutral-600",
+}: ScoreBarProps) => {
   const filledCount = Math.round((score / PERFECT_SCORE) * barWidth);
   const emptyCount = barWidth - filledCount;
   const colorClass = getScoreColorClass(score);

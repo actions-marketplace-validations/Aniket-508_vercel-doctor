@@ -10,25 +10,25 @@ interface DocsOgImageProps {
 const DocsOgImage = ({ title, description }: DocsOgImageProps) => (
   <div
     style={{
-      width: "100%",
-      height: "100%",
       backgroundColor: "black",
-      position: "relative",
+      color: "white",
       display: "flex",
       flexDirection: "column",
+      height: "100%",
       overflow: "hidden",
-      color: "white",
+      position: "relative",
+      width: "100%",
     }}
   >
     <div
       style={{
         display: "flex",
         flexDirection: "column",
-        width: "100%",
         height: "100%",
+        justifyContent: "space-between",
         padding: "60px",
         position: "relative",
-        justifyContent: "space-between",
+        width: "100%",
       }}
     >
       <div
@@ -42,26 +42,26 @@ const DocsOgImage = ({ title, description }: DocsOgImageProps) => (
       >
         <span
           style={{
+            color: "white",
             fontSize: 72,
             fontWeight: 800,
-            lineHeight: 1.1,
             letterSpacing: "-0.04em",
-            color: "white",
+            lineHeight: 1.1,
           }}
         >
           {title}
         </span>
         <span
           style={{
-            fontSize: 36,
             color: "#a1a1aa",
+            fontSize: 36,
             fontWeight: 400,
-            lineHeight: 1.4,
-            maxWidth: "95%",
             letterSpacing: "-0.01em",
             lineClamp: 2,
-            textOverflow: "ellipsis",
+            lineHeight: 1.4,
+            maxWidth: "95%",
             overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
           {description}
@@ -70,18 +70,18 @@ const DocsOgImage = ({ title, description }: DocsOgImageProps) => (
 
       <div
         style={{
-          display: "flex",
           alignItems: "center",
+          display: "flex",
           gap: "20px",
         }}
       >
         <LogoMark width={36} height={36} />
         <span
           style={{
+            color: "white",
             fontSize: 28,
             fontWeight: 700,
             letterSpacing: "-0.02em",
-            color: "white",
             opacity: 0.9,
           }}
         >
@@ -90,21 +90,21 @@ const DocsOgImage = ({ title, description }: DocsOgImageProps) => (
         <div style={{ flexGrow: 1 }} />
         <div
           style={{
-            height: 4,
-            width: 60,
             backgroundColor: "grey",
-            opacity: 0.9,
             borderRadius: 2,
+            height: 4,
+            opacity: 0.9,
+            width: 60,
           }}
         />
         <span
           style={{
+            color: "grey",
             fontSize: 20,
             fontWeight: 700,
-            textTransform: "uppercase",
             letterSpacing: "0.2em",
-            color: "grey",
             opacity: 0.9,
+            textTransform: "uppercase",
           }}
         >
           Documentation

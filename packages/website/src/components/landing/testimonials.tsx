@@ -37,66 +37,62 @@ interface TestimonialsProps {
   translation: Translation;
 }
 
-export function TestimonialsMarquee() {
-  return (
-    <div className="bg-background w-full space-y-4 [&_.rfm-initial-child-container]:items-stretch! [&_.rfm-marquee]:items-stretch!">
-      {[TESTIMONIALS_ROW_ONE, TESTIMONIALS_ROW_TWO].map((list, index) => (
-        <Marquee key={index} className="border-edge border-y">
-          <MarqueeFade side="left" />
-          <MarqueeFade side="right" />
+export const TestimonialsMarquee = () => (
+  <div className="bg-background w-full space-y-4 [&_.rfm-initial-child-container]:items-stretch! [&_.rfm-marquee]:items-stretch!">
+    {[TESTIMONIALS_ROW_ONE, TESTIMONIALS_ROW_TWO].map((list, index) => (
+      <Marquee key={list[0].url} className="border-edge border-y">
+        <MarqueeFade side="left" />
+        <MarqueeFade side="right" />
 
-          <MarqueeContent direction={index % 2 === 1 ? "right" : "left"}>
-            {list.map((item) => (
-              <MarqueeItem
-                key={item.url}
-                className="border-edge mx-0 h-full w-xs border-r"
+        <MarqueeContent direction={index % 2 === 1 ? "right" : "left"}>
+          {list.map((item) => (
+            <MarqueeItem
+              key={item.url}
+              className="border-edge mx-0 h-full w-xs border-r"
+            >
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:bg-accent/20 block h-full transition-[background-color] ease-out"
               >
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:bg-accent/20 block h-full transition-[background-color] ease-out"
-                >
-                  <Testimonial>
-                    <TestimonialQuote>
-                      <p>{item.quote}</p>
-                    </TestimonialQuote>
+                <Testimonial>
+                  <TestimonialQuote>
+                    <p>{item.quote}</p>
+                  </TestimonialQuote>
 
-                    <TestimonialAuthor
+                  <TestimonialAuthor
+                    className={item.authorTagline ? undefined : "grid-rows-1"}
+                  >
+                    <TestimonialAvatar>
+                      <TestimonialAvatarImg src={item.authorAvatar} />
+                      <TestimonialAvatarRing />
+                    </TestimonialAvatar>
+
+                    <TestimonialAuthorName
                       className={
-                        !item.authorTagline ? "grid-rows-1" : undefined
+                        item.authorTagline ? undefined : "flex items-center"
                       }
                     >
-                      <TestimonialAvatar>
-                        <TestimonialAvatarImg src={item.authorAvatar} />
-                        <TestimonialAvatarRing />
-                      </TestimonialAvatar>
+                      {item.authorName}
+                      {item.authorTagline && <TestimonialVerifiedBadge />}
+                    </TestimonialAuthorName>
 
-                      <TestimonialAuthorName
-                        className={
-                          !item.authorTagline ? "flex items-center" : undefined
-                        }
-                      >
-                        {item.authorName}
-                        {item.authorTagline && <TestimonialVerifiedBadge />}
-                      </TestimonialAuthorName>
-
-                      {item.authorTagline && (
-                        <TestimonialAuthorTagline>
-                          {item.authorTagline}
-                        </TestimonialAuthorTagline>
-                      )}
-                    </TestimonialAuthor>
-                  </Testimonial>
-                </a>
-              </MarqueeItem>
-            ))}
-          </MarqueeContent>
-        </Marquee>
-      ))}
-    </div>
-  );
-}
+                    {item.authorTagline && (
+                      <TestimonialAuthorTagline>
+                        {item.authorTagline}
+                      </TestimonialAuthorTagline>
+                    )}
+                  </TestimonialAuthor>
+                </Testimonial>
+              </a>
+            </MarqueeItem>
+          ))}
+        </MarqueeContent>
+      </Marquee>
+    ))}
+  </div>
+);
 
 export const Testimonials = ({ translation }: TestimonialsProps) => (
   <>

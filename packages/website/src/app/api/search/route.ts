@@ -4,11 +4,11 @@ import { source } from "@/lib/source";
 
 export const { GET } = createFromSource(source, {
   localeMap: {
-    zh: "english",
+    da: "danish",
+    hi: "indian",
     ja: "english",
     ko: "english",
-    hi: "indian",
-    da: "danish",
     "pt-br": "portuguese",
+    zh: "english",
   },
 });

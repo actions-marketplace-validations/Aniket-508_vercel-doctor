@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import Image from "next/image";
+import { useMemo } from "react";
 
 import { LINK } from "@/constants/links";
 import { SPONSORS } from "@/constants/sponsors";
@@ -70,9 +71,21 @@ interface SponsorsProps {
   lang?: (typeof i18n.languages)[number];
 }
 
+const STABLE_SLOT_IDS = Array.from(
+  { length: GRID_SIZE },
+  (_, i) => `sponsor-slot-${i}` as const,
+);
+
 export const Sponsors = ({ lang = i18n.defaultLanguage }: SponsorsProps) => {
   const translation = getTranslation(lang);
-  const sponsorSlots = SPONSORS.slice(0, GRID_SIZE);
+  const sponsorSlots = useMemo(
+    () =>
+      SPONSORS.slice(0, GRID_SIZE).map((sponsor, i) => ({
+        key: sponsor?.url ?? sponsor?.name ?? STABLE_SLOT_IDS[i],
+        sponsor,
+      })),
+    [],
+  );
 
   return (
     <SectionContainer>
@@ -95,10 +108,10 @@ export const Sponsors = ({ lang = i18n.defaultLanguage }: SponsorsProps) => {
         </div>
 
         <div className="border-fd-border grid grid-cols-2 border-t sm:grid-cols-3 md:grid-cols-4">
-          {sponsorSlots.map((sponsor, index) => (
+          {sponsorSlots.map((slot, index) => (
             <SponsorCell
-              key={index}
-              sponsor={sponsor}
+              key={slot.key}
+              sponsor={slot.sponsor}
               isLastCell={index === GRID_SIZE - 1}
             />
           ))}

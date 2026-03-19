@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/constants/routes";
@@ -30,13 +30,16 @@ const BadgeSnippet = ({
   const badgePreviewPath = `${badgePath}?${searchParamsString}`;
   const markdownSnippet = `[![Vercel Doctor](${badgeFullUrl})](${shareFullUrl})`;
 
-  const handleCopy = async () => {
+  const resetCopy = useCallback(() => setDidCopy(false), []);
+  const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(markdownSnippet);
       setDidCopy(true);
-      setTimeout(() => setDidCopy(false), COPY_FEEDBACK_DURATION_MS);
-    } catch {}
-  };
+      setTimeout(resetCopy, COPY_FEEDBACK_DURATION_MS);
+    } catch {
+      // Clipboard may be unavailable
+    }
+  }, [markdownSnippet, resetCopy]);
 
   return (
     <div className="space-y-3">

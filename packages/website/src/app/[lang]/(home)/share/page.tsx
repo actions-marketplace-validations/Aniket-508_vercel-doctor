@@ -16,10 +16,8 @@ import { withLocalePrefix } from "@/i18n/navigation";
 import { getTranslation } from "@/translations";
 import getScoreColorClass from "@/utils/get-score-color-class";
 import getScoreLabel from "@/utils/get-score-label";
-import {
-  getSharePageData,
-  type ShareSearchParams,
-} from "@/utils/get-share-page-data";
+import { getSharePageData } from "@/utils/get-share-page-data";
+import type { ShareSearchParams } from "@/utils/get-share-page-data";
 import getTranslatedScoreLabel from "@/utils/get-translated-score-label";
 
 import AnimatedScore from "./animated-score";
@@ -44,12 +42,14 @@ export const generateMetadata = async ({
   const titlePrefix = projectName ? `${projectName} - ` : "";
   const title = `Vercel Doctor - ${titlePrefix}Score: ${score}/${PERFECT_SCORE} (${label})`;
   const descriptionParts: string[] = [];
-  if (errorCount > 0)
+  if (errorCount > 0) {
     descriptionParts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
-  if (warningCount > 0)
+  }
+  if (warningCount > 0) {
     descriptionParts.push(
       `${warningCount} warning${warningCount === 1 ? "" : "s"}`,
     );
+  }
   const description =
     descriptionParts.length > 0
       ? `${descriptionParts.join(
@@ -60,14 +60,14 @@ export const generateMetadata = async ({
   const ogImageUrl = `/share/og?${searchParamsString}`;
 
   return {
-    title,
     description,
-    openGraph: { title, description, images: [ogImageUrl] },
+    openGraph: { description, images: [ogImageUrl], title },
+    title,
     twitter: {
       card: "summary_large_image",
-      title,
       description,
       images: [ogImageUrl],
+      title,
     },
   };
 };

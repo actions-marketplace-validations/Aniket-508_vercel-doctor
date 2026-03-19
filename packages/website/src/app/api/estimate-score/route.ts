@@ -7,7 +7,7 @@ const ERROR_ESTIMATED_FIX_RATE = 0.85;
 const WARNING_ESTIMATED_FIX_RATE = 0.8;
 
 export const OPTIONS = (): Response =>
-  new Response(null, { status: 204, headers: API_CORS_HEADERS });
+  new Response(null, { headers: API_CORS_HEADERS, status: 204 });
 
 export const POST = async (request: Request): Promise<Response> => {
   const body = await request.json().catch(() => null);
@@ -15,7 +15,7 @@ export const POST = async (request: Request): Promise<Response> => {
   if (!body || !Array.isArray(body.diagnostics)) {
     return Response.json(
       { error: "Request body must contain a 'diagnostics' array" },
-      { status: 400, headers: API_CORS_HEADERS },
+      { headers: API_CORS_HEADERS, status: 400 },
     );
   }
 
@@ -29,7 +29,7 @@ export const POST = async (request: Request): Promise<Response> => {
         error:
           "Each diagnostic must have 'filePath', 'plugin', 'rule', 'severity', 'message', 'help', 'line', 'column', and 'category'",
       },
-      { status: 400, headers: API_CORS_HEADERS },
+      { headers: API_CORS_HEADERS, status: 400 },
     );
   }
 
@@ -52,10 +52,10 @@ export const POST = async (request: Request): Promise<Response> => {
 
   return Response.json(
     {
-      currentScore,
       currentLabel: getScoreLabel(currentScore),
-      estimatedScore,
+      currentScore,
       estimatedLabel: getScoreLabel(estimatedScore),
+      estimatedScore,
     },
     { headers: API_CORS_HEADERS },
   );

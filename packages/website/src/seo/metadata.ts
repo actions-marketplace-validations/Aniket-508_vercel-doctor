@@ -31,80 +31,80 @@ const createMetadata = (options: CreateMetadataOptions = {}): Metadata => {
       },
     }),
     openGraph: {
-      title: ogTitle || title || SITE.NAME,
       description: ogDescription || description,
-      url: canonical ? `${SITE.URL}${canonical}` : SITE.URL,
-      type: "website",
       images: [
         {
+          alt: `${SITE.NAME} - Optimize Next.js costs`,
+          height: 630,
           url: SITE.OG_IMAGE,
           width: 1200,
-          height: 630,
-          alt: `${SITE.NAME} - Optimize Next.js costs`,
         },
       ],
+      title: ogTitle || title || SITE.NAME,
+      type: "website",
+      url: canonical ? `${SITE.URL}${canonical}` : SITE.URL,
     },
     twitter: {
       card: "summary_large_image",
-      title: ogTitle || title || SITE.NAME,
       description: ogDescription || description,
       images: [SITE.OG_IMAGE],
+      title: ogTitle || title || SITE.NAME,
     },
     ...(noIndex && {
       robots: {
-        index: false,
         follow: false,
+        index: false,
       },
     }),
   };
 };
 
 const baseMetadata: Metadata = {
-  metadataBase: new URL(SITE.URL),
   alternates: {
     canonical: "/",
   },
-  openGraph: {
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
     title: SITE.NAME,
-    description: SITE.DESCRIPTION.SHORT,
-    siteName: SITE.NAME,
-    type: "website",
-    locale: "en_US",
-    url: SITE.URL,
-    images: [
-      {
-        url: SITE.OG_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: `${SITE.NAME} - Optimize Next.js projects for Vercel`,
-      },
-    ],
   },
   applicationName: SITE.NAME,
-  appleWebApp: {
+  authors: [{ name: SITE.AUTHOR.NAME, url: LINK.TWITTER }],
+  category: "technology",
+  creator: SITE.AUTHOR.NAME,
+  description: SITE.DESCRIPTION.LONG,
+  icons: { icon: "/favicon.svg" },
+  keywords: [...SITE.KEYWORDS],
+  metadataBase: new URL(SITE.URL),
+  openGraph: {
+    description: SITE.DESCRIPTION.SHORT,
+    images: [
+      {
+        alt: `${SITE.NAME} - Optimize Next.js projects for Vercel`,
+        height: 630,
+        url: SITE.OG_IMAGE,
+        width: 1200,
+      },
+    ],
+    locale: "en_US",
+    siteName: SITE.NAME,
     title: SITE.NAME,
-    statusBarStyle: "default",
-    capable: true,
+    type: "website",
+    url: SITE.URL,
   },
+  publisher: SITE.AUTHOR.NAME,
   title: {
     default: `${SITE.NAME} | Optimize Next.js projects for Vercel`,
     template: `%s | ${SITE.NAME}`,
   },
-  description: SITE.DESCRIPTION.LONG,
-  keywords: [...SITE.KEYWORDS],
-  authors: [{ name: SITE.AUTHOR.NAME, url: LINK.TWITTER }],
-  creator: SITE.AUTHOR.NAME,
-  publisher: SITE.AUTHOR.NAME,
   twitter: {
     card: "summary_large_image",
-    title: `${SITE.NAME} | Optimize Next.js projects for Vercel`,
-    description: SITE.DESCRIPTION.SHORT,
     creator: SITE.AUTHOR.TWITTER,
-    site: SITE.AUTHOR.TWITTER,
+    description: SITE.DESCRIPTION.SHORT,
     images: [SITE.OG_IMAGE],
+    site: SITE.AUTHOR.TWITTER,
+    title: `${SITE.NAME} | Optimize Next.js projects for Vercel`,
   },
-  category: "technology",
-  icons: { icon: "/favicon.svg" },
 };
 
 export { baseMetadata, createMetadata };

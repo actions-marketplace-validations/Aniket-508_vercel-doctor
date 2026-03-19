@@ -17,22 +17,20 @@ const fontClassNames = [
 
 export const metadata = baseMetadata;
 
-const RootLayout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <html
-      lang={i18n.defaultLanguage}
-      className={fontClassNames}
-      suppressHydrationWarning
-    >
-      <head>
-        <JsonLdScripts />
-      </head>
-      <body className="flex min-h-screen flex-col font-sans antialiased">
-        {children}
-        <Analytics />
-      </body>
-    </html>
-  );
-};
+const RootLayout = ({ children }: { children: React.ReactNode }) => (
+  <html
+    lang={i18n.defaultLanguage}
+    className={fontClassNames}
+    suppressHydrationWarning
+  >
+    <head>
+      <JsonLdScripts />
+    </head>
+    <body className="flex min-h-screen flex-col font-sans antialiased">
+      {children}
+      <Analytics />
+    </body>
+  </html>
+);
 
 export default RootLayout;

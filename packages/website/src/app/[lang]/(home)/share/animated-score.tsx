@@ -20,11 +20,13 @@ const AnimatedScore = ({ targetScore }: { targetScore: number }) => {
     let frame = 0;
 
     const animate = () => {
-      if (cancelled || frame > SCORE_FRAME_COUNT) return;
+      if (cancelled || frame > SCORE_FRAME_COUNT) {
+        return;
+      }
       setAnimatedScore(
         Math.round(easeOutCubic(frame / SCORE_FRAME_COUNT) * targetScore),
       );
-      frame++;
+      frame += 1;
       setTimeout(animate, SCORE_FRAME_DELAY_MS);
     };
 

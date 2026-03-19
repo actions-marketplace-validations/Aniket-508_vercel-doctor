@@ -1,26 +1,30 @@
+/* eslint-disable react/no-danger -- JSON-LD requires injecting script body */
 import { LINK } from "@/constants/links";
 import { SITE } from "@/constants/site";
 import { i18n } from "@/i18n/config";
 
 const LOCALE_TO_BCP47: Record<string, string> = {
   en: "en-US",
-  zh: "zh-Hans",
   "pt-br": "pt-BR",
+  zh: "zh-Hans",
 };
 
 const WebsiteJsonLd = () => {
-  const inLanguage = i18n.languages.map((locale) => LOCALE_TO_BCP47[locale] ?? locale);
+  const inLanguage = i18n.languages.map(
+    (locale) => LOCALE_TO_BCP47[locale] ?? locale,
+  );
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: SITE.NAME,
-    url: SITE.URL,
     description: SITE.DESCRIPTION.LONG,
     inLanguage,
+    name: SITE.NAME,
+    url: SITE.URL,
   };
 
   return (
+    /* eslint-disable-next-line react/no-danger -- JSON-LD script content */
     <script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       type="application/ld+json"
@@ -32,29 +36,30 @@ const SoftwareSourceCodeJsonLd = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareSourceCode",
-    name: SITE.NAME,
-    description: SITE.DESCRIPTION.LONG,
-    url: SITE.URL,
-    codeRepository: LINK.GITHUB,
-    programmingLanguage: ["TypeScript", "JavaScript"],
-    runtimePlatform: "Node.js",
-    license: LINK.LICENSE,
     author: {
       "@type": "Person",
       name: SITE.AUTHOR.NAME,
       url: LINK.TWITTER,
     },
+    codeRepository: LINK.GITHUB,
+    description: SITE.DESCRIPTION.LONG,
+    isAccessibleForFree: true,
     keywords: SITE.KEYWORDS.join(", "),
+    license: LINK.LICENSE,
+    name: SITE.NAME,
     offers: {
       "@type": "Offer",
+      availability: "https://schema.org/InStock",
       price: "0",
       priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
     },
-    isAccessibleForFree: true,
+    programmingLanguage: ["TypeScript", "JavaScript"],
+    runtimePlatform: "Node.js",
+    url: SITE.URL,
   };
 
   return (
+    /* eslint-disable-next-line react/no-danger -- JSON-LD script content */
     <script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       type="application/ld+json"
@@ -66,13 +71,14 @@ const OrganizationJsonLd = () => {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: SITE.NAME,
-    url: SITE.URL,
     logo: `${SITE.URL}${SITE.OG_IMAGE}`,
+    name: SITE.NAME,
     sameAs: [LINK.GITHUB, LINK.TWITTER],
+    url: SITE.URL,
   };
 
   return (
+    /* eslint-disable-next-line react/no-danger -- JSON-LD script content */
     <script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       type="application/ld+json"
@@ -83,17 +89,17 @@ const OrganizationJsonLd = () => {
 const FAQJsonLd = () => {
   const faqs = [
     {
-      question: "What is Vercel Doctor?",
       answer: `${SITE.NAME} is an open-source tool for Next.js projects that identifies patterns increasing your Vercel costs, such as long function durations, uncached routes, and unnecessary invocations.`,
+      question: "What is Vercel Doctor?",
     },
     {
-      question: "How do I use Vercel Doctor?",
       answer:
         "You can run it via npx: `npx -y vercel-doctor@latest .`. Use `--verbose` for detailed reports.",
+      question: "How do I use Vercel Doctor?",
     },
     {
-      question: "Is Vercel Doctor free?",
       answer: `Yes, ${SITE.NAME} is completely free and open-source under the MIT license.`,
+      question: "Is Vercel Doctor free?",
     },
   ];
 
@@ -102,15 +108,16 @@ const FAQJsonLd = () => {
     "@type": "FAQPage",
     mainEntity: faqs.map((faq) => ({
       "@type": "Question",
-      name: faq.question,
       acceptedAnswer: {
         "@type": "Answer",
         text: faq.answer,
       },
+      name: faq.question,
     })),
   };
 
   return (
+    /* eslint-disable-next-line react/no-danger -- JSON-LD script content */
     <script
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       type="application/ld+json"
@@ -127,4 +134,10 @@ const JsonLdScripts = () => (
   </>
 );
 
-export { JsonLdScripts, WebsiteJsonLd, SoftwareSourceCodeJsonLd, OrganizationJsonLd, FAQJsonLd };
+export {
+  JsonLdScripts,
+  WebsiteJsonLd,
+  SoftwareSourceCodeJsonLd,
+  OrganizationJsonLd,
+  FAQJsonLd,
+};

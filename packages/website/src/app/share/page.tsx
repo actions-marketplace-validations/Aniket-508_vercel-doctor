@@ -1,3 +1,4 @@
+/* eslint-disable promise/prefer-await-to-then -- Next.js metadata and pass-through expect Promise, not async context */
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { Metadata } from "next";
@@ -5,10 +6,8 @@ import type { Metadata } from "next";
 import { i18n } from "@/i18n/config";
 import { provider } from "@/i18n/ui";
 import { baseOptions } from "@/lib/layout.shared";
-import {
-  getShareSearchParamsFromRecord,
-  type ShareSearchParams,
-} from "@/utils/get-share-page-data";
+import { getShareSearchParamsFromRecord } from "@/utils/get-share-page-data";
+import type { ShareSearchParams } from "@/utils/get-share-page-data";
 
 import LocalizedSharePage, {
   generateMetadata as generateLocalizedShareMetadata,
@@ -28,7 +27,8 @@ const getNormalizedShareSearchParams = async (
 export const generateMetadata = async ({
   searchParams,
 }: SharePageSearchParams): Promise<Metadata> => {
-  const normalizedSearchParams = getNormalizedShareSearchParams(searchParams);
+  const normalizedSearchParams =
+    await getNormalizedShareSearchParams(searchParams);
 
   return generateLocalizedShareMetadata({
     params: Promise.resolve({ lang: DEFAULT_LANG }),
@@ -37,7 +37,8 @@ export const generateMetadata = async ({
 };
 
 const SharePage = async ({ searchParams }: SharePageSearchParams) => {
-  const normalizedSearchParams = getNormalizedShareSearchParams(searchParams);
+  const normalizedSearchParams =
+    await getNormalizedShareSearchParams(searchParams);
 
   return (
     <RootProvider i18n={provider(DEFAULT_LANG)} dir="ltr">

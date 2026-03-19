@@ -1,92 +1,93 @@
 import type { Translation } from ".";
 
 export const es: Translation = {
+  disclaimer: {
+    text: "No avalado ni afiliado con",
+  },
+  footer: {
+    builtBy: "Creado por",
+    hostedOn: "Alojado en",
+    llms: "LLMs",
+    sourceAvailableOn: "El código fuente está disponible en",
+    twitter: "Twitter",
+  },
+  fumadocs: {
+    displayName: "Español",
+    search: "Buscar documentación",
+  },
+  hero: {
+    copied: "¡Copiado!",
+    copyCommand: "Copiar comando",
+    fixCosts: "Arregla tus costos",
+    github: "GitHub",
+    headingLine1: "Deja de acumular",
+    headingLine2: "costos de Vercel",
+    selectPackageManager: "Selecciona un gestor de paquetes",
+    subtitle:
+      "Deja que los agentes de código diagnostiquen y reparen tu factura de Vercel",
+  },
   nav: {
     docs: "Docs",
     showcase: "Galería",
     sponsors: "Patrocinadores",
   },
-  hero: {
-    copied: "¡Copiado!",
-    copyCommand: "Copiar comando",
-    selectPackageManager: "Selecciona un gestor de paquetes",
-    headingLine1: "Deja de acumular",
-    headingLine2: "costos de Vercel",
-    subtitle: "Deja que los agentes de código diagnostiquen y reparen tu factura de Vercel",
-    fixCosts: "Arregla tus costos",
-    github: "GitHub",
+  notFound: {
+    description: "La página que buscas podría haber sido movida o no existe.",
+    explore: "Explorar",
+    goHome: "Ir al inicio",
+    heading: "404",
+  },
+  preFooter: {
+    by: "por",
+    getStarted: "Comenzar",
+    heading: "Mejor facturación",
+    sectionLabel: "[¿LISTO PARA AHORRAR?]",
+    viewOnGithub: "Ver en GitHub",
+  },
+  score: {
+    critical: "Crítico",
+    great: "Excelente",
+    needsWork: "Necesita trabajo",
+  },
+  share: {
+    across: "en",
+    addBadgeToReadme: "Añade una insignia a tu README:",
+    copied: "Copiado",
+    copy: "Copiar",
+    error: "error",
+    errors: "errores",
+    file: "archivo",
+    files: "archivos",
+    myProject: "Mi proyecto Next.js ",
+    openSvg: "Abrir SVG",
+    runOnCodebase: "Ejecútalo en tu código:",
+    shareOnLinkedIn: "Compartir en LinkedIn",
+    shareOnX: "Compartir en X",
+    tweetSuffix: "en Vercel Doctor. Ejecútalo en el tuyo:",
+    warning: "advertencia",
+    warnings: "advertencias",
+  },
+  showcasePage: {
+    description: "Una colección de proyectos que usan Vercel Doctor.",
+    empty: "Aún no hay proyectos. ¡Sé el primero en enviar el tuyo!",
+    heading: "Galería",
+    suggestYours: "Sugiere el tuyo",
+  },
+  sponsorsPage: {
+    description:
+      "Tu patrocinio significa mucho para los proyectos de código abierto, incluyendo Vercel Doctor.",
+    empty: "Aún no hay patrocinadores. ¡Sé el primero en apoyar este proyecto!",
+    heading: "Patrocinadores",
+    organizationSponsors: "Patrocinadores organizacionales",
+    sponsorMyWork: "Patrocina mi trabajo",
+  },
+  sponsorsSection: {
+    description:
+      "Tu patrocinio significa mucho para los proyectos de código abierto, incluyendo Vercel Doctor.",
+    heading: "Apoyado por los mejores",
+    sponsorMyWork: "Patrocina mi trabajo",
   },
   testimonials: {
     sectionLabel: "[LO QUE DICE LA GENTE]",
-  },
-  preFooter: {
-    sectionLabel: "[¿LISTO PARA AHORRAR?]",
-    heading: "Mejor facturación",
-    by: "por",
-    getStarted: "Comenzar",
-    viewOnGithub: "Ver en GitHub",
-  },
-  footer: {
-    builtBy: "Creado por",
-    hostedOn: "Alojado en",
-    sourceAvailableOn: "El código fuente está disponible en",
-    twitter: "Twitter",
-    llms: "LLMs",
-  },
-  disclaimer: {
-    text: "No avalado ni afiliado con",
-  },
-  sponsorsSection: {
-    heading: "Apoyado por los mejores",
-    description:
-      "Tu patrocinio significa mucho para los proyectos de código abierto, incluyendo Vercel Doctor.",
-    sponsorMyWork: "Patrocina mi trabajo",
-  },
-  showcasePage: {
-    heading: "Galería",
-    description: "Una colección de proyectos que usan Vercel Doctor.",
-    suggestYours: "Sugiere el tuyo",
-    empty: "Aún no hay proyectos. ¡Sé el primero en enviar el tuyo!",
-  },
-  sponsorsPage: {
-    heading: "Patrocinadores",
-    description:
-      "Tu patrocinio significa mucho para los proyectos de código abierto, incluyendo Vercel Doctor.",
-    sponsorMyWork: "Patrocina mi trabajo",
-    organizationSponsors: "Patrocinadores organizacionales",
-    empty: "Aún no hay patrocinadores. ¡Sé el primero en apoyar este proyecto!",
-  },
-  notFound: {
-    heading: "404",
-    description: "La página que buscas podría haber sido movida o no existe.",
-    goHome: "Ir al inicio",
-    explore: "Explorar",
-  },
-  score: {
-    great: "Excelente",
-    needsWork: "Necesita trabajo",
-    critical: "Crítico",
-  },
-  share: {
-    myProject: "Mi proyecto Next.js ",
-    tweetSuffix: "en Vercel Doctor. Ejecútalo en el tuyo:",
-    runOnCodebase: "Ejecútalo en tu código:",
-    shareOnX: "Compartir en X",
-    shareOnLinkedIn: "Compartir en LinkedIn",
-    addBadgeToReadme: "Añade una insignia a tu README:",
-    openSvg: "Abrir SVG",
-    copy: "Copiar",
-    copied: "Copiado",
-    error: "error",
-    errors: "errores",
-    warning: "advertencia",
-    warnings: "advertencias",
-    across: "en",
-    file: "archivo",
-    files: "archivos",
-  },
-  fumadocs: {
-    displayName: "Español",
-    search: "Buscar documentación",
   },
 };

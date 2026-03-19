@@ -1,4 +1,5 @@
-import { type InferPageType, loader } from "fumadocs-core/source";
+import { loader } from "fumadocs-core/source";
+import type { InferPageType } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 import { docs } from "fumadocs-mdx:collections/server";
 
@@ -6,12 +7,12 @@ import { i18n } from "@/i18n/config";
 
 export const source = loader({
   baseUrl: "/docs",
-  source: docs.toFumadocsSource(),
-  plugins: [lucideIconsPlugin()],
   i18n,
+  plugins: [lucideIconsPlugin()],
+  source: docs.toFumadocsSource(),
 });
 
-export function getPageImage(page: InferPageType<typeof source>) {
+export const getPageImage = (page: InferPageType<typeof source>) => {
   const pathSegments =
     page.locale === i18n.defaultLanguage
       ? page.slugs
@@ -22,12 +23,12 @@ export function getPageImage(page: InferPageType<typeof source>) {
     segments,
     url: `/og/docs/${segments.join("/")}`,
   };
-}
+};
 
-export async function getLLMText(page: InferPageType<typeof source>) {
+export const getLLMText = async (page: InferPageType<typeof source>) => {
   const processed = await page.data.getText("processed");
 
   return `# ${page.data.title}
 
 ${processed}`;
-}
+};

@@ -3,7 +3,7 @@ import { getLLMText, source } from "@/lib/source";
 
 export const revalidate = false;
 
-export async function GET() {
+export const GET = async () => {
   const scan = source
     .getPages()
     .filter((page) => page.locale === i18n.defaultLanguage)
@@ -13,4 +13,4 @@ export async function GET() {
   return new Response(scanned.join("\n\n"), {
     headers: { "Content-Type": "text/markdown" },
   });
-}
+};

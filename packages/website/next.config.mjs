@@ -4,67 +4,67 @@ const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
-  reactStrictMode: true,
-  serverExternalPackages: ["@takumi-rs/image-response"],
-  images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "unavatar.io" },
-      { protocol: "https", hostname: "api.dicebear.com" },
-    ],
-  },
-  async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: "/",
-          destination: "/llms.txt",
-          has: [
-            {
-              type: "header",
-              key: "accept",
-              value: "(.*)text/markdown(.*)",
-            },
-          ],
-        },
-        {
-          source: "/llm.txt",
-          destination: "/llms.txt",
-        },
-        {
-          source: "/docs/:path*",
-          destination: "/llms.mdx/docs/:path*",
-          has: [
-            {
-              type: "header",
-              key: "accept",
-              value: "(.*)text/markdown(.*)",
-            },
-          ],
-        },
-        {
-          source: "/docs/:path*\\.mdx",
-          destination: "/llms.mdx/docs/:path*",
-        },
-        {
-          source: "/install-skill.sh",
-          destination: "/install-skill",
-        },
-      ],
-    };
-  },
-  async headers() {
+  headers() {
     return [
       {
-        source: "/_next/static/:path*",
         headers: [
           {
             key: "X-Robots-Tag",
             value: "noindex, nofollow, noarchive",
           },
         ],
+        source: "/_next/static/:path*",
       },
     ];
   },
+  images: {
+    remotePatterns: [
+      { hostname: "unavatar.io", protocol: "https" },
+      { hostname: "api.dicebear.com", protocol: "https" },
+    ],
+  },
+  reactStrictMode: true,
+  rewrites() {
+    return {
+      beforeFiles: [
+        {
+          destination: "/llms.txt",
+          has: [
+            {
+              key: "accept",
+              type: "header",
+              value: "(.*)text/markdown(.*)",
+            },
+          ],
+          source: "/",
+        },
+        {
+          destination: "/llms.txt",
+          source: "/llm.txt",
+        },
+        {
+          destination: "/llms.mdx/docs/:path*",
+          has: [
+            {
+              key: "accept",
+              type: "header",
+              value: "(.*)text/markdown(.*)",
+            },
+          ],
+          source: "/docs/:path*",
+        },
+        {
+          destination: "/llms.mdx/docs/:path*",
+          source: "/docs/:path*\\.mdx",
+        },
+        {
+          destination: "/install-skill",
+          source: "/install-skill.sh",
+        },
+      ],
+    };
+  },
+  serverExternalPackages: ["@takumi-rs/image-response"],
 };
 
 export default withMDX(config);

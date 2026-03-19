@@ -71,9 +71,9 @@ export const Diagnostics = () => {
     [0, SCORE_FADE_IN_FRAMES],
     [0, 1],
     {
+      easing: Easing.out(Easing.cubic),
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
     },
   );
 
@@ -82,9 +82,9 @@ export const Diagnostics = () => {
     [0, SCORE_ANIMATION_FRAMES],
     [0, 1],
     {
+      easing: Easing.out(Easing.cubic),
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
     },
   );
   const currentScore = Math.round(scoreProgress * TARGET_SCORE);
@@ -100,9 +100,9 @@ export const Diagnostics = () => {
     [SHRINK_START_FRAME, SHRINK_END_FRAME],
     [0, 1],
     {
+      easing: Easing.inOut(Easing.quad),
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.inOut(Easing.quad),
     },
   );
 
@@ -132,9 +132,9 @@ export const Diagnostics = () => {
     [SHRINK_END_FRAME, SHRINK_END_FRAME + 10],
     [0, 1],
     {
+      easing: Easing.out(Easing.cubic),
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
     },
   );
 
@@ -165,9 +165,9 @@ export const Diagnostics = () => {
     ],
     [0, 1, 1, 0],
     {
+      easing: Easing.out(Easing.cubic),
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
     },
   );
 
@@ -179,25 +179,25 @@ export const Diagnostics = () => {
     >
       <div
         style={{
-          transform: `translateY(${interpolate(shrinkProgress, [0, 1], [340, 0])}px)`,
           padding: "60px 80px",
+          transform: `translateY(${interpolate(shrinkProgress, [0, 1], [340, 0])}px)`,
         }}
       >
         <div
           style={{
-            opacity: scoreBlockOpacity,
+            alignItems: "flex-start",
             display: "flex",
             gap: interpolate(shrinkProgress, [0, 1], [48, 32]),
-            alignItems: "flex-start",
             marginBottom: 32,
+            opacity: scoreBlockOpacity,
           }}
         >
           <pre
             style={{
               color: scoreColor,
-              lineHeight: 1.2,
-              fontSize: faceFontSize,
               fontFamily,
+              fontSize: faceFontSize,
+              lineHeight: 1.2,
               margin: 0,
             }}
           >
@@ -209,9 +209,9 @@ export const Diagnostics = () => {
               <span
                 style={{
                   color: scoreColor,
-                  fontWeight: 500,
-                  fontSize: numberFontSize,
                   fontFamily,
+                  fontSize: numberFontSize,
+                  fontWeight: 500,
                 }}
               >
                 {currentScore}
@@ -219,8 +219,8 @@ export const Diagnostics = () => {
               <span
                 style={{
                   color: MUTED_COLOR,
-                  fontSize: labelFontSize,
                   fontFamily,
+                  fontSize: labelFontSize,
                 }}
               >
                 {` / ${PERFECT_SCORE}  `}
@@ -228,8 +228,8 @@ export const Diagnostics = () => {
               <span
                 style={{
                   color: scoreColor,
-                  fontSize: labelFontSize,
                   fontFamily,
+                  fontSize: labelFontSize,
                 }}
               >
                 {getScoreLabel(currentScore)}
@@ -237,10 +237,10 @@ export const Diagnostics = () => {
             </div>
             <div
               style={{
-                marginTop: 8,
-                letterSpacing: 2,
-                fontSize: barFontSize,
                 fontFamily,
+                fontSize: barFontSize,
+                letterSpacing: 2,
+                marginTop: 8,
               }}
             >
               <span style={{ color: scoreColor }}>
@@ -255,12 +255,12 @@ export const Diagnostics = () => {
 
         <div
           style={{
+            color: TEXT_COLOR,
             fontFamily,
             fontSize: SUMMARY_FONT_SIZE_PX,
             lineHeight: 1.7,
-            color: TEXT_COLOR,
-            opacity: summaryOpacity,
             marginBottom: 24,
+            opacity: summaryOpacity,
           }}
         >
           <span style={{ color: RED_COLOR }}>{TOTAL_ERROR_COUNT} errors</span>
@@ -278,9 +278,9 @@ export const Diagnostics = () => {
             [0, DIAGNOSTIC_FADE_IN_FRAMES],
             [0, 1],
             {
+              easing: Easing.out(Easing.cubic),
               extrapolateLeft: "clamp",
               extrapolateRight: "clamp",
-              easing: Easing.out(Easing.cubic),
             },
           );
 
@@ -288,13 +288,13 @@ export const Diagnostics = () => {
             <div
               key={diagnostic.message}
               style={{
+                color: TEXT_COLOR,
                 fontFamily,
                 fontSize: DIAGNOSTIC_FONT_SIZE_PX,
                 lineHeight: 1.7,
-                color: TEXT_COLOR,
-                whiteSpace: "pre-wrap",
-                opacity: diagnosticOpacity,
                 marginBottom: 2,
+                opacity: diagnosticOpacity,
+                whiteSpace: "pre-wrap",
               }}
             >
               <span style={{ color: RED_COLOR }}> ✗</span>
@@ -312,23 +312,23 @@ export const Diagnostics = () => {
       >
         <div
           style={{
-            width: "100%",
-            height: OVERLAY_GRADIENT_HEIGHT_PX,
+            alignItems: "flex-end",
             background: getBottomOverlayGradient(overlayOpacity),
             display: "flex",
+            height: OVERLAY_GRADIENT_HEIGHT_PX,
             justifyContent: "center",
-            alignItems: "flex-end",
             padding: `0 ${OVERLAY_GRADIENT_HORIZONTAL_PADDING_PX}px ${OVERLAY_GRADIENT_BOTTOM_PADDING_PX}px`,
+            width: "100%",
           }}
         >
           <div
             style={{
+              color: "white",
               fontFamily,
               fontSize: OVERLAY_TITLE_FONT_SIZE_PX,
-              color: "white",
+              lineHeight: 1.4,
               opacity: overlayTitleOpacity,
               textAlign: "center",
-              lineHeight: 1.4,
             }}
           >
             Send to coding agent

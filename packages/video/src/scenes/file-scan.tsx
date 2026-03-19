@@ -51,9 +51,9 @@ export const FileScan = () => {
     [SCROLL_START_FRAME, SCROLL_END_FRAME],
     [0, MAX_SCROLL_PX],
     {
+      easing: Easing.inOut(Easing.quad),
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.inOut(Easing.quad),
     },
   );
 
@@ -82,9 +82,9 @@ export const FileScan = () => {
     ],
     [0, 1, 1, 0],
     {
+      easing: Easing.out(Easing.cubic),
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
-      easing: Easing.out(Easing.cubic),
     },
   );
 
@@ -96,10 +96,10 @@ export const FileScan = () => {
     >
       <div
         style={{
-          width: "100%",
           height: "100%",
           overflow: "hidden",
           padding: `${CONTENT_PADDING_PX}px 60px`,
+          width: "100%",
         }}
       >
         <div style={{ transform: `translateY(-${scrollY}px)` }}>
@@ -112,9 +112,9 @@ export const FileScan = () => {
               [0, FADE_IN_FRAMES],
               [0, 1],
               {
+                easing: Easing.out(Easing.cubic),
                 extrapolateLeft: "clamp",
                 extrapolateRight: "clamp",
-                easing: Easing.out(Easing.cubic),
               },
             );
 
@@ -124,14 +124,14 @@ export const FileScan = () => {
               <div
                 key={file.path}
                 style={{
-                  opacity: fileOpacity,
+                  color: TEXT_COLOR,
+                  display: "flex",
                   fontFamily,
                   fontSize: FILE_SCAN_FONT_SIZE_PX,
-                  lineHeight: LINE_HEIGHT_MULTIPLIER,
-                  color: TEXT_COLOR,
-                  whiteSpace: "nowrap",
-                  display: "flex",
                   justifyContent: "space-between",
+                  lineHeight: LINE_HEIGHT_MULTIPLIER,
+                  opacity: fileOpacity,
+                  whiteSpace: "nowrap",
                 }}
               >
                 <span>
@@ -171,23 +171,23 @@ export const FileScan = () => {
       >
         <div
           style={{
-            width: "100%",
-            height: OVERLAY_GRADIENT_HEIGHT_PX,
+            alignItems: "flex-end",
             background: getBottomOverlayGradient(overlayOpacity),
             display: "flex",
+            height: OVERLAY_GRADIENT_HEIGHT_PX,
             justifyContent: "center",
-            alignItems: "flex-end",
             padding: `0 ${OVERLAY_GRADIENT_HORIZONTAL_PADDING_PX}px ${OVERLAY_GRADIENT_BOTTOM_PADDING_PX}px`,
+            width: "100%",
           }}
         >
           <div
             style={{
+              color: "white",
               fontFamily,
               fontSize: TITLE_FONT_SIZE_PX,
-              color: "white",
+              lineHeight: 1.4,
               opacity: titleOpacity,
               textAlign: "center",
-              lineHeight: 1.4,
             }}
           >
             Scan for Next.js issues

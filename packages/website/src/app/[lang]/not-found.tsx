@@ -7,11 +7,11 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
+  EmptyContent,
+  EmptyDescription,
   EmptyHeader,
   EmptyTitle,
-  EmptyDescription,
 } from "@/components/ui/empty";
-import { EmptyContent } from "@/components/ui/empty";
 import { ROUTES } from "@/constants/routes";
 import { withLocalePrefix } from "@/i18n/navigation";
 import { getTranslation } from "@/translations";

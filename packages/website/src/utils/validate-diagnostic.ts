@@ -12,7 +12,9 @@ interface DiagnosticInput {
 }
 
 const isValidDiagnostic = (value: unknown): value is DiagnosticInput => {
-  if (typeof value !== "object" || value === null) return false;
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
   const record = value as Record<string, unknown>;
   return (
     typeof record.filePath === "string" &&
