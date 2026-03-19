@@ -21,7 +21,12 @@ export const MUTATION_METHOD_NAMES = new Set([
   "append",
 ]);
 
-export const MUTATING_HTTP_METHODS = new Set(["POST", "PUT", "DELETE", "PATCH"]);
+export const MUTATING_HTTP_METHODS = new Set([
+  "POST",
+  "PUT",
+  "DELETE",
+  "PATCH",
+]);
 
 export const MUTATING_ROUTE_SEGMENTS = new Set([
   "logout",

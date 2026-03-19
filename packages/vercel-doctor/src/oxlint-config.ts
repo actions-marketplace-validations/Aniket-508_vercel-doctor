@@ -13,7 +13,8 @@ const createPluginRuleConfig = (ruleIds: string[]): Record<string, string> => {
     const ruleMetadata = PLUGIN_RULE_METADATA[ruleId];
 
     if (ruleMetadata) {
-      pluginRuleConfig[getQualifiedPluginRuleId(ruleId)] = ruleMetadata.severity;
+      pluginRuleConfig[getQualifiedPluginRuleId(ruleId)] =
+        ruleMetadata.severity;
     }
   }
 
@@ -29,18 +30,21 @@ interface OxlintConfigOptions {
   framework: Framework;
 }
 
-export const createOxlintConfig = ({ pluginPath, framework }: OxlintConfigOptions) => ({
+export const createOxlintConfig = ({
+  pluginPath,
+  framework,
+}: OxlintConfigOptions) => ({
   categories: {
     correctness: "off",
-    suspicious: "off",
+    nursery: "off",
     pedantic: "off",
     perf: "off",
     restriction: "off",
     style: "off",
-    nursery: "off",
+    suspicious: "off",
   },
-  plugins: [],
   jsPlugins: [pluginPath],
+  plugins: [],
   rules: {
     ...BASE_PLUGIN_RULES,
     ...(framework === "nextjs" ? NEXTJS_RULES : {}),

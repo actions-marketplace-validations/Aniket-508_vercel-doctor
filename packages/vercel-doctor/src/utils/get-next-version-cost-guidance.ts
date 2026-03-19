@@ -1,8 +1,12 @@
 import { NEXT_MAJOR_VERSION_15, NEXT_MAJOR_VERSION_16 } from "../constants.js";
 import type { ProjectInfo } from "../types.js";
 
-export const getNextVersionCostGuidance = (projectInfo: ProjectInfo): string[] => {
-  if (projectInfo.framework !== "nextjs") return [];
+export const getNextVersionCostGuidance = (
+  projectInfo: ProjectInfo,
+): string[] => {
+  if (projectInfo.framework !== "nextjs") {
+    return [];
+  }
 
   if (
     projectInfo.nextMajorVersion !== null &&

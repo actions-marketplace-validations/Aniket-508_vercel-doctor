@@ -17,8 +17,8 @@ export const summarizeDiagnostics = (diagnostics: Diagnostic[]) => {
   }
 
   return {
+    affectedFileCount: affectedFiles.size,
     errorCount,
     warningCount,
-    affectedFileCount: affectedFiles.size,
   };
 };

@@ -12,10 +12,12 @@ import type { RulePlugin } from "./types.js";
 const plugin: RulePlugin = {
   meta: { name: OXLINT_PLUGIN_NAME },
   rules: {
-    [PLUGIN_RULE_IDS.NEXTJS_NO_CLIENT_FETCH_FOR_SERVER_DATA]: nextjsNoClientFetchForServerData,
+    [PLUGIN_RULE_IDS.NEXTJS_NO_CLIENT_FETCH_FOR_SERVER_DATA]:
+      nextjsNoClientFetchForServerData,
     [PLUGIN_RULE_IDS.NEXTJS_IMAGE_MISSING_SIZES]: nextjsImageMissingSizes,
     [PLUGIN_RULE_IDS.NEXTJS_LINK_PREFETCH_DEFAULT]: nextjsLinkPrefetchDefault,
-    [PLUGIN_RULE_IDS.NEXTJS_NO_SIDE_EFFECT_IN_GET_HANDLER]: nextjsNoSideEffectInGetHandler,
+    [PLUGIN_RULE_IDS.NEXTJS_NO_SIDE_EFFECT_IN_GET_HANDLER]:
+      nextjsNoSideEffectInGetHandler,
     [PLUGIN_RULE_IDS.SERVER_AFTER_NONBLOCKING]: serverAfterNonblocking,
     [PLUGIN_RULE_IDS.ASYNC_PARALLEL]: asyncParallel,
   },

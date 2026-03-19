@@ -34,14 +34,16 @@ const cleanDiagnosticMessage = (
 ): CleanedDiagnostic => {
   const cleaned = message.replace(FILEPATH_WITH_LOCATION_PATTERN, "").trim();
   return {
-    message: cleaned || message,
     help: help || getRuleDetails(plugin, rule)?.help || "",
+    message: cleaned || message,
   };
 };
 
 const parseRuleCode = (code: string): { plugin: string; rule: string } => {
   const match = code.match(/^(.+)\((.+)\)$/);
-  if (!match) return { plugin: "unknown", rule: code };
+  if (!match) {
+    return { plugin: "unknown", rule: code };
+  }
   return { plugin: match[1].replace(/^eslint-plugin-/, ""), rule: match[2] };
 };
 
@@ -57,20 +59,23 @@ const resolveOxlintBinary = (): string => {
 const resolvePluginPath = (): string => {
   const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
   const pluginPath = path.join(currentDirectory, "vercel-doctor-plugin.js");
-  if (fs.existsSync(pluginPath)) return pluginPath;
+  if (fs.existsSync(pluginPath)) {
+    return pluginPath;
+  }
 
   const distPluginPath = path.resolve(
     currentDirectory,
     "../../dist/vercel-doctor-plugin.js",
   );
-  if (fs.existsSync(distPluginPath)) return distPluginPath;
+  if (fs.existsSync(distPluginPath)) {
+    return distPluginPath;
+  }
 
   return pluginPath;
 };
 
-const resolveDiagnosticCategory = (plugin: string, rule: string): string => {
-  return getRuleDetails(plugin, rule)?.category ?? RULE_CATEGORY_NAMES.OTHER;
-};
+const resolveDiagnosticCategory = (plugin: string, rule: string): string =>
+  getRuleDetails(plugin, rule)?.category ?? RULE_CATEGORY_NAMES.OTHER;
 
 export const runOxlint = async (
   rootDirectory: string,
@@ -87,7 +92,7 @@ export const runOxlint = async (
     `vercel-doctor-oxlintrc-${process.pid}.json`,
   );
   const pluginPath = resolvePluginPath();
-  const config = createOxlintConfig({ pluginPath, framework });
+  const config = createOxlintConfig({ framework, pluginPath });
   const restoreDisableDirectives = neutralizeDisableDirectives(rootDirectory);
 
   try {
@@ -100,40 +105,41 @@ export const runOxlint = async (
       args.push("--tsconfig", "./tsconfig.json");
     }
 
-    if (includePaths !== undefined) {
-      args.push(...includePaths);
-    } else {
+    if (includePaths === undefined) {
       args.push(".");
+    } else {
+      args.push(...includePaths);
     }
 
-    const stdout = await new Promise<string>((resolve, reject) => {
-      const child = spawn(process.execPath, args, {
-        cwd: rootDirectory,
-      });
-
-      const stdoutBuffers: Buffer[] = [];
-      const stderrBuffers: Buffer[] = [];
-
-      child.stdout.on("data", (buffer: Buffer) => stdoutBuffers.push(buffer));
-      child.stderr.on("data", (buffer: Buffer) => stderrBuffers.push(buffer));
-
-      child.on("error", (error) =>
-        reject(new Error(`Failed to run oxlint: ${error.message}`)),
-      );
-      child.on("close", () => {
-        const output = Buffer.concat(stdoutBuffers).toString("utf-8").trim();
-        if (!output) {
-          const stderrOutput = Buffer.concat(stderrBuffers)
-            .toString("utf-8")
-            .trim();
-          if (stderrOutput) {
-            reject(new Error(`Failed to run oxlint: ${stderrOutput}`));
-            return;
-          }
-        }
-        resolve(output);
-      });
+    const { promise, resolve, reject } = Promise.withResolvers<string>();
+    const child = spawn(process.execPath, args, {
+      cwd: rootDirectory,
     });
+
+    const stdoutBuffers: Buffer[] = [];
+    const stderrBuffers: Buffer[] = [];
+
+    child.stdout.on("data", (buffer: Buffer) => stdoutBuffers.push(buffer));
+    child.stderr.on("data", (buffer: Buffer) => stderrBuffers.push(buffer));
+
+    child.on("error", (error) =>
+      reject(new Error(`Failed to run oxlint: ${error.message}`)),
+    );
+    child.on("close", () => {
+      const output = Buffer.concat(stdoutBuffers).toString("utf8").trim();
+      if (!output) {
+        const stderrOutput = Buffer.concat(stderrBuffers)
+          .toString("utf8")
+          .trim();
+        if (stderrOutput) {
+          reject(new Error(`Failed to run oxlint: ${stderrOutput}`));
+          return;
+        }
+      }
+      resolve(output);
+    });
+
+    const stdout = await promise;
 
     if (!stdout) {
       return [];
@@ -155,7 +161,7 @@ export const runOxlint = async (
       )
       .map((diagnostic) => {
         const { plugin, rule } = parseRuleCode(diagnostic.code);
-        const primaryLabel = diagnostic.labels[0];
+        const [primaryLabel] = diagnostic.labels;
 
         const cleaned = cleanDiagnosticMessage(
           diagnostic.message,
@@ -165,15 +171,15 @@ export const runOxlint = async (
         );
 
         return {
+          category: resolveDiagnosticCategory(plugin, rule),
+          column: primaryLabel?.span.column ?? 0,
           filePath: diagnostic.filename,
+          help: cleaned.help,
+          line: primaryLabel?.span.line ?? 0,
+          message: cleaned.message,
           plugin,
           rule,
           severity: diagnostic.severity,
-          message: cleaned.message,
-          help: cleaned.help,
-          line: primaryLabel?.span.line ?? 0,
-          column: primaryLabel?.span.column ?? 0,
-          category: resolveDiagnosticCategory(plugin, rule),
         };
       });
   } finally {

@@ -62,37 +62,48 @@ export const diagnose = async (
     ? includePaths.filter((filePath) => JSX_FILE_PATTERN.test(filePath))
     : undefined;
 
-  const lintPromise = effectiveLint
-    ? runOxlint(
+  const runLint = async (): Promise<Diagnostic[]> => {
+    if (!effectiveLint) {
+      return [];
+    }
+    try {
+      return await runOxlint(
         resolvedDirectory,
         projectInfo.hasTypeScript,
         projectInfo.framework,
         jsxIncludePaths,
-      ).catch((error: unknown) => {
-        console.error("Lint failed:", error);
-        return [] as Diagnostic[];
-      })
-    : Promise.resolve([] as Diagnostic[]);
+      );
+    } catch (error: unknown) {
+      console.error("Lint failed:", error);
+      return [];
+    }
+  };
 
-  const deadCodePromise =
-    effectiveDeadCode && !isDiffMode
-      ? runKnip(resolvedDirectory).catch((error: unknown) => {
-          console.error("Dead code analysis failed:", error);
-          return [] as Diagnostic[];
-        })
-      : Promise.resolve([] as Diagnostic[]);
+  const runDeadCode = async (): Promise<Diagnostic[]> => {
+    if (!effectiveDeadCode || isDiffMode) {
+      return [];
+    }
+    try {
+      return await runKnip(resolvedDirectory);
+    } catch (error: unknown) {
+      console.error("Dead code analysis failed:", error);
+      return [];
+    }
+  };
 
-  const vercelChecksPromise = Promise.resolve(
-    runVercelChecks(resolvedDirectory, {
-      includePaths: isDiffMode ? includePaths : undefined,
-    }),
-  ).catch((error: unknown) => {
-    console.error("Vercel optimization checks failed:", error);
-    return [];
-  });
+  const runVercelChecksSafe = async (): Promise<Diagnostic[]> => {
+    try {
+      return await runVercelChecks(resolvedDirectory, {
+        includePaths: isDiffMode ? includePaths : undefined,
+      });
+    } catch (error: unknown) {
+      console.error("Vercel optimization checks failed:", error);
+      return [];
+    }
+  };
 
   const [lintDiagnostics, deadCodeDiagnostics, vercelDiagnostics] =
-    await Promise.all([lintPromise, deadCodePromise, vercelChecksPromise]);
+    await Promise.all([runLint(), runDeadCode(), runVercelChecksSafe()]);
   const allDiagnostics = [
     ...lintDiagnostics,
     ...deadCodeDiagnostics,
@@ -107,8 +118,8 @@ export const diagnose = async (
 
   return {
     diagnostics,
-    score,
-    project: projectInfo,
     elapsedMilliseconds,
+    project: projectInfo,
+    score,
   };
 };

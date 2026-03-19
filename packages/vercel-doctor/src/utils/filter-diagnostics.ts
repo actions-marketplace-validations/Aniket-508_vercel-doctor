@@ -5,7 +5,9 @@ export const filterIgnoredDiagnostics = (
   diagnostics: Diagnostic[],
   config: VercelDoctorConfig,
 ): Diagnostic[] => {
-  const ignoredRules = new Set(Array.isArray(config.ignore?.rules) ? config.ignore.rules : []);
+  const ignoredRules = new Set(
+    Array.isArray(config.ignore?.rules) ? config.ignore.rules : [],
+  );
   const ignoredFilePatterns = Array.isArray(config.ignore?.files)
     ? config.ignore.files.map(compileGlobPattern)
     : [];
@@ -20,7 +22,9 @@ export const filterIgnoredDiagnostics = (
       return false;
     }
 
-    const normalizedPath = diagnostic.filePath.replace(/\\/g, "/").replace(/^\.\//, "");
+    const normalizedPath = diagnostic.filePath
+      .replaceAll("\\", "/")
+      .replace(/^\.\//, "");
     if (ignoredFilePatterns.some((pattern) => pattern.test(normalizedPath))) {
       return false;
     }

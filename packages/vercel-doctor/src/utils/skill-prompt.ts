@@ -17,8 +17,10 @@ interface SkillPromptConfig {
 
 const readSkillPromptConfig = (): SkillPromptConfig => {
   try {
-    if (!existsSync(CONFIG_FILE)) return {};
-    return JSON.parse(readFileSync(CONFIG_FILE, "utf-8"));
+    if (!existsSync(CONFIG_FILE)) {
+      return {};
+    }
+    return JSON.parse(readFileSync(CONFIG_FILE, "utf8"));
   } catch {
     return {};
   }
@@ -30,7 +32,9 @@ const writeSkillPromptConfig = (config: SkillPromptConfig): void => {
       mkdirSync(CONFIG_DIRECTORY, { recursive: true });
     }
     writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
-  } catch {}
+  } catch {
+    // Config write may fail (permissions, etc.)
+  }
 };
 
 const installSkill = (): void => {
@@ -47,8 +51,12 @@ export const maybePromptSkillInstall = async (
   shouldSkipPrompts: boolean,
 ): Promise<void> => {
   const config = readSkillPromptConfig();
-  if (config.skillPromptDismissed) return;
-  if (shouldSkipPrompts) return;
+  if (config.skillPromptDismissed) {
+    return;
+  }
+  if (shouldSkipPrompts) {
+    return;
+  }
 
   logger.break();
   logger.log(
@@ -63,10 +71,10 @@ export const maybePromptSkillInstall = async (
   logger.break();
 
   const { shouldInstall } = await prompts({
-    type: "confirm",
-    name: "shouldInstall",
-    message: "Install skill? (recommended)",
     initial: true,
+    message: "Install skill? (recommended)",
+    name: "shouldInstall",
+    type: "confirm",
   });
 
   if (shouldInstall) {

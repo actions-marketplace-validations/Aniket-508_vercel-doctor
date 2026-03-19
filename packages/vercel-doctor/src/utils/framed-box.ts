@@ -19,7 +19,9 @@ export const createFramedLine = (
 });
 
 export const renderFramedBoxString = (framedLines: FramedLine[]): string => {
-  if (framedLines.length === 0) return "";
+  if (framedLines.length === 0) {
+    return "";
+  }
 
   const borderColorizer = highlighter.dim;
   const outerIndent = " ".repeat(SUMMARY_BOX_OUTER_INDENT_CHARS);
@@ -27,19 +29,19 @@ export const renderFramedBoxString = (framedLines: FramedLine[]): string => {
   const maximumLineLength = Math.max(
     ...framedLines.map((framedLine) => framedLine.plainText.length),
   );
-  const borderLine = "─".repeat(maximumLineLength + SUMMARY_BOX_HORIZONTAL_PADDING_CHARS * 2);
+  const borderLine = "─".repeat(
+    maximumLineLength + SUMMARY_BOX_HORIZONTAL_PADDING_CHARS * 2,
+  );
 
-  const lines: string[] = [];
-  lines.push(`${outerIndent}${borderColorizer(`┌${borderLine}┐`)}`);
-
-  for (const framedLine of framedLines) {
-    const trailingSpaces = " ".repeat(maximumLineLength - framedLine.plainText.length);
-    lines.push(
-      `${outerIndent}${borderColorizer("│")}${horizontalPadding}${framedLine.renderedText}${trailingSpaces}${horizontalPadding}${borderColorizer("│")}`,
+  const topBorder = `${outerIndent}${borderColorizer(`┌${borderLine}┐`)}`;
+  const bodyLines = framedLines.map((framedLine) => {
+    const trailingSpaces = " ".repeat(
+      maximumLineLength - framedLine.plainText.length,
     );
-  }
-
-  lines.push(`${outerIndent}${borderColorizer(`└${borderLine}┘`)}`);
+    return `${outerIndent}${borderColorizer("│")}${horizontalPadding}${framedLine.renderedText}${trailingSpaces}${horizontalPadding}${borderColorizer("│")}`;
+  });
+  const bottomBorder = `${outerIndent}${borderColorizer(`└${borderLine}┘`)}`;
+  const lines = [topBorder, ...bodyLines, bottomBorder];
   return lines.join("\n");
 };
 

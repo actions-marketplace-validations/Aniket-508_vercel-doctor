@@ -14,21 +14,21 @@ import {
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
 const makeDiagnostic = (overrides: Partial<Diagnostic> = {}): Diagnostic => ({
+  category: "Vercel",
+  column: 1,
   filePath: "/app/page.tsx",
+  help: "Test help",
+  line: 1,
+  message: "Test message",
   plugin: "vercel",
   rule: "vercel-no-force-dynamic",
   severity: "error",
-  message: "Test message",
-  help: "Test help",
-  line: 1,
-  column: 1,
-  category: "Vercel",
   ...overrides,
 });
 
 // ─── #5: RULE_FIX_STRATEGIES drift check ─────────────────────────────────────
 
-describe("RULE_FIX_STRATEGIES", () => {
+describe(RULE_FIX_STRATEGIES, () => {
   it("all keys are registered in the live plugin or oxlint rule registry", () => {
     // Plugin rules (js-performance, nextjs, server)
     const registeredPluginRules = new Set(Object.keys(plugin.rules));
@@ -45,14 +45,14 @@ describe("RULE_FIX_STRATEGIES", () => {
     );
     // Every plugin rule key found in strategies must still exist in the plugin
     for (const key of pluginRulesInStrategies) {
-      expect(registeredPluginRules.has(key)).toBe(true);
+      expect(registeredPluginRules.has(key)).toBeTruthy();
     }
   });
 });
 
 // ─── #8: groupDiagnosticsByCategory ─────────────────────────────────────────
 
-describe("groupDiagnosticsByCategory", () => {
+describe(groupDiagnosticsByCategory, () => {
   it("groups diagnostics by category", () => {
     const diagnostics = [
       makeDiagnostic({ category: "Vercel" }),
@@ -85,24 +85,24 @@ describe("groupDiagnosticsByCategory", () => {
   });
 
   it("returns empty array for empty input", () => {
-    expect(groupDiagnosticsByCategory([])).toEqual([]);
+    expect(groupDiagnosticsByCategory([])).toStrictEqual([]);
   });
 });
 
 // ─── #8 + #10: generateAIPrompts ─────────────────────────────────────────────
 
-describe("generateAIPrompts", () => {
+describe(generateAIPrompts, () => {
   it("returns an array (not a Map)", () => {
     const result = generateAIPrompts([makeDiagnostic()]);
-    expect(Array.isArray(result)).toBe(true);
+    expect(Array.isArray(result)).toBeTruthy();
   });
 
   it("produces one entry per diagnostic (no key collision)", () => {
-    // Two diagnostics with the same rule but different files — both must be preserved
+    // Two diagnostics with same rule, different files/columns — both preserved
     const diagnostics = [
-      makeDiagnostic({ filePath: "/app/page.tsx", line: 1, column: 1 }),
-      makeDiagnostic({ filePath: "/app/page.tsx", line: 1, column: 2 }), // different column
-      makeDiagnostic({ filePath: "/app/layout.tsx", line: 5, column: 1 }),
+      makeDiagnostic({ column: 1, filePath: "/app/page.tsx", line: 1 }),
+      makeDiagnostic({ column: 2, filePath: "/app/page.tsx", line: 1 }),
+      makeDiagnostic({ column: 1, filePath: "/app/layout.tsx", line: 5 }),
     ];
     const result = generateAIPrompts(diagnostics);
     expect(result).toHaveLength(3);
@@ -110,9 +110,10 @@ describe("generateAIPrompts", () => {
   });
 
   it("filters for fixable issues only", () => {
+    // fixable rule and non-fixable rule
     const diagnostics = [
-      makeDiagnostic({ rule: "vercel-no-force-dynamic" }), // fixable
-      makeDiagnostic({ rule: "unknown-rule" }), // not fixable
+      makeDiagnostic({ rule: "vercel-no-force-dynamic" }),
+      makeDiagnostic({ rule: "unknown-rule" }),
     ];
     const result = generateAIPrompts(diagnostics);
     expect(result).toHaveLength(1);
@@ -121,10 +122,10 @@ describe("generateAIPrompts", () => {
 
   it("includes column number in prompt content", () => {
     const diag = makeDiagnostic({
-      rule: "vercel-no-force-dynamic",
+      column: 5,
       filePath: "src/app/page.tsx",
       line: 10,
-      column: 5,
+      rule: "vercel-no-force-dynamic",
     });
     const [entry] = generateAIPrompts([diag]);
     expect(entry.prompt).toContain("**File:** src/app/page.tsx:10:5");
@@ -132,11 +133,11 @@ describe("generateAIPrompts", () => {
 
   it("key format is plugin/rule::filePath:line:column", () => {
     const diag = makeDiagnostic({
-      plugin: "vercel",
-      rule: "vercel-no-force-dynamic",
+      column: 10,
       filePath: "/app/page.tsx",
       line: 42,
-      column: 10,
+      plugin: "vercel",
+      rule: "vercel-no-force-dynamic",
     });
     const [entry] = generateAIPrompts([diag]);
     expect(entry.key).toBe(
@@ -145,7 +146,7 @@ describe("generateAIPrompts", () => {
   });
 
   it("returns empty array for empty input", () => {
-    expect(generateAIPrompts([])).toEqual([]);
+    expect(generateAIPrompts([])).toStrictEqual([]);
   });
 
   it("adds better-all codemod prompt for async-parallel diagnostics", () => {
@@ -164,7 +165,7 @@ describe("generateAIPrompts", () => {
 
 // ─── #8 + #9: Empty-state and deterministic timestamps ────────────────────────
 
-describe("generateHumanReadableReport", () => {
+describe(generateHumanReadableReport, () => {
   it("returns no-issues message for empty diagnostics", () => {
     const report = generateHumanReadableReport([]);
     expect(report).toContain("No Vercel optimization issues found");
@@ -173,14 +174,14 @@ describe("generateHumanReadableReport", () => {
   it("includes error and warning counts for non-empty diagnostics", () => {
     const diagnostics = [
       makeDiagnostic({ severity: "error" }),
-      makeDiagnostic({ severity: "warning", rule: "vercel-no-no-store-fetch" }),
+      makeDiagnostic({ rule: "vercel-no-no-store-fetch", severity: "warning" }),
     ];
     const report = generateHumanReadableReport(diagnostics);
     expect(report).toContain("1 errors, 1 warnings");
   });
 });
 
-describe("generateMarkdownReport", () => {
+describe(generateMarkdownReport, () => {
   it("returns no-issues block for empty diagnostics", () => {
     const report = generateMarkdownReport(
       [],
@@ -205,7 +206,7 @@ describe("generateMarkdownReport", () => {
   });
 });
 
-describe("generateAIPromptsMarkdown", () => {
+describe(generateAIPromptsMarkdown, () => {
   it("returns no-fixable-issues message for empty input", () => {
     const report = generateAIPromptsMarkdown([]);
     expect(report).toContain("No auto-fixable issues detected");

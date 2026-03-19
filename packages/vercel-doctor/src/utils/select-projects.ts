@@ -9,7 +9,7 @@ import { highlighter } from "./highlighter.js";
 import { logger } from "./logger.js";
 import { prompts } from "./prompts.js";
 
-export const selectProjects = async (
+export const selectProjects = (
   rootDirectory: string,
   projectFlag: string | undefined,
   skipPrompts: boolean,
@@ -19,19 +19,25 @@ export const selectProjects = async (
     packages = discoverReactSubprojects(rootDirectory);
   }
 
-  if (packages.length === 0) return [rootDirectory];
+  if (packages.length === 0) {
+    return Promise.resolve([rootDirectory]);
+  }
   if (packages.length === 1) {
     logger.log(
       `${highlighter.success("✔")} Select projects to scan ${highlighter.dim("›")} ${packages[0].name}`,
     );
-    return [packages[0].directory];
+    return Promise.resolve([packages[0].directory]);
   }
 
-  if (projectFlag) return resolveProjectFlag(projectFlag, packages);
+  if (projectFlag) {
+    return Promise.resolve(resolveProjectFlag(projectFlag, packages));
+  }
 
   if (skipPrompts) {
     printDiscoveredProjects(packages);
-    return packages.map((workspacePackage) => workspacePackage.directory);
+    return Promise.resolve(
+      packages.map((workspacePackage) => workspacePackage.directory),
+    );
   }
 
   return promptProjectSelection(packages, rootDirectory);
@@ -77,15 +83,15 @@ const promptProjectSelection = async (
   rootDirectory: string,
 ): Promise<string[]> => {
   const { selectedDirectories } = await prompts({
-    type: "multiselect",
-    name: "selectedDirectories",
-    message: "Select projects to scan",
     choices: workspacePackages.map((workspacePackage) => ({
-      title: workspacePackage.name,
       description: path.relative(rootDirectory, workspacePackage.directory),
+      title: workspacePackage.name,
       value: workspacePackage.directory,
     })),
+    message: "Select projects to scan",
     min: 1,
+    name: "selectedDirectories",
+    type: "multiselect",
   });
 
   return selectedDirectories;

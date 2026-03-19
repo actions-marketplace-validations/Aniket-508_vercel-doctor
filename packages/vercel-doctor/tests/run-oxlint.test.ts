@@ -26,24 +26,37 @@ const describeRules = (
   rules: Record<string, RuleTestCase>,
   getDiagnostics: () => Diagnostic[],
 ) => {
+  const rows = (Object.entries(rules) as [string, RuleTestCase][]).map(
+    ([ruleName, testCase]) =>
+      [ruleName, testCase.fixture, testCase.ruleSource, ruleName, testCase] as [
+        string,
+        string,
+        string,
+        string,
+        RuleTestCase,
+      ],
+  );
   describe(groupName, () => {
-    for (const [ruleName, testCase] of Object.entries(rules)) {
-      it(`${ruleName} (${testCase.fixture} → ${testCase.ruleSource})`, () => {
+    it.each(rows)(
+      "%s (%s → %s)",
+      (_displayName, _fixture, _ruleSource, ruleName, testCase) => {
         const issues = findDiagnosticsByRule(getDiagnostics(), ruleName);
         expect(issues.length).toBeGreaterThan(0);
-        if (testCase.severity)
-          expect(issues[0].severity).toBe(testCase.severity);
-        if (testCase.category)
-          expect(issues[0].category).toBe(testCase.category);
-      });
-    }
+        expect(issues[0].severity).toBe(
+          testCase.severity ?? issues[0].severity,
+        );
+        expect(issues[0].category).toBe(
+          testCase.category ?? issues[0].category,
+        );
+      },
+    );
   });
 };
 
 let basicReactDiagnostics: Diagnostic[];
 let nextjsDiagnostics: Diagnostic[];
 
-describe("runOxlint", () => {
+describe(runOxlint, () => {
   it("loads basic-react diagnostics", async () => {
     basicReactDiagnostics = await runOxlint(
       BASIC_REACT_DIRECTORY,
@@ -81,9 +94,9 @@ describe("runOxlint", () => {
     "function duration rules",
     {
       "async-parallel": {
+        category: "Function Duration",
         fixture: "js-performance-issues.tsx",
         ruleSource: "rules/js-performance.ts",
-        category: "Function Duration",
       },
     },
     () => basicReactDiagnostics,
@@ -94,37 +107,37 @@ describe("runOxlint", () => {
       nextjsDiagnostics,
       "nextjs-link-prefetch-default",
     ).filter((innerDiagnostic) => innerDiagnostic.filePath.includes("nav-ok"));
-    expect(linkPrefetchDisabledIssues.length).toBe(0);
+    expect(linkPrefetchDisabledIssues).toHaveLength(0);
   });
 
   describeRules(
     "billing-focused nextjs rules",
     {
-      "nextjs-no-client-fetch-for-server-data": {
-        fixture: "app/layout.tsx",
-        ruleSource: "rules/nextjs.ts",
-        category: "Invocations",
-      },
       "nextjs-image-missing-sizes": {
+        category: "Image Optimization",
         fixture: "app/page.tsx",
         ruleSource: "rules/nextjs.ts",
-        category: "Image Optimization",
       },
       "nextjs-link-prefetch-default": {
+        category: "Invocations",
         fixture: "app/nav.tsx",
         ruleSource: "rules/nextjs.ts",
+      },
+      "nextjs-no-client-fetch-for-server-data": {
         category: "Invocations",
+        fixture: "app/layout.tsx",
+        ruleSource: "rules/nextjs.ts",
       },
       "nextjs-no-side-effect-in-get-handler": {
+        category: "Caching",
         fixture: "app/logout/route.tsx",
         ruleSource: "rules/nextjs.ts",
         severity: "error",
-        category: "Caching",
       },
       "server-after-nonblocking": {
+        category: "Function Duration",
         fixture: "app/actions.tsx",
         ruleSource: "rules/server.ts",
-        category: "Function Duration",
       },
     },
     () => nextjsDiagnostics,

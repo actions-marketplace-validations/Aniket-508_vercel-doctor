@@ -6,11 +6,18 @@ import {
 } from "./constants.js";
 import type { EsTreeNode } from "./types.js";
 
-export const walkAst = (node: EsTreeNode, visitor: (child: EsTreeNode) => void): void => {
-  if (!node || typeof node !== "object") return;
+export const walkAst = (
+  node: EsTreeNode,
+  visitor: (child: EsTreeNode) => void,
+): void => {
+  if (!node || typeof node !== "object") {
+    return;
+  }
   visitor(node);
   for (const key of Object.keys(node)) {
-    if (key === "parent") continue;
+    if (key === "parent") {
+      continue;
+    }
     const child = node[key];
     if (Array.isArray(child)) {
       for (const item of child) {
@@ -25,20 +32,33 @@ export const walkAst = (node: EsTreeNode, visitor: (child: EsTreeNode) => void):
 };
 
 export const getEffectCallback = (node: EsTreeNode): EsTreeNode | null => {
-  if (!node.arguments?.length) return null;
-  const callback = node.arguments[0];
-  if (callback.type === "ArrowFunctionExpression" || callback.type === "FunctionExpression") {
+  if (!node.arguments?.length) {
+    return null;
+  }
+  const [callback] = node.arguments;
+  if (
+    callback.type === "ArrowFunctionExpression" ||
+    callback.type === "FunctionExpression"
+  ) {
     return callback;
   }
   return null;
 };
 
-export const isHookCall = (node: EsTreeNode, hookName: string | Set<string>): boolean =>
+export const isHookCall = (
+  node: EsTreeNode,
+  hookName: string | Set<string>,
+): boolean =>
   node.type === "CallExpression" &&
   node.callee?.type === "Identifier" &&
-  (typeof hookName === "string" ? node.callee.name === hookName : hookName.has(node.callee.name));
+  (typeof hookName === "string"
+    ? node.callee.name === hookName
+    : hookName.has(node.callee.name));
 
-export const hasDirective = (programNode: EsTreeNode, directive: string): boolean =>
+export const hasDirective = (
+  programNode: EsTreeNode,
+  directive: string,
+): boolean =>
   Boolean(
     programNode.body?.some(
       (statement: EsTreeNode) =>
@@ -51,8 +71,13 @@ export const hasDirective = (programNode: EsTreeNode, directive: string): boolea
 export const containsFetchCall = (node: EsTreeNode): boolean => {
   let didFindFetchCall = false;
   walkAst(node, (child) => {
-    if (didFindFetchCall || child.type !== "CallExpression") return;
-    if (child.callee?.type === "Identifier" && FETCH_CALLEE_NAMES.has(child.callee.name)) {
+    if (didFindFetchCall || child.type !== "CallExpression") {
+      return;
+    }
+    if (
+      child.callee?.type === "Identifier" &&
+      FETCH_CALLEE_NAMES.has(child.callee.name)
+    ) {
       didFindFetchCall = true;
     }
     if (
@@ -77,40 +102,79 @@ const findJsxAttribute = (
       attr.name.name === attributeName,
   );
 
-export const hasJsxAttribute = (attributes: EsTreeNode[], attributeName: string): boolean =>
-  Boolean(findJsxAttribute(attributes, attributeName));
+export const hasJsxAttribute = (
+  attributes: EsTreeNode[],
+  attributeName: string,
+): boolean => Boolean(findJsxAttribute(attributes, attributeName));
 
 const isFalseLiteral = (node: EsTreeNode | undefined): boolean =>
   Boolean(
-    node && (node.type === "BooleanLiteral" || node.type === "Literal") && node.value === false,
+    node &&
+    (node.type === "BooleanLiteral" || node.type === "Literal") &&
+    node.value === false,
   );
 
 export const hasPrefetchDisabled = (attributes: EsTreeNode[]): boolean => {
   const prefetchAttr = findJsxAttribute(attributes, "prefetch");
-  if (!prefetchAttr?.value) return false;
-  if (prefetchAttr.value.type !== "JSXExpressionContainer") return false;
+  if (!prefetchAttr?.value) {
+    return false;
+  }
+  if (prefetchAttr.value.type !== "JSXExpressionContainer") {
+    return false;
+  }
   return isFalseLiteral(prefetchAttr.value.expression);
 };
 
-const isCookiesOrHeadersCall = (node: EsTreeNode, methodName: string): boolean => {
-  if (node.type !== "CallExpression" || node.callee?.type !== "MemberExpression") return false;
+const isCookiesOrHeadersCall = (
+  node: EsTreeNode,
+  methodName: string,
+): boolean => {
+  if (
+    node.type !== "CallExpression" ||
+    node.callee?.type !== "MemberExpression"
+  ) {
+    return false;
+  }
   const { object, property } = node.callee;
-  if (property?.type !== "Identifier" || !MUTATION_METHOD_NAMES.has(property.name)) return false;
-  if (object?.type !== "CallExpression" || object.callee?.type !== "Identifier") return false;
+  if (
+    property?.type !== "Identifier" ||
+    !MUTATION_METHOD_NAMES.has(property.name)
+  ) {
+    return false;
+  }
+  if (
+    object?.type !== "CallExpression" ||
+    object.callee?.type !== "Identifier"
+  ) {
+    return false;
+  }
   return object.callee.name === methodName;
 };
 
 const isMutatingDbCall = (node: EsTreeNode): boolean => {
-  if (node.type !== "CallExpression" || node.callee?.type !== "MemberExpression") return false;
+  if (
+    node.type !== "CallExpression" ||
+    node.callee?.type !== "MemberExpression"
+  ) {
+    return false;
+  }
   const { property } = node.callee;
-  return property?.type === "Identifier" && MUTATION_METHOD_NAMES.has(property.name);
+  return (
+    property?.type === "Identifier" && MUTATION_METHOD_NAMES.has(property.name)
+  );
 };
 
 const isMutatingFetchCall = (node: EsTreeNode): boolean => {
-  if (node.type !== "CallExpression") return false;
-  if (node.callee?.type !== "Identifier" || node.callee.name !== "fetch") return false;
+  if (node.type !== "CallExpression") {
+    return false;
+  }
+  if (node.callee?.type !== "Identifier" || node.callee.name !== "fetch") {
+    return false;
+  }
   const optionsArgument = node.arguments?.[1];
-  if (!optionsArgument || optionsArgument.type !== "ObjectExpression") return false;
+  if (!optionsArgument || optionsArgument.type !== "ObjectExpression") {
+    return false;
+  }
   return optionsArgument.properties?.some(
     (property: EsTreeNode) =>
       property.type === "Property" &&
@@ -125,7 +189,9 @@ const isMutatingFetchCall = (node: EsTreeNode): boolean => {
 export const findSideEffect = (node: EsTreeNode): string | null => {
   let sideEffectDescription: string | null = null;
   walkAst(node, (child: EsTreeNode) => {
-    if (sideEffectDescription) return;
+    if (sideEffectDescription) {
+      return;
+    }
     if (isCookiesOrHeadersCall(child, "cookies")) {
       const methodName = child.callee.property.name;
       sideEffectDescription = `cookies().${methodName}()`;
@@ -141,8 +207,12 @@ export const findSideEffect = (node: EsTreeNode): string | null => {
     } else if (isMutatingDbCall(child)) {
       const methodName = child.callee.property.name;
       const objectName =
-        child.callee.object?.type === "Identifier" ? child.callee.object.name : null;
-      sideEffectDescription = objectName ? `${objectName}.${methodName}()` : `.${methodName}()`;
+        child.callee.object?.type === "Identifier"
+          ? child.callee.object.name
+          : null;
+      sideEffectDescription = objectName
+        ? `${objectName}.${methodName}()`
+        : `.${methodName}()`;
     }
   });
   return sideEffectDescription;

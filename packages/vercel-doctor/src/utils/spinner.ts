@@ -4,11 +4,15 @@ let sharedInstance: ReturnType<typeof ora> | null = null;
 let activeCount = 0;
 const pendingTexts = new Set<string>();
 
-const finalize = (method: "succeed" | "fail", originalText: string, displayText: string) => {
+const finalize = (
+  method: "succeed" | "fail",
+  originalText: string,
+  displayText: string,
+) => {
   pendingTexts.delete(originalText);
-  activeCount--;
+  activeCount -= 1;
 
-  if (activeCount <= 0 || !sharedInstance) {
+  if (activeCount <= 0 || sharedInstance === null) {
     sharedInstance?.[method](displayText);
     sharedInstance = null;
     activeCount = 0;
@@ -27,18 +31,18 @@ const finalize = (method: "succeed" | "fail", originalText: string, displayText:
 
 export const spinner = (text: string) => ({
   start() {
-    activeCount++;
+    activeCount += 1;
     pendingTexts.add(text);
 
-    if (!sharedInstance) {
+    if (sharedInstance === null) {
       sharedInstance = ora({ text }).start();
     } else {
       sharedInstance.text = text;
     }
 
     return {
-      succeed: (displayText: string) => finalize("succeed", text, displayText),
       fail: (displayText: string) => finalize("fail", text, displayText),
+      succeed: (displayText: string) => finalize("succeed", text, displayText),
     };
   },
 });

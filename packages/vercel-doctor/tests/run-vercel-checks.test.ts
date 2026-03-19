@@ -23,11 +23,11 @@ const writeTestFile = (
 writeTestFile(
   "package.json",
   JSON.stringify({
-    name: "vercel-checks-fixture",
     dependencies: {
-      react: "^19.0.0",
       next: "^16.0.0",
+      react: "^19.0.0",
     },
+    name: "vercel-checks-fixture",
   }),
 );
 
@@ -180,64 +180,68 @@ export async function GET() {
 `,
 );
 
-afterAll(() => {
-  fs.rmSync(testProjectDirectory, { recursive: true, force: true });
-});
-
-describe("runVercelChecks", () => {
-  it("reports Vercel-focused optimization diagnostics", () => {
-    const diagnostics = runVercelChecks(testProjectDirectory);
-    const reportedRules = new Set(
-      diagnostics.map((diagnostic) => diagnostic.rule),
-    );
-
-    expect(reportedRules).toContain("vercel-large-static-asset");
-    expect(reportedRules).toContain("vercel-no-force-dynamic");
-    expect(reportedRules).toContain("vercel-no-no-store-fetch");
-    expect(reportedRules).toContain("vercel-prefer-get-static-props");
-    expect(reportedRules).toContain("vercel-edge-heavy-import");
-    expect(reportedRules).toContain("vercel-edge-sequential-await");
-    expect(reportedRules).toContain("vercel-missing-cache-policy");
-    expect(reportedRules).toContain("vercel-consider-bun-runtime");
-    expect(reportedRules).toContain("vercel-avoid-platform-cron");
-    expect(reportedRules).toContain("vercel-consider-fluid-compute");
-    expect(reportedRules).toContain("vercel-image-svg-without-unoptimized");
-    expect(reportedRules).toContain("vercel-image-global-unoptimized");
-    expect(reportedRules).toContain("vercel-image-remote-pattern-too-broad");
-    expect(reportedRules).toContain("vercel-sequential-database-await");
-    expect(reportedRules).toContain("vercel-suggest-turbopack-build-cache");
-    expect(reportedRules).toContain("vercel-get-static-props-consider-isr");
-
-    const noStoreDiagnostic = diagnostics.find(
-      (diagnostic) => diagnostic.rule === "vercel-no-no-store-fetch",
-    );
-    expect(noStoreDiagnostic?.help).toContain('"use cache"');
-
-    const edgeAwaitDiagnostic = diagnostics.find(
-      (diagnostic) => diagnostic.rule === "vercel-edge-sequential-await",
-    );
-    expect(edgeAwaitDiagnostic?.help).toContain("Promise.all()");
-
-    const databaseAwaitDiagnostic = diagnostics.find(
-      (diagnostic) => diagnostic.rule === "vercel-sequential-database-await",
-    );
-    expect(databaseAwaitDiagnostic?.help).toContain("Promise.all()");
+describe("vercel checks runner", () => {
+  afterAll(() => {
+    fs.rmSync(testProjectDirectory, { force: true, recursive: true });
   });
 
-  it("respects includePaths filtering", () => {
-    const diagnostics = runVercelChecks(testProjectDirectory, {
-      includePaths: ["app/page.tsx"],
-    });
-    const reportedRules = new Set(
-      diagnostics.map((diagnostic) => diagnostic.rule),
-    );
+  describe(runVercelChecks, () => {
+    it("reports Vercel-focused optimization diagnostics", () => {
+      const diagnostics = runVercelChecks(testProjectDirectory);
+      const reportedRules = new Set(
+        diagnostics.map((diagnostic) => diagnostic.rule),
+      );
 
-    expect(reportedRules).toContain("vercel-no-force-dynamic");
-    expect(reportedRules).toContain("vercel-no-no-store-fetch");
-    expect(reportedRules).not.toContain("vercel-consider-bun-runtime");
-    expect(reportedRules).not.toContain("vercel-avoid-platform-cron");
-    expect(
-      diagnostics.every((diagnostic) => diagnostic.filePath === "app/page.tsx"),
-    ).toBe(true);
+      expect(reportedRules).toContain("vercel-large-static-asset");
+      expect(reportedRules).toContain("vercel-no-force-dynamic");
+      expect(reportedRules).toContain("vercel-no-no-store-fetch");
+      expect(reportedRules).toContain("vercel-prefer-get-static-props");
+      expect(reportedRules).toContain("vercel-edge-heavy-import");
+      expect(reportedRules).toContain("vercel-edge-sequential-await");
+      expect(reportedRules).toContain("vercel-missing-cache-policy");
+      expect(reportedRules).toContain("vercel-consider-bun-runtime");
+      expect(reportedRules).toContain("vercel-avoid-platform-cron");
+      expect(reportedRules).toContain("vercel-consider-fluid-compute");
+      expect(reportedRules).toContain("vercel-image-svg-without-unoptimized");
+      expect(reportedRules).toContain("vercel-image-global-unoptimized");
+      expect(reportedRules).toContain("vercel-image-remote-pattern-too-broad");
+      expect(reportedRules).toContain("vercel-sequential-database-await");
+      expect(reportedRules).toContain("vercel-suggest-turbopack-build-cache");
+      expect(reportedRules).toContain("vercel-get-static-props-consider-isr");
+
+      const noStoreDiagnostic = diagnostics.find(
+        (diagnostic) => diagnostic.rule === "vercel-no-no-store-fetch",
+      );
+      expect(noStoreDiagnostic?.help).toContain('"use cache"');
+
+      const edgeAwaitDiagnostic = diagnostics.find(
+        (diagnostic) => diagnostic.rule === "vercel-edge-sequential-await",
+      );
+      expect(edgeAwaitDiagnostic?.help).toContain("Promise.all()");
+
+      const databaseAwaitDiagnostic = diagnostics.find(
+        (diagnostic) => diagnostic.rule === "vercel-sequential-database-await",
+      );
+      expect(databaseAwaitDiagnostic?.help).toContain("Promise.all()");
+    });
+
+    it("respects includePaths filtering", () => {
+      const diagnostics = runVercelChecks(testProjectDirectory, {
+        includePaths: ["app/page.tsx"],
+      });
+      const reportedRules = new Set(
+        diagnostics.map((diagnostic) => diagnostic.rule),
+      );
+
+      expect(reportedRules).toContain("vercel-no-force-dynamic");
+      expect(reportedRules).toContain("vercel-no-no-store-fetch");
+      expect(reportedRules).not.toContain("vercel-consider-bun-runtime");
+      expect(reportedRules).not.toContain("vercel-avoid-platform-cron");
+      expect(
+        diagnostics.every(
+          (diagnostic) => diagnostic.filePath === "app/page.tsx",
+        ),
+      ).toBeTruthy();
+    });
   });
 });

@@ -70,13 +70,13 @@ const buildDiagnosticLocation = (diagnostic: Diagnostic): string =>
     : diagnostic.filePath;
 
 const createAIPromptContext = (diagnostic: Diagnostic): AIPromptContext => ({
-  rule: diagnostic.rule,
-  issue: diagnostic.message,
-  filePath: diagnostic.filePath,
-  line: diagnostic.line,
   column: diagnostic.column,
-  severity: diagnostic.severity,
+  filePath: diagnostic.filePath,
   fixStrategy: diagnostic.help,
+  issue: diagnostic.message,
+  line: diagnostic.line,
+  rule: diagnostic.rule,
+  severity: diagnostic.severity,
 });
 
 const generateAIPrompt = (context: AIPromptContext): string => {
@@ -129,10 +129,10 @@ export const groupDiagnosticsByCategory = (
       RULE_CATEGORY_DETAILS[category] ?? RULE_CATEGORY_DETAILS.Other;
 
     return {
-      title: category,
-      diagnostics: categoryDiagnostics,
       description: categoryInfo.description,
+      diagnostics: categoryDiagnostics,
       impact: categoryInfo.impact,
+      title: category,
     };
   });
 };
@@ -201,7 +201,9 @@ export const generateAIPromptsMarkdown = (
 
   for (const diagnostic of fixableDiagnostics) {
     const fix = RULE_FIX_STRATEGIES[diagnostic.rule];
-    if (!fix) continue;
+    if (!fix) {
+      continue;
+    }
 
     report += `## ${fix.title}\n\n`;
     report += `- **File:** \`${buildDiagnosticLocation(diagnostic)}\`\n`;

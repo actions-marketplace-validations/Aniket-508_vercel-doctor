@@ -7,6 +7,12 @@ import { createOptions } from "knip/session";
 import { RULE_CATEGORY_NAMES } from "../rule-metadata.js";
 import type { Diagnostic, KnipIssueRecords, KnipResults } from "../types.js";
 
+/* eslint-disable arrow-body-style, no-useless-return -- noop for silencing console */
+const noop = (): void => {
+  return;
+};
+/* eslint-enable arrow-body-style, no-useless-return */
+
 const KNIP_DEFAULT_CATEGORY = RULE_CATEGORY_NAMES.DEAD_CODE;
 
 const KNIP_DEFAULT_SEVERITY: Diagnostic["severity"] = "warning";
@@ -20,29 +26,29 @@ const KNIP_ISSUE_DETAILS: Record<
     help: string;
   }
 > = {
-  files: {
+  duplicates: {
     category: KNIP_DEFAULT_CATEGORY,
-    message: "Unused file",
+    help: "",
+    message: "Duplicate export",
     severity: KNIP_DEFAULT_SEVERITY,
-    help: "This file is not imported by any other file in the project.",
   },
   exports: {
     category: KNIP_DEFAULT_CATEGORY,
+    help: "",
     message: "Unused export",
     severity: KNIP_DEFAULT_SEVERITY,
-    help: "",
+  },
+  files: {
+    category: KNIP_DEFAULT_CATEGORY,
+    help: "This file is not imported by any other file in the project.",
+    message: "Unused file",
+    severity: KNIP_DEFAULT_SEVERITY,
   },
   types: {
     category: KNIP_DEFAULT_CATEGORY,
+    help: "",
     message: "Unused type",
     severity: KNIP_DEFAULT_SEVERITY,
-    help: "",
-  },
-  duplicates: {
-    category: KNIP_DEFAULT_CATEGORY,
-    message: "Duplicate export",
-    severity: KNIP_DEFAULT_SEVERITY,
-    help: "",
   },
 };
 
@@ -54,23 +60,23 @@ const createKnipDiagnostic = (
 ): Diagnostic => {
   const issueDetails = KNIP_ISSUE_DETAILS[issueType] ?? {
     category: KNIP_DEFAULT_CATEGORY,
+    help: "",
     message: "Unused code",
     severity: KNIP_DEFAULT_SEVERITY,
-    help: "",
   };
 
   return {
+    category: issueDetails.category,
+    column: 0,
     filePath: path.relative(rootDirectory, filePath),
-    plugin: "knip",
-    rule: issueType,
-    severity: issueDetails.severity,
+    help: issueDetails.help,
+    line: 0,
     message: symbol
       ? `${issueDetails.message}: ${symbol}`
       : issueDetails.message,
-    help: issueDetails.help,
-    line: 0,
-    column: 0,
-    category: issueDetails.category,
+    plugin: "knip",
+    rule: issueType,
+    severity: issueDetails.severity,
     weight: 1,
   };
 };
@@ -104,10 +110,10 @@ const silenced = async <T>(fn: () => Promise<T>): Promise<T> => {
   const originalInfo = console.info;
   const originalWarn = console.warn;
   const originalError = console.error;
-  console.log = () => {};
-  console.info = () => {};
-  console.warn = () => {};
-  console.error = () => {};
+  console.log = noop;
+  console.info = noop;
+  console.warn = noop;
+  console.error = noop;
   try {
     return await fn();
   } finally {
@@ -126,9 +132,11 @@ const findMonorepoRoot = (directory: string): string | null => {
       fs.existsSync(path.join(currentDirectory, "pnpm-workspace.yaml")) ||
       (() => {
         const packageJsonPath = path.join(currentDirectory, "package.json");
-        if (!fs.existsSync(packageJsonPath)) return false;
+        if (!fs.existsSync(packageJsonPath)) {
+          return false;
+        }
         const packageJson = JSON.parse(
-          fs.readFileSync(packageJsonPath, "utf-8"),
+          fs.readFileSync(packageJsonPath, "utf8"),
         );
         return (
           Array.isArray(packageJson.workspaces) ||
@@ -136,7 +144,9 @@ const findMonorepoRoot = (directory: string): string | null => {
         );
       })();
 
-    if (hasWorkspaceConfig) return currentDirectory;
+    if (hasWorkspaceConfig) {
+      return currentDirectory;
+    }
     currentDirectory = path.dirname(currentDirectory);
   }
 
@@ -166,7 +176,7 @@ const runKnipWithOptions = async (
 
   const parsedConfig = options.parsedConfig as Record<string, unknown>;
 
-  for (let attempt = 0; attempt <= MAX_KNIP_RETRIES; attempt++) {
+  for (let attempt = 0; attempt <= MAX_KNIP_RETRIES; attempt += 1) {
     try {
       return (await silenced(() => main(options))) as KnipResults;
     } catch (error) {
@@ -203,7 +213,7 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
   if (monorepoRoot) {
     const packageJsonPath = path.join(rootDirectory, "package.json");
     const packageJson = fs.existsSync(packageJsonPath)
-      ? JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"))
+      ? JSON.parse(fs.readFileSync(packageJsonPath, "utf8"))
       : {};
     const workspaceName = packageJson.name ?? path.basename(rootDirectory);
 

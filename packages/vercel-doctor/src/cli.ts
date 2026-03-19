@@ -46,6 +46,121 @@ const exitWithFixHint = () => {
 process.on("SIGINT", exitWithFixHint);
 process.on("SIGTERM", exitWithFixHint);
 
+const getIncludePathsForProject = (
+  projectDirectory: string,
+  isDiffMode: boolean,
+  explicitBaseBranch: string | undefined,
+  isScoreOnly: boolean,
+): { includePaths: string[] | undefined; shouldSkip: boolean } => {
+  if (!isDiffMode) {
+    return { includePaths: undefined, shouldSkip: false };
+  }
+  const projectDiffInfo = getDiffInfo(projectDirectory, explicitBaseBranch);
+  if (!projectDiffInfo) {
+    return { includePaths: undefined, shouldSkip: false };
+  }
+  const changedSourceFiles = filterSourceFiles(projectDiffInfo.changedFiles);
+  if (changedSourceFiles.length === 0) {
+    if (!isScoreOnly) {
+      logger.dim(`No changed source files in ${projectDirectory}, skipping.`);
+      logger.break();
+    }
+    return { includePaths: undefined, shouldSkip: true };
+  }
+  return { includePaths: changedSourceFiles, shouldSkip: false };
+};
+
+const writeReportIfRequested = (
+  reportPath: string,
+  diagnostics: Diagnostic[],
+  projectName: string,
+): void => {
+  const markdownReport = generateMarkdownReport(diagnostics, projectName);
+  try {
+    mkdirSync(path.dirname(reportPath), { recursive: true });
+    writeFileSync(reportPath, markdownReport);
+    logger.break();
+    logger.success(`Report written to ${reportPath}`);
+  } catch (error) {
+    logger.break();
+    logger.error(`Failed to write report to ${reportPath}: ${String(error)}`);
+  }
+};
+
+const writeAiPromptsIfRequested = (
+  aiPromptsPath: string,
+  diagnostics: Diagnostic[],
+): void => {
+  const isMarkdown =
+    aiPromptsPath.endsWith(".md") || aiPromptsPath.endsWith(".markdown");
+  try {
+    if (isMarkdown) {
+      const markdownContent = generateAIPromptsMarkdown(diagnostics);
+      mkdirSync(path.dirname(aiPromptsPath), { recursive: true });
+      writeFileSync(aiPromptsPath, markdownContent);
+      logger.break();
+      logger.success(`AI prompts (Markdown) written to ${aiPromptsPath}`);
+      logger.dim(
+        `Open this file and copy any prompt to paste into Cursor, Claude, or Windsurf.`,
+      );
+    } else {
+      const aiPrompts = generateAIPrompts(diagnostics);
+      const promptsObject = Object.fromEntries(
+        aiPrompts.map(({ key, prompt }) => [key, prompt]),
+      );
+      mkdirSync(path.dirname(aiPromptsPath), { recursive: true });
+      writeFileSync(aiPromptsPath, JSON.stringify(promptsObject, null, 2));
+      logger.break();
+      logger.success(`AI prompts (JSON) written to ${aiPromptsPath}`);
+      logger.dim(
+        `Use these prompts with Cursor, Claude, Windsurf, or other AI coding tools.`,
+      );
+    }
+  } catch (error) {
+    logger.break();
+    logger.error(
+      `Failed to write AI prompts to ${aiPromptsPath}: ${String(error)}`,
+    );
+  }
+};
+
+const getScanOptionsFromFlags = (
+  flags: CliFlags,
+  userConfig: { deadCode?: boolean; lint?: boolean; verbose?: boolean } | null,
+  isCliOverride: (name: string) => boolean,
+): ScanOptions => ({
+  deadCode: isCliOverride("deadCode")
+    ? flags.deadCode
+    : (userConfig?.deadCode ?? flags.deadCode),
+  lint: isCliOverride("lint") ? flags.lint : (userConfig?.lint ?? flags.lint),
+  offline: flags.offline,
+  output: flags.output ?? "human",
+  scoreOnly: flags.score,
+  verbose: isCliOverride("verbose")
+    ? Boolean(flags.verbose)
+    : (userConfig?.verbose ?? false),
+});
+
+const logDiffModeMessage = (
+  isDiffMode: boolean,
+  diffInfo: DiffInfo | null,
+  isScoreOnly: boolean,
+): void => {
+  if (!isDiffMode || !diffInfo || isScoreOnly) {
+    return;
+  }
+  if (diffInfo.isCurrentChanges) {
+    logger.log("Scanning uncommitted changes");
+  } else {
+    logger.log(
+      `Scanning changes: ${highlighter.info(
+        diffInfo.currentBranch,
+      )} → ${highlighter.info(diffInfo.baseBranch)}`,
+    );
+  }
+  logger.break();
+};
+
 const resolveDiffMode = async (
   diffInfo: DiffInfo | null,
   effectiveDiff: boolean | string | undefined,
@@ -53,7 +168,9 @@ const resolveDiffMode = async (
   isScoreOnly: boolean,
 ): Promise<boolean> => {
   if (effectiveDiff !== undefined && effectiveDiff !== false) {
-    if (diffInfo) return true;
+    if (diffInfo) {
+      return true;
+    }
     if (!isScoreOnly) {
       logger.warn(
         "No feature branch or uncommitted changes detected. Running full scan.",
@@ -63,22 +180,30 @@ const resolveDiffMode = async (
     return false;
   }
 
-  if (effectiveDiff === false || !diffInfo) return false;
+  if (effectiveDiff === false || !diffInfo) {
+    return false;
+  }
 
   const changedSourceFiles = filterSourceFiles(diffInfo.changedFiles);
-  if (changedSourceFiles.length === 0) return false;
-  if (shouldSkipPrompts) return true;
-  if (isScoreOnly) return false;
+  if (changedSourceFiles.length === 0) {
+    return false;
+  }
+  if (shouldSkipPrompts) {
+    return true;
+  }
+  if (isScoreOnly) {
+    return false;
+  }
 
   const promptMessage = diffInfo.isCurrentChanges
     ? `Found ${changedSourceFiles.length} uncommitted changed files. Only scan current changes?`
     : `On branch ${diffInfo.currentBranch} (${changedSourceFiles.length} changed files vs ${diffInfo.baseBranch}). Only scan this branch?`;
 
   const { shouldScanChangedOnly } = await prompts({
-    type: "confirm",
-    name: "shouldScanChangedOnly",
-    message: promptMessage,
     initial: true,
+    message: promptMessage,
+    name: "shouldScanChangedOnly",
+    type: "confirm",
   });
   return Boolean(shouldScanChangedOnly);
 };
@@ -125,21 +250,11 @@ const program = new Command()
 
       const isCliOverride = (optionName: string) =>
         program.getOptionValueSource(optionName) === "cli";
-
-      const scanOptions: ScanOptions = {
-        lint: isCliOverride("lint")
-          ? flags.lint
-          : (userConfig?.lint ?? flags.lint),
-        deadCode: isCliOverride("deadCode")
-          ? flags.deadCode
-          : (userConfig?.deadCode ?? flags.deadCode),
-        verbose: isCliOverride("verbose")
-          ? Boolean(flags.verbose)
-          : (userConfig?.verbose ?? false),
-        scoreOnly: isScoreOnly,
-        offline: flags.offline,
-        output: flags.output ?? "human",
-      };
+      const scanOptions = getScanOptionsFromFlags(
+        flags,
+        userConfig,
+        isCliOverride,
+      );
 
       const isAutomatedEnvironment = [
         process.env.CI,
@@ -170,43 +285,19 @@ const program = new Command()
         isScoreOnly,
       );
 
-      if (isDiffMode && diffInfo && !isScoreOnly) {
-        if (diffInfo.isCurrentChanges) {
-          logger.log("Scanning uncommitted changes");
-        } else {
-          logger.log(
-            `Scanning changes: ${highlighter.info(
-              diffInfo.currentBranch,
-            )} → ${highlighter.info(diffInfo.baseBranch)}`,
-          );
-        }
-        logger.break();
-      }
+      logDiffModeMessage(isDiffMode, diffInfo, isScoreOnly);
 
       const allDiagnostics: Diagnostic[] = [];
 
       for (const projectDirectory of projectDirectories) {
-        let includePaths: string[] | undefined;
-        if (isDiffMode) {
-          const projectDiffInfo = getDiffInfo(
-            projectDirectory,
-            explicitBaseBranch,
-          );
-          if (projectDiffInfo) {
-            const changedSourceFiles = filterSourceFiles(
-              projectDiffInfo.changedFiles,
-            );
-            if (changedSourceFiles.length === 0) {
-              if (!isScoreOnly) {
-                logger.dim(
-                  `No changed source files in ${projectDirectory}, skipping.`,
-                );
-                logger.break();
-              }
-              continue;
-            }
-            includePaths = changedSourceFiles;
-          }
+        const { includePaths, shouldSkip } = getIncludePathsForProject(
+          projectDirectory,
+          isDiffMode,
+          explicitBaseBranch,
+          isScoreOnly,
+        );
+        if (shouldSkip) {
+          continue;
         }
 
         if (!isScoreOnly) {
@@ -219,69 +310,17 @@ const program = new Command()
         });
         allDiagnostics.push(...scanResult.diagnostics);
 
-        // #4: Report and AI-prompt file I/O belongs in the CLI layer, not in scan().
-        // #3: Wrapped in try-catch so a bad path doesn't crash after all the expensive scan work.
         if (flags.report) {
           const projectName = path.basename(path.resolve(projectDirectory));
-          const markdownReport = generateMarkdownReport(
+          writeReportIfRequested(
+            flags.report,
             scanResult.diagnostics,
             projectName,
           );
-          try {
-            mkdirSync(path.dirname(flags.report), { recursive: true });
-            writeFileSync(flags.report, markdownReport);
-            logger.break();
-            logger.success(`Report written to ${flags.report}`);
-          } catch (error) {
-            logger.break();
-            logger.error(
-              `Failed to write report to ${flags.report}: ${String(error)}`,
-            );
-          }
         }
-
         if (flags.aiPrompts) {
-          const isMarkdown =
-            flags.aiPrompts.endsWith(".md") ||
-            flags.aiPrompts.endsWith(".markdown");
-          try {
-            if (isMarkdown) {
-              const markdownContent = generateAIPromptsMarkdown(
-                scanResult.diagnostics,
-              );
-              mkdirSync(path.dirname(flags.aiPrompts), { recursive: true });
-              writeFileSync(flags.aiPrompts, markdownContent);
-              logger.break();
-              logger.success(
-                `AI prompts (Markdown) written to ${flags.aiPrompts}`,
-              );
-              logger.dim(
-                `Open this file and copy any prompt to paste into Cursor, Claude, or Windsurf.`,
-              );
-            } else {
-              const aiPrompts = generateAIPrompts(scanResult.diagnostics);
-              const promptsObject = Object.fromEntries(
-                aiPrompts.map(({ key, prompt }) => [key, prompt]),
-              );
-              mkdirSync(path.dirname(flags.aiPrompts), { recursive: true });
-              writeFileSync(
-                flags.aiPrompts,
-                JSON.stringify(promptsObject, null, 2),
-              );
-              logger.break();
-              logger.success(`AI prompts (JSON) written to ${flags.aiPrompts}`);
-              logger.dim(
-                `Use these prompts with Cursor, Claude, Windsurf, or other AI coding tools.`,
-              );
-            }
-          } catch (error) {
-            logger.break();
-            logger.error(
-              `Failed to write AI prompts to ${flags.aiPrompts}: ${String(error)}`,
-            );
-          }
+          writeAiPromptsIfRequested(flags.aiPrompts, scanResult.diagnostics);
         }
-
         if (!isScoreOnly) {
           logger.break();
         }

@@ -5,7 +5,11 @@ import {
   SCORE_GOOD_THRESHOLD,
   SCORE_OK_THRESHOLD,
 } from "../constants.js";
-import type { Diagnostic, EstimatedScoreResult, ScoreResult } from "../types.js";
+import type {
+  Diagnostic,
+  EstimatedScoreResult,
+  ScoreResult,
+} from "../types.js";
 import { isErrorDiagnostic } from "./diagnostic-severity.js";
 
 const ERROR_RULE_PENALTY = 1.5;
@@ -14,20 +18,29 @@ const ERROR_ESTIMATED_FIX_RATE = 0.85;
 const WARNING_ESTIMATED_FIX_RATE = 0.8;
 
 const getScoreLabel = (score: number): string => {
-  if (score >= SCORE_GOOD_THRESHOLD) return "Great";
-  if (score >= SCORE_OK_THRESHOLD) return "Needs work";
+  if (score >= SCORE_GOOD_THRESHOLD) {
+    return "Great";
+  }
+  if (score >= SCORE_OK_THRESHOLD) {
+    return "Needs work";
+  }
   return "Critical";
 };
 
-const postDiagnostics = async <T>(url: string, diagnostics: Diagnostic[]): Promise<T | null> => {
+const postDiagnostics = async <T>(
+  url: string,
+  diagnostics: Diagnostic[],
+): Promise<T | null> => {
   try {
     const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ diagnostics }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      return null;
+    }
 
     return await response.json();
   } catch {
@@ -50,15 +63,25 @@ const countUniqueRules = (
     }
   }
 
-  return { errorRuleCount: errorRules.size, warningRuleCount: warningRules.size };
+  return {
+    errorRuleCount: errorRules.size,
+    warningRuleCount: warningRules.size,
+  };
 };
 
-const scoreFromRuleCounts = (errorRuleCount: number, warningRuleCount: number): number => {
-  const penalty = errorRuleCount * ERROR_RULE_PENALTY + warningRuleCount * WARNING_RULE_PENALTY;
+const scoreFromRuleCounts = (
+  errorRuleCount: number,
+  warningRuleCount: number,
+): number => {
+  const penalty =
+    errorRuleCount * ERROR_RULE_PENALTY +
+    warningRuleCount * WARNING_RULE_PENALTY;
   return Math.max(0, Math.round(PERFECT_SCORE - penalty));
 };
 
-const estimateScoreLocally = (diagnostics: Diagnostic[]): EstimatedScoreResult => {
+const estimateScoreLocally = (
+  diagnostics: Diagnostic[],
+): EstimatedScoreResult => {
   const { errorRuleCount, warningRuleCount } = countUniqueRules(diagnostics);
 
   const currentScore = scoreFromRuleCounts(errorRuleCount, warningRuleCount);
@@ -74,16 +97,17 @@ const estimateScoreLocally = (diagnostics: Diagnostic[]): EstimatedScoreResult =
   );
 
   return {
-    currentScore,
     currentLabel: getScoreLabel(currentScore),
-    estimatedScore,
+    currentScore,
     estimatedLabel: getScoreLabel(estimatedScore),
+    estimatedScore,
   };
 };
 
-export const calculateScore = async (diagnostics: Diagnostic[]): Promise<ScoreResult | null> => {
-  return postDiagnostics<ScoreResult>(SCORE_API_URL, diagnostics);
-};
+export const calculateScore = (
+  diagnostics: Diagnostic[],
+): Promise<ScoreResult | null> =>
+  postDiagnostics<ScoreResult>(SCORE_API_URL, diagnostics);
 
 export const fetchEstimatedScore = async (
   diagnostics: Diagnostic[],

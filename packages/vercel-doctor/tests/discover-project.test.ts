@@ -17,7 +17,7 @@ const VALID_FRAMEWORKS = [
   "unknown",
 ];
 
-describe("discoverProject", () => {
+describe(discoverProject, () => {
   it("detects React version from package.json", () => {
     const projectInfo = discoverProject(
       path.join(FIXTURES_DIRECTORY, "basic-react"),
@@ -36,7 +36,7 @@ describe("discoverProject", () => {
     const projectInfo = discoverProject(
       path.join(FIXTURES_DIRECTORY, "basic-react"),
     );
-    expect(projectInfo.hasTypeScript).toBe(true);
+    expect(projectInfo.hasTypeScript).toBeTruthy();
   });
 
   it("detects React version from peerDependencies", () => {
@@ -61,7 +61,7 @@ describe("discoverProject", () => {
   });
 });
 
-describe("formatFrameworkName", () => {
+describe(formatFrameworkName, () => {
   it("formats known frameworks", () => {
     expect(formatFrameworkName("nextjs")).toBe("Next.js");
     expect(formatFrameworkName("vite")).toBe("Vite");

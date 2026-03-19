@@ -4,23 +4,25 @@ import type { Diagnostic, VercelDoctorConfig } from "../src/types.js";
 import { filterIgnoredDiagnostics } from "../src/utils/filter-diagnostics.js";
 
 const createDiagnostic = (overrides: Partial<Diagnostic> = {}): Diagnostic => ({
+  category: "Correctness",
+  column: 1,
   filePath: "src/app.tsx",
+  help: "test help",
+  line: 1,
+  message: "test message",
   plugin: "react",
   rule: "no-danger",
   severity: "warning",
-  message: "test message",
-  help: "test help",
-  line: 1,
-  column: 1,
-  category: "Correctness",
   ...overrides,
 });
 
-describe("filterIgnoredDiagnostics", () => {
+describe(filterIgnoredDiagnostics, () => {
   it("returns all diagnostics when config has no ignore rules", () => {
     const diagnostics = [createDiagnostic()];
     const config: VercelDoctorConfig = {};
-    expect(filterIgnoredDiagnostics(diagnostics, config)).toEqual(diagnostics);
+    expect(filterIgnoredDiagnostics(diagnostics, config)).toStrictEqual(
+      diagnostics,
+    );
   });
 
   it("filters diagnostics matching ignored rules", () => {
@@ -60,25 +62,25 @@ describe("filterIgnoredDiagnostics", () => {
   it("filters by both rules and files together", () => {
     const diagnostics = [
       createDiagnostic({
+        filePath: "src/app.tsx",
         plugin: "react",
         rule: "no-danger",
-        filePath: "src/app.tsx",
       }),
       createDiagnostic({
+        filePath: "src/generated/api.tsx",
         plugin: "knip",
         rule: "exports",
-        filePath: "src/generated/api.tsx",
       }),
       createDiagnostic({
+        filePath: "src/components/App.tsx",
         plugin: "vercel-doctor",
         rule: "no-giant-component",
-        filePath: "src/components/App.tsx",
       }),
     ];
     const config: VercelDoctorConfig = {
       ignore: {
-        rules: ["react/no-danger"],
         files: ["src/generated/**"],
+        rules: ["react/no-danger"],
       },
     };
 
@@ -94,8 +96,8 @@ describe("filterIgnoredDiagnostics", () => {
     ];
     const config: VercelDoctorConfig = {
       ignore: {
-        rules: ["nonexistent/rule"],
         files: ["nonexistent/**"],
+        rules: ["nonexistent/rule"],
       },
     };
 

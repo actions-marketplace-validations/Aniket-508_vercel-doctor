@@ -1,4 +1,10 @@
-export type Framework = "nextjs" | "vite" | "cra" | "remix" | "gatsby" | "unknown";
+export type Framework =
+  | "nextjs"
+  | "vite"
+  | "cra"
+  | "remix"
+  | "gatsby"
+  | "unknown";
 
 export interface ProjectInfo {
   rootDirectory: string;
@@ -76,11 +82,7 @@ export interface KnipIssue {
   type: string;
 }
 
-export interface KnipIssueRecords {
-  [workspace: string]: {
-    [filePath: string]: KnipIssue;
-  };
-}
+export type KnipIssueRecords = Record<string, Record<string, KnipIssue>>;
 
 export interface ScoreResult {
   score: number;

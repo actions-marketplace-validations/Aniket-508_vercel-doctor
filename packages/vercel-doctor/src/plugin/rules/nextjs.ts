@@ -21,26 +21,31 @@ export const nextjsNoClientFetchForServerData: Rule = {
     let fileHasUseClient = false;
 
     return {
-      Program(programNode: EsTreeNode) {
-        fileHasUseClient = hasDirective(programNode, "use client");
-      },
       CallExpression(node: EsTreeNode) {
-        if (!fileHasUseClient || !isHookCall(node, EFFECT_HOOK_NAMES)) return;
+        if (!fileHasUseClient || !isHookCall(node, EFFECT_HOOK_NAMES)) {
+          return;
+        }
 
         const callback = getEffectCallback(node);
-        if (!callback || !containsFetchCall(callback)) return;
+        if (!callback || !containsFetchCall(callback)) {
+          return;
+        }
 
         const filename = context.getFilename?.() ?? "";
         const isPageOrLayoutFile =
-          PAGE_OR_LAYOUT_FILE_PATTERN.test(filename) || PAGES_DIRECTORY_PATTERN.test(filename);
+          PAGE_OR_LAYOUT_FILE_PATTERN.test(filename) ||
+          PAGES_DIRECTORY_PATTERN.test(filename);
 
         if (isPageOrLayoutFile) {
           context.report({
-            node,
             message:
               "useEffect + fetch in a page/layout — fetch data server-side with a server component instead",
+            node,
           });
         }
+      },
+      Program(programNode: EsTreeNode) {
+        fileHasUseClient = hasDirective(programNode, "use client");
       },
     };
   },
@@ -53,9 +58,14 @@ export const nextjsLinkPrefetchDefault: Rule = {
     return {
       ImportDeclaration(node: EsTreeNode) {
         const source = node.source?.value;
-        if (source !== "next/link") return;
+        if (source !== "next/link") {
+          return;
+        }
         for (const specifier of node.specifiers ?? []) {
-          if (specifier.type === "ImportDefaultSpecifier" && specifier.local?.name) {
+          if (
+            specifier.type === "ImportDefaultSpecifier" &&
+            specifier.local?.name
+          ) {
             nextLinkLocalNames.add(specifier.local.name);
           }
           if (
@@ -68,15 +78,20 @@ export const nextjsLinkPrefetchDefault: Rule = {
         }
       },
       JSXOpeningElement(node: EsTreeNode) {
-        const elementName = node.name?.type === "JSXIdentifier" ? node.name.name : null;
-        if (!elementName || !nextLinkLocalNames.has(elementName)) return;
+        const elementName =
+          node.name?.type === "JSXIdentifier" ? node.name.name : null;
+        if (!elementName || !nextLinkLocalNames.has(elementName)) {
+          return;
+        }
         const attributes = node.attributes ?? [];
-        if (hasPrefetchDisabled(attributes)) return;
+        if (hasPrefetchDisabled(attributes)) {
+          return;
+        }
 
         context.report({
-          node,
           message:
             "Link prefetches by default — adds compute. Use prefetch={false} or disable globally, then add prefetch={true} only to critical links",
+          node,
         });
       },
     };
@@ -86,15 +101,21 @@ export const nextjsLinkPrefetchDefault: Rule = {
 export const nextjsImageMissingSizes: Rule = {
   create: (context: RuleContext) => ({
     JSXOpeningElement(node: EsTreeNode) {
-      if (node.name?.type !== "JSXIdentifier" || node.name.name !== "Image") return;
+      if (node.name?.type !== "JSXIdentifier" || node.name.name !== "Image") {
+        return;
+      }
       const attributes = node.attributes ?? [];
-      if (!hasJsxAttribute(attributes, "fill")) return;
-      if (hasJsxAttribute(attributes, "sizes")) return;
+      if (!hasJsxAttribute(attributes, "fill")) {
+        return;
+      }
+      if (hasJsxAttribute(attributes, "sizes")) {
+        return;
+      }
 
       context.report({
-        node,
         message:
           "next/image with fill but no sizes — the browser downloads the largest image. Add a sizes attribute for responsive behavior",
+        node,
       });
     },
   }),
@@ -104,17 +125,26 @@ const extractMutatingRouteSegment = (filename: string): string | null => {
   const segments = filename.split("/");
   for (const segment of segments) {
     const cleaned = segment.replace(/^\[.*\]$/, "");
-    if (MUTATING_ROUTE_SEGMENTS.has(cleaned)) return cleaned;
+    if (MUTATING_ROUTE_SEGMENTS.has(cleaned)) {
+      return cleaned;
+    }
   }
   return null;
 };
 
 const getExportedGetHandlerBody = (node: EsTreeNode): EsTreeNode | null => {
-  if (node.type !== "ExportNamedDeclaration") return null;
-  const declaration = node.declaration;
-  if (!declaration) return null;
+  if (node.type !== "ExportNamedDeclaration") {
+    return null;
+  }
+  const { declaration } = node;
+  if (!declaration) {
+    return null;
+  }
 
-  if (declaration.type === "FunctionDeclaration" && declaration.id?.name === "GET") {
+  if (
+    declaration.type === "FunctionDeclaration" &&
+    declaration.id?.name === "GET"
+  ) {
     return declaration.body;
   }
 
@@ -138,16 +168,20 @@ export const nextjsNoSideEffectInGetHandler: Rule = {
   create: (context: RuleContext) => ({
     ExportNamedDeclaration(node: EsTreeNode) {
       const filename = context.getFilename?.() ?? "";
-      if (!ROUTE_HANDLER_FILE_PATTERN.test(filename)) return;
+      if (!ROUTE_HANDLER_FILE_PATTERN.test(filename)) {
+        return;
+      }
 
       const handlerBody = getExportedGetHandlerBody(node);
-      if (!handlerBody) return;
+      if (!handlerBody) {
+        return;
+      }
 
       const mutatingSegment = extractMutatingRouteSegment(filename);
       if (mutatingSegment) {
         context.report({
-          node,
           message: `GET handler on "/${mutatingSegment}" route — use POST to prevent CSRF and unintended prefetch triggers`,
+          node,
         });
         return;
       }
@@ -155,8 +189,8 @@ export const nextjsNoSideEffectInGetHandler: Rule = {
       const sideEffect = findSideEffect(handlerBody);
       if (sideEffect) {
         context.report({
-          node,
           message: `GET handler has side effects (${sideEffect}) — use POST to prevent CSRF and unintended prefetch triggers`,
+          node,
         });
       }
     },

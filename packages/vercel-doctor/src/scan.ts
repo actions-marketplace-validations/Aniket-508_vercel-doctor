@@ -20,6 +20,7 @@ import {
 } from "./constants.js";
 import type {
   Diagnostic,
+  Framework,
   ScanOptions,
   ScanResult,
   ScoreResult,
@@ -35,11 +36,8 @@ import {
   formatFrameworkName,
 } from "./utils/discover-project.js";
 import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
-import {
-  type FramedLine,
-  createFramedLine,
-  printFramedBox,
-} from "./utils/framed-box.js";
+import { createFramedLine, printFramedBox } from "./utils/framed-box.js";
+import type { FramedLine } from "./utils/framed-box.js";
 import { generateMarkdownReport } from "./utils/generate-report.js";
 import { getNextVersionCostGuidance } from "./utils/get-next-version-cost-guidance.js";
 import { groupBy } from "./utils/group-by.js";
@@ -94,7 +92,7 @@ const printDiagnostics = (
   isVerbose: boolean,
 ): void => {
   for (const [, ruleDiagnostics] of getSortedRuleGroups(diagnostics)) {
-    const firstDiagnostic = ruleDiagnostics[0];
+    const [firstDiagnostic] = ruleDiagnostics;
     const severitySymbol =
       DIAGNOSTIC_SEVERITY_SYMBOLS[firstDiagnostic.severity];
     const icon = colorizeDiagnosticSeverity(
@@ -136,7 +134,7 @@ const formatRuleSummary = (
   ruleKey: string,
   ruleDiagnostics: Diagnostic[],
 ): string => {
-  const firstDiagnostic = ruleDiagnostics[0];
+  const [firstDiagnostic] = ruleDiagnostics;
   const fileLines = buildFileLineMap(ruleDiagnostics);
 
   const sections = [
@@ -158,7 +156,7 @@ const formatRuleSummary = (
     sections.push(`  ${filePath}${lineLabel}`);
   }
 
-  return sections.join("\n") + "\n";
+  return `${sections.join("\n")}\n`;
 };
 
 const writeDiagnosticsDirectory = (diagnostics: Diagnostic[]): string => {
@@ -166,7 +164,7 @@ const writeDiagnosticsDirectory = (diagnostics: Diagnostic[]): string => {
   mkdirSync(outputDirectory);
 
   for (const [ruleKey, ruleDiagnostics] of getSortedRuleGroups(diagnostics)) {
-    const fileName = ruleKey.replace(/\//g, "--") + ".txt";
+    const fileName = `${ruleKey.replaceAll("/", "--")}.txt`;
     writeFileSync(
       join(outputDirectory, fileName),
       formatRuleSummary(ruleKey, ruleDiagnostics),
@@ -182,8 +180,12 @@ const writeDiagnosticsDirectory = (diagnostics: Diagnostic[]): string => {
 };
 
 const colorizeByScore = (text: string, score: number): string => {
-  if (score >= SCORE_GOOD_THRESHOLD) return highlighter.success(text);
-  if (score >= SCORE_OK_THRESHOLD) return highlighter.warn(text);
+  if (score >= SCORE_GOOD_THRESHOLD) {
+    return highlighter.success(text);
+  }
+  if (score >= SCORE_OK_THRESHOLD) {
+    return highlighter.warn(text);
+  }
   return highlighter.error(text);
 };
 
@@ -194,8 +196,8 @@ const buildScoreBarSegments = (score: number): ScoreBarSegments => {
   const emptyCount = SCORE_BAR_WIDTH_CHARS - filledCount;
 
   return {
-    filledSegment: "█".repeat(filledCount),
     emptySegment: "░".repeat(emptyCount),
+    filledSegment: "█".repeat(filledCount),
   };
 };
 
@@ -206,7 +208,7 @@ const buildPlainScoreBar = (score: number): string => {
 
 const buildScoreBar = (score: number): string => {
   const { filledSegment, emptySegment } = buildScoreBarSegments(score);
-  return colorizeByScore(filledSegment, score) + highlighter.dim(emptySegment);
+  return `${colorizeByScore(filledSegment, score)}${highlighter.dim(emptySegment)}`;
 };
 
 const printScoreGauge = (score: number, label: string): void => {
@@ -219,8 +221,12 @@ const printScoreGauge = (score: number, label: string): void => {
 };
 
 const getDoctorFace = (score: number): string[] => {
-  if (score >= SCORE_GOOD_THRESHOLD) return ["◠ ◠", " ▽ "];
-  if (score >= SCORE_OK_THRESHOLD) return ["• •", " ─ "];
+  if (score >= SCORE_GOOD_THRESHOLD) {
+    return ["◠ ◠", " ▽ "];
+  }
+  if (score >= SCORE_OK_THRESHOLD) {
+    return ["• •", " ─ "];
+  }
   return ["x x", " ▽ "];
 };
 
@@ -236,7 +242,9 @@ const printCompletedSteps = (messages: string[]): void => {
 };
 
 const printVersionAwareGuidance = (guidanceLines: string[]): void => {
-  if (guidanceLines.length === 0) return;
+  if (guidanceLines.length === 0) {
+    return;
+  }
 
   logger.log(`Version-aware cost guidance:`);
   for (const guidanceLine of guidanceLines) {
@@ -309,9 +317,12 @@ const buildShareUrl = (
 
   const params = new URLSearchParams();
   params.set("p", projectName);
-  if (scoreResult) params.set("s", String(scoreResult.score));
-  if (diagnosticSummary.errorCount > 0)
+  if (scoreResult) {
+    params.set("s", String(scoreResult.score));
+  }
+  if (diagnosticSummary.errorCount > 0) {
     params.set("e", String(diagnosticSummary.errorCount));
+  }
   if (diagnosticSummary.warningCount > 0) {
     params.set("w", String(diagnosticSummary.warningCount));
   }
@@ -427,6 +438,132 @@ const printSummary = (
   logger.dim(`  Share your results: ${highlighter.info(shareUrl)}`);
 };
 
+interface ResolvedScanOptions extends ScanOptions {
+  deadCode: boolean;
+  lint: boolean;
+  offline: boolean;
+  output: "human" | "json" | "markdown";
+  scoreOnly: boolean;
+  verbose: boolean;
+}
+
+const resolveScanOptions = (
+  inputOptions: ScanOptions,
+  userConfig: { deadCode?: boolean; lint?: boolean; verbose?: boolean } | null,
+): ResolvedScanOptions => ({
+  deadCode: inputOptions.deadCode ?? userConfig?.deadCode ?? true,
+  includePaths: inputOptions.includePaths,
+  lint: inputOptions.lint ?? userConfig?.lint ?? true,
+  offline: inputOptions.offline ?? false,
+  output: inputOptions.output ?? "human",
+  scoreOnly: inputOptions.scoreOnly ?? false,
+  verbose: inputOptions.verbose ?? userConfig?.verbose ?? false,
+});
+
+const buildProjectStepMessages = (
+  projectInfo: {
+    framework: Framework;
+    hasTypeScript: boolean;
+    nextVersion: string | null;
+    reactVersion: string | null;
+    sourceFileCount: number;
+  },
+  hasUserConfig: boolean,
+  isDiffMode: boolean,
+  includePathsLength: number,
+): string[] => {
+  const frameworkLabel = formatFrameworkName(projectInfo.framework);
+  const languageLabel = projectInfo.hasTypeScript ? "TypeScript" : "JavaScript";
+  const nextVersionLabel = projectInfo.nextVersion
+    ? `Next.js ${projectInfo.nextVersion}`
+    : "Next.js version unknown";
+  return [
+    `Detecting framework. Found ${highlighter.info(frameworkLabel)}.`,
+    ...(projectInfo.framework === "nextjs"
+      ? [
+          `Detecting Next.js version. Found ${highlighter.info(nextVersionLabel)}.`,
+        ]
+      : []),
+    `Detecting React version. Found ${highlighter.info(`React ${projectInfo.reactVersion}`)}.`,
+    `Detecting language. Found ${highlighter.info(languageLabel)}.`,
+    isDiffMode
+      ? `Scanning ${highlighter.info(`${includePathsLength}`)} changed source files.`
+      : `Found ${highlighter.info(`${projectInfo.sourceFileCount}`)} source files.`,
+    ...(hasUserConfig
+      ? [`Loaded ${highlighter.info("vercel-doctor config")}.`]
+      : []),
+  ];
+};
+
+interface ScanOutputParams {
+  diagnostics: Diagnostic[];
+  scoreResult: ScoreResult | null;
+  options: ResolvedScanOptions;
+  projectInfo: { projectName: string; sourceFileCount: number };
+  includePaths: string[];
+  isDiffMode: boolean;
+  elapsedMilliseconds: number;
+  noScoreMessage: string;
+}
+
+const printScanOutput = ({
+  diagnostics,
+  scoreResult,
+  options,
+  projectInfo,
+  includePaths,
+  isDiffMode,
+  elapsedMilliseconds,
+  noScoreMessage,
+}: ScanOutputParams): void => {
+  if (options.scoreOnly) {
+    if (scoreResult) {
+      logger.log(`${scoreResult.score}`);
+    } else {
+      logger.dim(noScoreMessage);
+    }
+    return;
+  }
+  if (options.output === "json") {
+    logger.log(JSON.stringify({ diagnostics, scoreResult }, null, 2));
+    return;
+  }
+  if (diagnostics.length === 0) {
+    logger.success("No issues found!");
+    logger.break();
+    if (scoreResult) {
+      printBranding(scoreResult.score);
+      printScoreGauge(scoreResult.score, scoreResult.label);
+    } else {
+      logger.dim(`  ${noScoreMessage}`);
+    }
+    return;
+  }
+  const displayedSourceFileCount = isDiffMode
+    ? includePaths.length
+    : projectInfo.sourceFileCount;
+  if (options.output === "human") {
+    printDiagnostics(diagnostics, options.verbose);
+    printSummary(
+      diagnostics,
+      elapsedMilliseconds,
+      scoreResult,
+      projectInfo.projectName,
+      displayedSourceFileCount,
+      noScoreMessage,
+    );
+    return;
+  }
+  if (options.output === "markdown") {
+    const markdownReport = generateMarkdownReport(
+      diagnostics,
+      projectInfo.projectName,
+    );
+    logger.break();
+    logger.log(markdownReport);
+  }
+};
+
 export const scan = async (
   directory: string,
   inputOptions: ScanOptions = {},
@@ -434,16 +571,7 @@ export const scan = async (
   const startTime = performance.now();
   const projectInfo = discoverProject(directory);
   const userConfig = loadConfig(directory);
-
-  const options = {
-    lint: inputOptions.lint ?? userConfig?.lint ?? true,
-    deadCode: inputOptions.deadCode ?? userConfig?.deadCode ?? true,
-    verbose: inputOptions.verbose ?? userConfig?.verbose ?? false,
-    scoreOnly: inputOptions.scoreOnly ?? false,
-    offline: inputOptions.offline ?? false,
-    includePaths: inputOptions.includePaths,
-    output: inputOptions.output ?? "human",
-  };
+  const options = resolveScanOptions(inputOptions, userConfig);
 
   const includePaths = options.includePaths ?? [];
   const isDiffMode = includePaths.length > 0;
@@ -453,30 +581,12 @@ export const scan = async (
   }
 
   if (!options.scoreOnly) {
-    const frameworkLabel = formatFrameworkName(projectInfo.framework);
-    const languageLabel = projectInfo.hasTypeScript
-      ? "TypeScript"
-      : "JavaScript";
-    const nextVersionLabel = projectInfo.nextVersion
-      ? `Next.js ${projectInfo.nextVersion}`
-      : "Next.js version unknown";
-    const projectStepMessages = [
-      `Detecting framework. Found ${highlighter.info(frameworkLabel)}.`,
-      ...(projectInfo.framework === "nextjs"
-        ? [
-            `Detecting Next.js version. Found ${highlighter.info(nextVersionLabel)}.`,
-          ]
-        : []),
-      `Detecting React version. Found ${highlighter.info(`React ${projectInfo.reactVersion}`)}.`,
-      `Detecting language. Found ${highlighter.info(languageLabel)}.`,
-      isDiffMode
-        ? `Scanning ${highlighter.info(`${includePaths.length}`)} changed source files.`
-        : `Found ${highlighter.info(`${projectInfo.sourceFileCount}`)} source files.`,
-      ...(userConfig
-        ? [`Loaded ${highlighter.info("vercel-doctor config")}.`]
-        : []),
-    ];
-
+    const projectStepMessages = buildProjectStepMessages(
+      projectInfo,
+      Boolean(userConfig),
+      isDiffMode,
+      includePaths.length,
+    );
     printCompletedSteps(projectStepMessages);
     printVersionAwareGuidance(getNextVersionCostGuidance(projectInfo));
   }
@@ -534,7 +644,6 @@ export const scan = async (
     : allDiagnostics;
 
   const elapsedMilliseconds = performance.now() - startTime;
-
   const scoreResult = options.offline
     ? null
     : await calculateScore(diagnostics);
@@ -542,58 +651,16 @@ export const scan = async (
     ? OFFLINE_FLAG_MESSAGE
     : OFFLINE_MESSAGE;
 
-  if (options.scoreOnly) {
-    if (scoreResult) {
-      logger.log(`${scoreResult.score}`);
-    } else {
-      logger.dim(noScoreMessage);
-    }
-    return { diagnostics, scoreResult };
-  }
-
-  // #2: JSON output — emit structured data and return early (no terminal UI)
-  if (options.output === "json") {
-    logger.log(JSON.stringify({ diagnostics, scoreResult }, null, 2));
-    return { diagnostics, scoreResult };
-  }
-
-  if (diagnostics.length === 0) {
-    logger.success("No issues found!");
-    logger.break();
-    if (scoreResult) {
-      printBranding(scoreResult.score);
-      printScoreGauge(scoreResult.score, scoreResult.label);
-    } else {
-      logger.dim(`  ${noScoreMessage}`);
-    }
-    return { diagnostics, scoreResult };
-  }
-
-  const displayedSourceFileCount = isDiffMode
-    ? includePaths.length
-    : projectInfo.sourceFileCount;
-
-  // #1: "human" is the sole terminal format — printDiagnostics/printSummary only run here.
-  // "markdown" to stdout is handled by cli.ts after scan() returns.
-  if (options.output === "human") {
-    printDiagnostics(diagnostics, options.verbose);
-    printSummary(
-      diagnostics,
-      elapsedMilliseconds,
-      scoreResult,
-      projectInfo.projectName,
-      displayedSourceFileCount,
-      noScoreMessage,
-    );
-  } else if (options.output === "markdown") {
-    // Markdown to stdout — #4: file writes are handled by cli.ts
-    const markdownReport = generateMarkdownReport(
-      diagnostics,
-      projectInfo.projectName,
-    );
-    logger.break();
-    logger.log(markdownReport);
-  }
+  printScanOutput({
+    diagnostics,
+    elapsedMilliseconds,
+    includePaths,
+    isDiffMode,
+    noScoreMessage,
+    options,
+    projectInfo,
+    scoreResult,
+  });
 
   return { diagnostics, scoreResult };
 };

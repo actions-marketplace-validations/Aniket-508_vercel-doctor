@@ -17,20 +17,20 @@ import { getSemverMajorVersion } from "./get-semver-major-version.js";
 import { readPackageJson } from "./read-package-json.js";
 
 const FRAMEWORK_PACKAGES: Record<string, Framework> = {
-  next: "nextjs",
-  vite: "vite",
-  "react-scripts": "cra",
   "@remix-run/react": "remix",
   gatsby: "gatsby",
+  next: "nextjs",
+  "react-scripts": "cra",
+  vite: "vite",
 };
 
 const FRAMEWORK_DISPLAY_NAMES: Record<Framework, string> = {
-  nextjs: "Next.js",
-  vite: "Vite",
   cra: "Create React App",
-  remix: "Remix",
   gatsby: "Gatsby",
+  nextjs: "Next.js",
+  remix: "Remix",
   unknown: "React",
+  vite: "Vite",
 };
 
 export const formatFrameworkName = (framework: Framework): string =>
@@ -42,7 +42,7 @@ const countSourceFiles = (rootDirectory: string): number => {
     ["ls-files", "--cached", "--others", "--exclude-standard"],
     {
       cwd: rootDirectory,
-      encoding: "utf-8",
+      encoding: "utf8",
       maxBuffer: GIT_LS_FILES_MAX_BUFFER_BYTES,
     },
   );
@@ -81,18 +81,20 @@ const extractDependencyInfo = (packageJson: PackageJson): DependencyInfo => {
   const allDependencies = collectAllDependencies(packageJson);
   const nextVersion = allDependencies.next ?? null;
   return {
-    reactVersion: allDependencies.react ?? null,
     framework: detectFramework(allDependencies),
-    nextVersion,
     nextMajorVersion: getSemverMajorVersion(nextVersion),
+    nextVersion,
+    reactVersion: allDependencies.react ?? null,
   };
 };
 
 const parsePnpmWorkspacePatterns = (rootDirectory: string): string[] => {
   const workspacePath = path.join(rootDirectory, "pnpm-workspace.yaml");
-  if (!fs.existsSync(workspacePath)) return [];
+  if (!fs.existsSync(workspacePath)) {
+    return [];
+  }
 
-  const content = fs.readFileSync(workspacePath, "utf-8");
+  const content = fs.readFileSync(workspacePath, "utf8");
   const patterns: string[] = [];
   let isInsidePackagesBlock = false;
 
@@ -103,7 +105,7 @@ const parsePnpmWorkspacePatterns = (rootDirectory: string): string[] => {
       continue;
     }
     if (isInsidePackagesBlock && trimmed.startsWith("-")) {
-      patterns.push(trimmed.replace(/^-\s*/, "").replace(/["']/g, ""));
+      patterns.push(trimmed.replace(/^-\s*/, "").replaceAll(/["']/g, ""));
     } else if (
       isInsidePackagesBlock &&
       trimmed.length > 0 &&
@@ -121,7 +123,9 @@ const getWorkspacePatterns = (
   packageJson: PackageJson,
 ): string[] => {
   const pnpmPatterns = parsePnpmWorkspacePatterns(rootDirectory);
-  if (pnpmPatterns.length > 0) return pnpmPatterns;
+  if (pnpmPatterns.length > 0) {
+    return pnpmPatterns;
+  }
 
   if (Array.isArray(packageJson.workspaces)) {
     return packageJson.workspaces;
@@ -138,7 +142,7 @@ const resolveWorkspaceDirectories = (
   rootDirectory: string,
   pattern: string,
 ): string[] => {
-  const cleanPattern = pattern.replace(/["']/g, "").replace(/\/\*\*$/, "/*");
+  const cleanPattern = pattern.replaceAll(/["']/g, "").replace(/\/\*\*$/, "/*");
 
   if (!cleanPattern.includes("*")) {
     const directoryPath = path.join(rootDirectory, cleanPattern);
@@ -174,9 +178,13 @@ const resolveWorkspaceDirectories = (
 };
 
 const isMonorepoRoot = (directory: string): boolean => {
-  if (fs.existsSync(path.join(directory, "pnpm-workspace.yaml"))) return true;
+  if (fs.existsSync(path.join(directory, "pnpm-workspace.yaml"))) {
+    return true;
+  }
   const packageJsonPath = path.join(directory, "package.json");
-  if (!fs.existsSync(packageJsonPath)) return false;
+  if (!fs.existsSync(packageJsonPath)) {
+    return false;
+  }
   const packageJson = readPackageJson(packageJsonPath);
   return (
     Array.isArray(packageJson.workspaces) ||
@@ -188,7 +196,9 @@ const findMonorepoRoot = (startDirectory: string): string | null => {
   let currentDirectory = path.dirname(startDirectory);
 
   while (currentDirectory !== path.dirname(currentDirectory)) {
-    if (isMonorepoRoot(currentDirectory)) return currentDirectory;
+    if (isMonorepoRoot(currentDirectory)) {
+      return currentDirectory;
+    }
     currentDirectory = path.dirname(currentDirectory);
   }
 
@@ -201,10 +211,10 @@ const findDependencyInfoFromMonorepoRoot = (
   const monorepoRoot = findMonorepoRoot(directory);
   if (!monorepoRoot) {
     return {
-      reactVersion: null,
       framework: "unknown",
-      nextVersion: null,
       nextMajorVersion: null,
+      nextVersion: null,
+      reactVersion: null,
     };
   }
 
@@ -215,14 +225,14 @@ const findDependencyInfoFromMonorepoRoot = (
   const workspaceInfo = findReactInWorkspaces(monorepoRoot, rootPackageJson);
 
   return {
-    reactVersion: rootInfo.reactVersion ?? workspaceInfo.reactVersion,
     framework:
-      rootInfo.framework !== "unknown"
-        ? rootInfo.framework
-        : workspaceInfo.framework,
-    nextVersion: rootInfo.nextVersion ?? workspaceInfo.nextVersion,
+      rootInfo.framework === "unknown"
+        ? workspaceInfo.framework
+        : rootInfo.framework,
     nextMajorVersion:
       rootInfo.nextMajorVersion ?? workspaceInfo.nextMajorVersion,
+    nextVersion: rootInfo.nextVersion ?? workspaceInfo.nextVersion,
+    reactVersion: rootInfo.reactVersion ?? workspaceInfo.reactVersion,
   };
 };
 
@@ -232,10 +242,10 @@ const findReactInWorkspaces = (
 ): DependencyInfo => {
   const patterns = getWorkspacePatterns(rootDirectory, packageJson);
   const result: DependencyInfo = {
-    reactVersion: null,
     framework: "unknown",
-    nextVersion: null,
     nextMajorVersion: null,
+    nextVersion: null,
+    reactVersion: null,
   };
 
   for (const pattern of patterns) {
@@ -287,8 +297,9 @@ export const discoverReactSubprojects = (
   if (
     !fs.existsSync(rootDirectory) ||
     !fs.statSync(rootDirectory).isDirectory()
-  )
+  ) {
     return [];
+  }
 
   const entries = fs.readdirSync(rootDirectory, { withFileTypes: true });
   const packages: WorkspacePackage[] = [];
@@ -304,13 +315,17 @@ export const discoverReactSubprojects = (
 
     const subdirectory = path.join(rootDirectory, entry.name);
     const packageJsonPath = path.join(subdirectory, "package.json");
-    if (!fs.existsSync(packageJsonPath)) continue;
+    if (!fs.existsSync(packageJsonPath)) {
+      continue;
+    }
 
     const packageJson = readPackageJson(packageJsonPath);
-    if (!hasReactDependency(packageJson)) continue;
+    if (!hasReactDependency(packageJson)) {
+      continue;
+    }
 
     const name = packageJson.name ?? entry.name;
-    packages.push({ name, directory: subdirectory });
+    packages.push({ directory: subdirectory, name });
   }
 
   return packages;
@@ -320,11 +335,15 @@ export const listWorkspacePackages = (
   rootDirectory: string,
 ): WorkspacePackage[] => {
   const packageJsonPath = path.join(rootDirectory, "package.json");
-  if (!fs.existsSync(packageJsonPath)) return [];
+  if (!fs.existsSync(packageJsonPath)) {
+    return [];
+  }
 
   const packageJson = readPackageJson(packageJsonPath);
   const patterns = getWorkspacePatterns(rootDirectory, packageJson);
-  if (patterns.length === 0) return [];
+  if (patterns.length === 0) {
+    return [];
+  }
 
   const packages: WorkspacePackage[] = [];
 
@@ -335,16 +354,37 @@ export const listWorkspacePackages = (
         path.join(workspaceDirectory, "package.json"),
       );
 
-      if (!hasReactDependency(workspacePackageJson)) continue;
+      if (!hasReactDependency(workspacePackageJson)) {
+        continue;
+      }
 
       const name =
         workspacePackageJson.name ?? path.basename(workspaceDirectory);
-      packages.push({ name, directory: workspaceDirectory });
+      packages.push({ directory: workspaceDirectory, name });
     }
   }
 
   return packages;
 };
+
+const mergeDependencyInfo = (
+  current: DependencyInfo,
+  source: DependencyInfo,
+): DependencyInfo => ({
+  framework:
+    current.framework === "unknown" ? source.framework : current.framework,
+  nextMajorVersion: current.nextMajorVersion ?? source.nextMajorVersion ?? null,
+  nextVersion: current.nextVersion ?? source.nextVersion ?? null,
+  reactVersion: current.reactVersion ?? source.reactVersion ?? null,
+});
+
+const isDependencyInfoComplete = (info: DependencyInfo): boolean =>
+  Boolean(
+    info.reactVersion &&
+    info.framework !== "unknown" &&
+    info.nextVersion &&
+    info.nextMajorVersion !== null,
+  );
 
 export const discoverProject = (directory: string): ProjectInfo => {
   const packageJsonPath = path.join(directory, "package.json");
@@ -353,64 +393,36 @@ export const discoverProject = (directory: string): ProjectInfo => {
   }
 
   const packageJson = readPackageJson(packageJsonPath);
-  let { reactVersion, framework, nextVersion, nextMajorVersion } =
-    extractDependencyInfo(packageJson);
+  let dependencyInfo = extractDependencyInfo(packageJson);
 
-  if (
-    !reactVersion ||
-    framework === "unknown" ||
-    !nextVersion ||
-    nextMajorVersion === null
-  ) {
-    const workspaceInfo = findReactInWorkspaces(directory, packageJson);
-    if (!reactVersion && workspaceInfo.reactVersion) {
-      reactVersion = workspaceInfo.reactVersion;
-    }
-    if (framework === "unknown" && workspaceInfo.framework !== "unknown") {
-      framework = workspaceInfo.framework;
-    }
-    if (!nextVersion && workspaceInfo.nextVersion) {
-      nextVersion = workspaceInfo.nextVersion;
-    }
-    if (nextMajorVersion === null && workspaceInfo.nextMajorVersion !== null) {
-      nextMajorVersion = workspaceInfo.nextMajorVersion;
-    }
+  if (!isDependencyInfoComplete(dependencyInfo)) {
+    dependencyInfo = mergeDependencyInfo(
+      dependencyInfo,
+      findReactInWorkspaces(directory, packageJson),
+    );
   }
 
-  if (
-    (!reactVersion ||
-      framework === "unknown" ||
-      !nextVersion ||
-      nextMajorVersion === null) &&
-    !isMonorepoRoot(directory)
-  ) {
-    const monorepoInfo = findDependencyInfoFromMonorepoRoot(directory);
-    if (!reactVersion) {
-      reactVersion = monorepoInfo.reactVersion;
-    }
-    if (framework === "unknown") {
-      framework = monorepoInfo.framework;
-    }
-    if (!nextVersion) {
-      nextVersion = monorepoInfo.nextVersion;
-    }
-    if (nextMajorVersion === null) {
-      nextMajorVersion = monorepoInfo.nextMajorVersion;
-    }
+  if (!isDependencyInfoComplete(dependencyInfo) && !isMonorepoRoot(directory)) {
+    dependencyInfo = mergeDependencyInfo(
+      dependencyInfo,
+      findDependencyInfoFromMonorepoRoot(directory),
+    );
   }
 
+  const { framework, nextMajorVersion, nextVersion, reactVersion } =
+    dependencyInfo;
   const projectName = packageJson.name ?? path.basename(directory);
   const hasTypeScript = fs.existsSync(path.join(directory, "tsconfig.json"));
   const sourceFileCount = countSourceFiles(directory);
 
   return {
-    rootDirectory: directory,
+    framework,
+    hasTypeScript,
+    nextMajorVersion,
+    nextVersion,
     projectName,
     reactVersion,
-    framework,
-    nextVersion,
-    nextMajorVersion,
-    hasTypeScript,
+    rootDirectory: directory,
     sourceFileCount,
   };
 };

@@ -16,7 +16,7 @@ export const loadConfig = (
 
   if (fs.existsSync(configFilePath)) {
     try {
-      const fileContent = fs.readFileSync(configFilePath, "utf-8");
+      const fileContent = fs.readFileSync(configFilePath, "utf8");
       const parsed: unknown = JSON.parse(fileContent);
       if (!isPlainObject(parsed)) {
         console.warn(
@@ -36,7 +36,7 @@ export const loadConfig = (
   const packageJsonPath = path.join(rootDirectory, "package.json");
   if (fs.existsSync(packageJsonPath)) {
     try {
-      const fileContent = fs.readFileSync(packageJsonPath, "utf-8");
+      const fileContent = fs.readFileSync(packageJsonPath, "utf8");
       const packageJson = JSON.parse(fileContent);
       const embeddedConfig = packageJson[PACKAGE_JSON_CONFIG_KEY];
       if (isPlainObject(embeddedConfig)) {

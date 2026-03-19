@@ -37,7 +37,9 @@ const detectDefaultBranch = (directory: string): string | null => {
           stdio: "pipe",
         });
         return candidate;
-      } catch {}
+      } catch {
+        // Rev parse failed, try next candidate
+      }
     }
     return null;
   }
@@ -65,7 +67,9 @@ const getChangedFilesSinceBranch = (
       .toString()
       .trim();
 
-    if (!output) return [];
+    if (!output) {
+      return [];
+    }
     return output.split("\n").filter(Boolean);
   } catch {
     return [];
@@ -83,7 +87,9 @@ const getUncommittedChangedFiles = (directory: string): string[] => {
     )
       .toString()
       .trim();
-    if (!output) return [];
+    if (!output) {
+      return [];
+    }
     return output.split("\n").filter(Boolean);
   } catch {
     return [];
@@ -95,24 +101,30 @@ export const getDiffInfo = (
   explicitBaseBranch?: string,
 ): DiffInfo | null => {
   const currentBranch = getCurrentBranch(directory);
-  if (!currentBranch) return null;
+  if (!currentBranch) {
+    return null;
+  }
 
   const baseBranch = explicitBaseBranch ?? detectDefaultBranch(directory);
-  if (!baseBranch) return null;
+  if (!baseBranch) {
+    return null;
+  }
 
   if (currentBranch === baseBranch) {
     const uncommittedFiles = getUncommittedChangedFiles(directory);
-    if (uncommittedFiles.length === 0) return null;
+    if (uncommittedFiles.length === 0) {
+      return null;
+    }
     return {
-      currentBranch,
       baseBranch,
       changedFiles: uncommittedFiles,
+      currentBranch,
       isCurrentChanges: true,
     };
   }
 
   const changedFiles = getChangedFilesSinceBranch(directory, baseBranch);
-  return { currentBranch, baseBranch, changedFiles };
+  return { baseBranch, changedFiles, currentBranch };
 };
 
 export const filterSourceFiles = (filePaths: string[]): string[] =>

@@ -41,7 +41,8 @@ export const GIT_LS_FILES_MAX_BUFFER_BYTES = 50 * 1024 * 1024;
 export const OFFLINE_MESSAGE =
   "You are offline, could not calculate score. Reconnect to calculate.";
 
-export const OFFLINE_FLAG_MESSAGE = "Score not calculated. Remove --offline to calculate score.";
+export const OFFLINE_FLAG_MESSAGE =
+  "Score not calculated. Remove --offline to calculate score.";
 
 export const DEFAULT_BRANCH_CANDIDATES = ["main", "master"];
 

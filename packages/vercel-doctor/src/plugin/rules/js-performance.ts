@@ -9,7 +9,9 @@ export const asyncParallel: Rule = {
 
     return {
       BlockStatement(node: EsTreeNode) {
-        if (isTestFile) return;
+        if (isTestFile) {
+          return;
+        }
         const consecutiveAwaitStatements: EsTreeNode[] = [];
 
         const flushConsecutiveAwaits = (): void => {
@@ -39,12 +41,17 @@ export const asyncParallel: Rule = {
   },
 };
 
-const reportIfIndependent = (statements: EsTreeNode[], context: RuleContext): void => {
+const reportIfIndependent = (
+  statements: EsTreeNode[],
+  context: RuleContext,
+): void => {
   const declaredNames = new Set<string>();
 
   for (const statement of statements) {
-    if (statement.type !== "VariableDeclaration") continue;
-    const declarator = statement.declarations[0];
+    if (statement.type !== "VariableDeclaration") {
+      continue;
+    }
+    const [declarator] = statement.declarations;
     const awaitArgument = declarator.init?.argument;
 
     let referencesEarlierResult = false;
@@ -54,7 +61,9 @@ const reportIfIndependent = (statements: EsTreeNode[], context: RuleContext): vo
       }
     });
 
-    if (referencesEarlierResult) return;
+    if (referencesEarlierResult) {
+      return;
+    }
 
     if (declarator.id?.type === "Identifier") {
       declaredNames.add(declarator.id.name);
@@ -62,7 +71,7 @@ const reportIfIndependent = (statements: EsTreeNode[], context: RuleContext): vo
   }
 
   context.report({
-    node: statements[0],
     message: `${statements.length} sequential await statements that appear independent — use Promise.all() for parallel execution`,
+    node: statements[0],
   });
 };

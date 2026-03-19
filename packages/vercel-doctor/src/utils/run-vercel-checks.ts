@@ -126,7 +126,7 @@ const BUN_LOCK_PATH = "bun.lock";
 const BUN_LOCK_BINARY_PATH = "bun.lockb";
 
 const normalizeProjectPath = (filePath: string): string =>
-  filePath.replace(/\\/g, "/").replace(/^\.\//, "");
+  filePath.replaceAll("\\", "/").replace(/^\.\//, "");
 
 const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -135,7 +135,9 @@ const buildIncludedPathSet = (
   rootDirectory: string,
   includePaths?: string[],
 ): Set<string> | null => {
-  if (!includePaths || includePaths.length === 0) return null;
+  if (!includePaths || includePaths.length === 0) {
+    return null;
+  }
 
   const includedPathSet = new Set<string>();
   for (const includePath of includePaths) {
@@ -160,7 +162,9 @@ const collectProjectFilePaths = (rootDirectory: string): string[] => {
 
   while (directoryQueue.length > 0) {
     const currentDirectory = directoryQueue.pop();
-    if (!currentDirectory) continue;
+    if (!currentDirectory) {
+      continue;
+    }
 
     let directoryEntries: fs.Dirent[] = [];
     try {
@@ -181,7 +185,9 @@ const collectProjectFilePaths = (rootDirectory: string): string[] => {
       );
 
       if (directoryEntry.isDirectory()) {
-        if (IGNORED_DIRECTORY_NAMES.has(directoryEntry.name)) continue;
+        if (IGNORED_DIRECTORY_NAMES.has(directoryEntry.name)) {
+          continue;
+        }
         directoryQueue.push(entryAbsolutePath);
         continue;
       }
@@ -216,7 +222,7 @@ const isEdgeRuntimeFile = (
 
 const readTextFileSafely = (absoluteFilePath: string): string | null => {
   try {
-    return fs.readFileSync(absoluteFilePath, "utf-8");
+    return fs.readFileSync(absoluteFilePath, "utf8");
   } catch {
     return null;
   }
@@ -227,7 +233,9 @@ const getLineNumberForPattern = (
   pattern: RegExp,
 ): number => {
   const matchedIndex = fileContent.search(pattern);
-  if (matchedIndex < 0) return 0;
+  if (matchedIndex < 0) {
+    return 0;
+  }
   return fileContent.slice(0, matchedIndex).split("\n").length;
 };
 
@@ -235,7 +243,9 @@ const getLineNumberForCharacterIndex = (
   fileContent: string,
   characterIndex: number,
 ): number => {
-  if (characterIndex < 0) return 0;
+  if (characterIndex < 0) {
+    return 0;
+  }
   return fileContent.slice(0, characterIndex).split("\n").length;
 };
 
@@ -251,23 +261,27 @@ const createVercelWarningDiagnostic = (
   help: string,
   line = 0,
 ): Diagnostic => ({
+  category: RULE_CATEGORY_NAMES.VERCEL,
+  column: 0,
   filePath,
+  help,
+  line,
+  message,
   plugin: OXLINT_PLUGIN_NAME,
   rule,
   severity: "warning",
-  message,
-  help,
-  line,
-  column: 0,
-  category: RULE_CATEGORY_NAMES.VERCEL,
 });
 
 const readVercelConfig = (rootDirectory: string): VercelConfig | null => {
   const vercelConfigPath = path.join(rootDirectory, VERCEL_JSON_PATH);
-  if (!fs.existsSync(vercelConfigPath)) return null;
+  if (!fs.existsSync(vercelConfigPath)) {
+    return null;
+  }
 
   const rawConfigContent = readTextFileSafely(vercelConfigPath);
-  if (!rawConfigContent) return null;
+  if (!rawConfigContent) {
+    return null;
+  }
 
   let parsedConfig: unknown;
   try {
@@ -275,14 +289,18 @@ const readVercelConfig = (rootDirectory: string): VercelConfig | null => {
   } catch {
     return null;
   }
-  if (!isObjectRecord(parsedConfig)) return null;
+  if (!isObjectRecord(parsedConfig)) {
+    return null;
+  }
 
   const parsedVercelConfig: VercelConfig = {};
   const cronsField = parsedConfig.crons;
   if (Array.isArray(cronsField)) {
     const parsedCrons: VercelConfigCron[] = [];
     for (const cronEntry of cronsField) {
-      if (!isObjectRecord(cronEntry)) continue;
+      if (!isObjectRecord(cronEntry)) {
+        continue;
+      }
       const pathValue = cronEntry.path;
       const scheduleValue = cronEntry.schedule;
       if (typeof pathValue === "string" && typeof scheduleValue === "string") {
@@ -300,7 +318,9 @@ const readVercelConfig = (rootDirectory: string): VercelConfig | null => {
     for (const [functionGlob, functionConfigValue] of Object.entries(
       functionsField,
     )) {
-      if (!isObjectRecord(functionConfigValue)) continue;
+      if (!isObjectRecord(functionConfigValue)) {
+        continue;
+      }
       const runtimeValue =
         typeof functionConfigValue.runtime === "string"
           ? functionConfigValue.runtime
@@ -311,8 +331,8 @@ const readVercelConfig = (rootDirectory: string): VercelConfig | null => {
           : undefined;
 
       parsedFunctions[functionGlob] = {
-        runtime: runtimeValue,
         maxDuration: maxDurationValue,
+        runtime: runtimeValue,
       };
     }
     if (Object.keys(parsedFunctions).length > 0) {
@@ -325,7 +345,9 @@ const readVercelConfig = (rootDirectory: string): VercelConfig | null => {
 
 const readNextVersion = (rootDirectory: string): string | null => {
   const packageJsonPath = path.join(rootDirectory, PACKAGE_JSON_PATH);
-  if (!fs.existsSync(packageJsonPath)) return null;
+  if (!fs.existsSync(packageJsonPath)) {
+    return null;
+  }
 
   try {
     const packageJson = readPackageJson(packageJsonPath);
@@ -380,8 +402,12 @@ const collectLargeStaticAssetCandidates = (
   const largeStaticAssetCandidates: StaticAssetCandidate[] = [];
 
   for (const relativeFilePath of projectFilePaths) {
-    if (!isStaticAssetPath(relativeFilePath)) continue;
-    if (!shouldInspectPath(relativeFilePath, includedPathSet)) continue;
+    if (!isStaticAssetPath(relativeFilePath)) {
+      continue;
+    }
+    if (!shouldInspectPath(relativeFilePath, includedPathSet)) {
+      continue;
+    }
 
     const absoluteFilePath = path.join(rootDirectory, relativeFilePath);
 
@@ -392,8 +418,9 @@ const collectLargeStaticAssetCandidates = (
       continue;
     }
 
-    if (staticAssetSizeBytes < STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES)
+    if (staticAssetSizeBytes < STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES) {
       continue;
+    }
     largeStaticAssetCandidates.push({
       filePath: relativeFilePath,
       sizeBytes: staticAssetSizeBytes,
@@ -482,7 +509,9 @@ const collectEdgeDiagnostics = (
   fileContent: string,
   diagnostics: Diagnostic[],
 ): void => {
-  if (!isEdgeRuntimeFile(relativeFilePath, fileContent)) return;
+  if (!isEdgeRuntimeFile(relativeFilePath, fileContent)) {
+    return;
+  }
 
   if (EDGE_HEAVY_IMPORT_PATTERN.test(fileContent)) {
     diagnostics.push(
@@ -519,7 +548,9 @@ const collectCachingDiagnostics = (
   nextMajorVersion: number | null,
   diagnostics: Diagnostic[],
 ): void => {
-  if (!isApiRoutePath(relativeFilePath)) return;
+  if (!isApiRoutePath(relativeFilePath)) {
+    return;
+  }
 
   const hasAnyCacheConfiguration =
     CACHE_CONTROL_PATTERN.test(fileContent) ||
@@ -566,9 +597,12 @@ const collectBuildOptimizationDiagnostics = (
   nextMajorVersion: number | null,
   diagnostics: Diagnostic[],
 ): void => {
-  if (!NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath)) return;
-  if (nextMajorVersion !== null && nextMajorVersion < NEXT_MAJOR_VERSION_16)
+  if (!NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath)) {
     return;
+  }
+  if (nextMajorVersion !== null && nextMajorVersion < NEXT_MAJOR_VERSION_16) {
+    return;
+  }
 
   const hasExperimental = /\bexperimental\s*:\s*\{/m.test(fileContent);
   const hasTurbopackCache = TURBOPACK_CACHE_PATTERN.test(fileContent);
@@ -585,103 +619,134 @@ const collectBuildOptimizationDiagnostics = (
   }
 };
 
-const collectImageOptimizationDiagnostics = (
+const collectNextConfigUnoptimizedDiagnostic = (
   relativeFilePath: string,
   fileContent: string,
   diagnostics: Diagnostic[],
 ): void => {
   if (
-    NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath) &&
-    NEXT_CONFIG_UNOPTIMIZED_IMAGE_PATTERN.test(fileContent)
+    !NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath) ||
+    !NEXT_CONFIG_UNOPTIMIZED_IMAGE_PATTERN.test(fileContent)
   ) {
+    return;
+  }
+  diagnostics.push(
+    createVercelWarningDiagnostic(
+      relativeFilePath,
+      VERCEL_RULE_IDS.IMAGE_GLOBAL_UNOPTIMIZED,
+      "next.config enables `images.unoptimized: true` — this disables Vercel Image Optimization globally",
+      "Keep optimization enabled and configure image domains/remotePatterns as needed: https://vercel.com/docs/image-optimization",
+      getLineNumberForPattern(
+        fileContent,
+        NEXT_CONFIG_UNOPTIMIZED_IMAGE_PATTERN,
+      ),
+    ),
+  );
+};
+
+const collectNextConfigRemotePatternsDiagnostics = (
+  relativeFilePath: string,
+  fileContent: string,
+  diagnostics: Diagnostic[],
+): void => {
+  if (!NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath)) {
+    return;
+  }
+  const remotePatternsMatch = fileContent.match(
+    NEXT_IMAGE_REMOTE_PATTERNS_PATTERN,
+  );
+  if (!remotePatternsMatch) {
+    return;
+  }
+  const remotePatternsBlockContent = remotePatternsMatch[1] ?? "";
+  const remotePatternsStartCharacterIndex = fileContent.indexOf(
+    remotePatternsBlockContent,
+  );
+  if (remotePatternsStartCharacterIndex === -1) {
+    return;
+  }
+  for (const remotePatternMatch of remotePatternsBlockContent.matchAll(
+    NEXT_IMAGE_REMOTE_PATTERN_OBJECT_PATTERN,
+  )) {
+    const [matchedRemotePatternObject] = remotePatternMatch;
+    if (
+      !NEXT_IMAGE_REMOTE_PATTERN_HOSTNAME_PATTERN.test(
+        matchedRemotePatternObject,
+      )
+    ) {
+      continue;
+    }
+    const pathnameMatch = matchedRemotePatternObject.match(
+      NEXT_IMAGE_REMOTE_PATTERN_PATHNAME_PATTERN,
+    );
+    const hasBroadPathname =
+      pathnameMatch &&
+      NEXT_IMAGE_BROAD_PATHNAME_PATTERN.test(pathnameMatch[1].trim());
+    const isPathnameMissing = !pathnameMatch;
+    if (!hasBroadPathname && !isPathnameMissing) {
+      continue;
+    }
     diagnostics.push(
       createVercelWarningDiagnostic(
         relativeFilePath,
-        VERCEL_RULE_IDS.IMAGE_GLOBAL_UNOPTIMIZED,
-        "next.config enables `images.unoptimized: true` — this disables Vercel Image Optimization globally",
-        "Keep optimization enabled and configure image domains/remotePatterns as needed: https://vercel.com/docs/image-optimization",
-        getLineNumberForPattern(
+        VERCEL_RULE_IDS.IMAGE_REMOTE_PATTERN_TOO_BROAD,
+        "next.config image remotePatterns is too broad — unrestricted remote image paths can drive unexpected optimization usage",
+        "Restrict `images.remotePatterns.pathname` to app-specific prefixes instead of `/**`, and avoid patterns that omit pathname entirely: https://vercel.com/docs/image-optimization",
+        getLineNumberForCharacterIndex(
           fileContent,
-          NEXT_CONFIG_UNOPTIMIZED_IMAGE_PATTERN,
+          remotePatternsStartCharacterIndex + (remotePatternMatch.index ?? 0),
         ),
       ),
     );
+    break;
   }
+};
 
-  if (NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath)) {
-    const remotePatternsMatch = fileContent.match(
-      NEXT_IMAGE_REMOTE_PATTERNS_PATTERN,
-    );
-    if (remotePatternsMatch) {
-      const remotePatternsBlockContent = remotePatternsMatch[1] ?? "";
-      const remotePatternsStartCharacterIndex = fileContent.indexOf(
-        remotePatternsBlockContent,
-      );
-
-      if (remotePatternsStartCharacterIndex >= 0) {
-        for (const remotePatternMatch of remotePatternsBlockContent.matchAll(
-          NEXT_IMAGE_REMOTE_PATTERN_OBJECT_PATTERN,
-        )) {
-          const matchedRemotePatternObject = remotePatternMatch[0];
-          if (
-            !NEXT_IMAGE_REMOTE_PATTERN_HOSTNAME_PATTERN.test(
-              matchedRemotePatternObject,
-            )
-          )
-            continue;
-
-          const pathnameMatch = matchedRemotePatternObject.match(
-            NEXT_IMAGE_REMOTE_PATTERN_PATHNAME_PATTERN,
-          );
-          const hasBroadPathname =
-            pathnameMatch &&
-            NEXT_IMAGE_BROAD_PATHNAME_PATTERN.test(pathnameMatch[1].trim());
-          const isPathnameMissing = !pathnameMatch;
-
-          if (!hasBroadPathname && !isPathnameMissing) continue;
-
-          diagnostics.push(
-            createVercelWarningDiagnostic(
-              relativeFilePath,
-              VERCEL_RULE_IDS.IMAGE_REMOTE_PATTERN_TOO_BROAD,
-              "next.config image remotePatterns is too broad — unrestricted remote image paths can drive unexpected optimization usage",
-              "Restrict `images.remotePatterns.pathname` to app-specific prefixes instead of `/**`, and avoid patterns that omit pathname entirely: https://vercel.com/docs/image-optimization",
-              getLineNumberForCharacterIndex(
-                fileContent,
-                remotePatternsStartCharacterIndex +
-                  (remotePatternMatch.index ?? 0),
-              ),
-            ),
-          );
-          break;
-        }
-      }
-    }
+const collectImageTagSvgDiagnostics = (
+  relativeFilePath: string,
+  fileContent: string,
+  diagnostics: Diagnostic[],
+): void => {
+  if (!NEXT_IMAGE_IMPORT_PATTERN.test(fileContent)) {
+    return;
   }
-
-  if (!NEXT_IMAGE_IMPORT_PATTERN.test(fileContent)) return;
-
   for (const imageMatch of fileContent.matchAll(IMAGE_TAG_PATTERN)) {
-    const tagContent = imageMatch[0];
+    const [tagContent] = imageMatch;
     const matchIndex = imageMatch.index ?? -1;
     const srcSvgMatch = tagContent.match(IMAGE_SRC_SVG_PATTERN);
     const hasSvgSrc = Boolean(srcSvgMatch?.[1] ?? srcSvgMatch?.[2]);
     const hasUnoptimized = IMAGE_HAS_UNOPTIMIZED_PATTERN.test(tagContent);
-
-    if (hasSvgSrc && hasUnoptimized) continue;
-
-    if (hasSvgSrc && !hasUnoptimized) {
-      diagnostics.push(
-        createVercelWarningDiagnostic(
-          relativeFilePath,
-          VERCEL_RULE_IDS.IMAGE_SVG_WITHOUT_UNOPTIMIZED,
-          "next/image with SVG src should use the `unoptimized` prop — SVGs are not optimized by the pipeline",
-          "Add unoptimized to the Image component when using SVG sources: https://vercel.com/docs/image-optimization",
-          getLineNumberForCharacterIndex(fileContent, matchIndex),
-        ),
-      );
+    if (!hasSvgSrc || hasUnoptimized) {
+      continue;
     }
+    diagnostics.push(
+      createVercelWarningDiagnostic(
+        relativeFilePath,
+        VERCEL_RULE_IDS.IMAGE_SVG_WITHOUT_UNOPTIMIZED,
+        "next/image with SVG src should use the `unoptimized` prop — SVGs are not optimized by the pipeline",
+        "Add unoptimized to the Image component when using SVG sources: https://vercel.com/docs/image-optimization",
+        getLineNumberForCharacterIndex(fileContent, matchIndex),
+      ),
+    );
   }
+};
+
+const collectImageOptimizationDiagnostics = (
+  relativeFilePath: string,
+  fileContent: string,
+  diagnostics: Diagnostic[],
+): void => {
+  collectNextConfigUnoptimizedDiagnostic(
+    relativeFilePath,
+    fileContent,
+    diagnostics,
+  );
+  collectNextConfigRemotePatternsDiagnostics(
+    relativeFilePath,
+    fileContent,
+    diagnostics,
+  );
+  collectImageTagSvgDiagnostics(relativeFilePath, fileContent, diagnostics);
 };
 
 const collectDatabaseAwaitDiagnostics = (
@@ -689,16 +754,21 @@ const collectDatabaseAwaitDiagnostics = (
   fileContent: string,
   diagnostics: Diagnostic[],
 ): void => {
-  if (!isApiRoutePath(relativeFilePath)) return;
-  if (PROMISE_ALL_PATTERN.test(fileContent)) return;
+  if (!isApiRoutePath(relativeFilePath)) {
+    return;
+  }
+  if (PROMISE_ALL_PATTERN.test(fileContent)) {
+    return;
+  }
 
   const sequentialDatabaseAwaitMatches =
     fileContent.match(SEQUENTIAL_DATABASE_AWAIT_PATTERN) ?? [];
   if (
     sequentialDatabaseAwaitMatches.length <
     SEQUENTIAL_DATABASE_AWAIT_WARNING_THRESHOLD_COUNT
-  )
+  ) {
     return;
+  }
 
   diagnostics.push(
     createVercelWarningDiagnostic(
@@ -731,10 +801,14 @@ const collectBunDiagnostic = (
     shouldRunConfigCheck(includedPathSet, BUN_LOCK_PATH) ||
     shouldRunConfigCheck(includedPathSet, BUN_LOCK_BINARY_PATH);
 
-  if (!shouldEvaluatePackageManager) return;
+  if (!shouldEvaluatePackageManager) {
+    return;
+  }
 
   const packageJsonPath = path.join(rootDirectory, PACKAGE_JSON_PATH);
-  if (!fs.existsSync(packageJsonPath)) return;
+  if (!fs.existsSync(packageJsonPath)) {
+    return;
+  }
 
   let packageJson;
   try {
@@ -751,7 +825,9 @@ const collectBunDiagnostic = (
     fs.existsSync(path.join(rootDirectory, BUN_LOCK_PATH)) ||
     fs.existsSync(path.join(rootDirectory, BUN_LOCK_BINARY_PATH));
 
-  if (usesBunPackageManager || hasBunLockfile) return;
+  if (usesBunPackageManager || hasBunLockfile) {
+    return;
+  }
 
   diagnostics.push(
     createVercelWarningDiagnostic(
@@ -768,8 +844,12 @@ const collectCronDiagnostic = (
   vercelConfig: VercelConfig | null,
   diagnostics: Diagnostic[],
 ): void => {
-  if (!shouldRunConfigCheck(includedPathSet, VERCEL_JSON_PATH)) return;
-  if (!vercelConfig?.crons || vercelConfig.crons.length === 0) return;
+  if (!shouldRunConfigCheck(includedPathSet, VERCEL_JSON_PATH)) {
+    return;
+  }
+  if (!vercelConfig?.crons || vercelConfig.crons.length === 0) {
+    return;
+  }
 
   diagnostics.push(
     createVercelWarningDiagnostic(
@@ -787,7 +867,9 @@ const collectFluidComputeDiagnostic = (
   apiRouteFilePaths: string[],
   diagnostics: Diagnostic[],
 ): void => {
-  if (apiRouteCount < FLUID_COMPUTE_ROUTE_THRESHOLD_COUNT) return;
+  if (apiRouteCount < FLUID_COMPUTE_ROUTE_THRESHOLD_COUNT) {
+    return;
+  }
 
   const referenceFilePath = apiRouteFilePaths[0] ?? PACKAGE_JSON_PATH;
   diagnostics.push(
@@ -831,12 +913,18 @@ export const runVercelChecks = (
 
   const apiRouteFilePaths: string[] = [];
   for (const relativeFilePath of projectFilePaths) {
-    if (!shouldInspectPath(relativeFilePath, includedPathSet)) continue;
-    if (!isSourceCodePath(relativeFilePath)) continue;
+    if (!shouldInspectPath(relativeFilePath, includedPathSet)) {
+      continue;
+    }
+    if (!isSourceCodePath(relativeFilePath)) {
+      continue;
+    }
 
     const absoluteFilePath = path.join(rootDirectory, relativeFilePath);
     const fileContent = readTextFileSafely(absoluteFilePath);
-    if (!fileContent) continue;
+    if (!fileContent) {
+      continue;
+    }
 
     collectSsgDiagnostics(
       relativeFilePath,

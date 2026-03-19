@@ -1,9 +1,9 @@
 import pc from "picocolors";
 
 export const highlighter = {
+  dim: pc.dim,
   error: pc.red,
-  warn: pc.yellow,
   info: pc.cyan,
   success: pc.green,
-  dim: pc.dim,
+  warn: pc.yellow,
 };

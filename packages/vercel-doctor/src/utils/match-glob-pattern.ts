@@ -1,7 +1,7 @@
 const REGEX_SPECIAL_CHARACTERS = /[.+^${}()|[\]\\]/g;
 
 export const compileGlobPattern = (pattern: string): RegExp => {
-  const normalizedPattern = pattern.replace(/\\/g, "/");
+  const normalizedPattern = pattern.replaceAll("\\", "/");
 
   let regexSource = "^";
   let characterIndex = 0;
@@ -20,13 +20,16 @@ export const compileGlobPattern = (pattern: string): RegExp => {
       }
     } else if (normalizedPattern[characterIndex] === "*") {
       regexSource += "[^/]*";
-      characterIndex++;
+      characterIndex += 1;
     } else if (normalizedPattern[characterIndex] === "?") {
       regexSource += "[^/]";
-      characterIndex++;
+      characterIndex += 1;
     } else {
-      regexSource += normalizedPattern[characterIndex].replace(REGEX_SPECIAL_CHARACTERS, "\\$&");
-      characterIndex++;
+      regexSource += normalizedPattern[characterIndex].replace(
+        REGEX_SPECIAL_CHARACTERS,
+        "\\$&",
+      );
+      characterIndex += 1;
     }
   }
 
@@ -34,7 +37,10 @@ export const compileGlobPattern = (pattern: string): RegExp => {
   return new RegExp(regexSource);
 };
 
-export const matchGlobPattern = (filePath: string, pattern: string): boolean => {
-  const normalizedPath = filePath.replace(/\\/g, "/");
+export const matchGlobPattern = (
+  filePath: string,
+  pattern: string,
+): boolean => {
+  const normalizedPath = filePath.replaceAll("\\", "/");
   return compileGlobPattern(pattern).test(normalizedPath);
 };

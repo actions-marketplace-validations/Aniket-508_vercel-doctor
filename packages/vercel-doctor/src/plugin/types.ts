@@ -8,9 +8,10 @@ export interface RuleContext {
   getFilename?: () => string;
 }
 
-export interface RuleVisitors {
-  [selector: string]: ((node: EsTreeNode) => void) | (() => void);
-}
+export type RuleVisitors = Record<
+  string,
+  ((node: EsTreeNode) => void) | (() => void)
+>;
 
 export interface Rule {
   create: (context: RuleContext) => RuleVisitors;
@@ -23,5 +24,6 @@ export interface RulePlugin {
 
 export interface EsTreeNode {
   type: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ESTree nodes have arbitrary dynamic properties
   [key: string]: any;
 }

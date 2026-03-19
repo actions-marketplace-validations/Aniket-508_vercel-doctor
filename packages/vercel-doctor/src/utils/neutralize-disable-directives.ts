@@ -13,12 +13,14 @@ const findFilesWithDisableDirectives = (rootDirectory: string): string[] => {
     ["grep", "-l", "--untracked", "-E", "(eslint|oxlint)-disable"],
     {
       cwd: rootDirectory,
-      encoding: "utf-8",
+      encoding: "utf8",
       maxBuffer: GIT_LS_FILES_MAX_BUFFER_BYTES,
     },
   );
 
-  if (result.error || result.status === null) return [];
+  if (result.error || result.status === null) {
+    return [];
+  }
 
   return result.stdout
     .split("\n")
@@ -43,7 +45,7 @@ export const neutralizeDisableDirectives = (
 
     let originalContent: string;
     try {
-      originalContent = fs.readFileSync(absolutePath, "utf-8");
+      originalContent = fs.readFileSync(absolutePath, "utf8");
     } catch {
       continue;
     }

@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 
-import basePrompts, { type PromptObject, type Answers } from "prompts";
+import basePrompts from "prompts";
+import type { PromptObject, Answers } from "prompts";
 
 import type { PromptMultiselectContext } from "../types.js";
 import { logger } from "./logger.js";
@@ -35,12 +36,14 @@ const onCancel = () => {
 };
 
 const patchMultiselectToggleAll = (): void => {
-  if (didPatchMultiselectToggleAll) return;
+  if (didPatchMultiselectToggleAll) {
+    return;
+  }
   didPatchMultiselectToggleAll = true;
 
   const multiselectPromptConstructor = require(PROMPTS_MULTISELECT_MODULE_PATH);
 
-  multiselectPromptConstructor.prototype.toggleAll = function (
+  multiselectPromptConstructor.prototype.toggleAll = function toggleAll(
     this: PromptMultiselectContext,
   ): void {
     const isCurrentChoiceDisabled = Boolean(this.value[this.cursor]?.disabled);
@@ -52,7 +55,9 @@ const patchMultiselectToggleAll = (): void => {
     const shouldSelectAllEnabledChoices = shouldSelectAllChoices(this.value);
 
     for (const choiceState of this.value) {
-      if (choiceState.disabled) continue;
+      if (choiceState.disabled) {
+        continue;
+      }
       choiceState.selected = shouldSelectAllEnabledChoices;
     }
 
@@ -61,13 +66,15 @@ const patchMultiselectToggleAll = (): void => {
 };
 
 const patchMultiselectSubmit = (): void => {
-  if (didPatchMultiselectSubmit) return;
+  if (didPatchMultiselectSubmit) {
+    return;
+  }
   didPatchMultiselectSubmit = true;
 
   const multiselectPromptConstructor = require(PROMPTS_MULTISELECT_MODULE_PATH);
   const originalSubmit = multiselectPromptConstructor.prototype.submit;
 
-  multiselectPromptConstructor.prototype.submit = function (
+  multiselectPromptConstructor.prototype.submit = function submit(
     this: PromptMultiselectContext,
   ): void {
     if (shouldAutoSelectCurrentChoice(this.value, this.cursor)) {
@@ -87,14 +94,16 @@ interface SelectPromptInstance {
 }
 
 const patchSelectBanner = (): void => {
-  if (didPatchSelectBanner) return;
+  if (didPatchSelectBanner) {
+    return;
+  }
   didPatchSelectBanner = true;
 
   const selectConstructor = require(PROMPTS_SELECT_MODULE_PATH);
   const promptsClear = require("prompts/lib/util/clear");
   const originalRender = selectConstructor.prototype.render;
 
-  selectConstructor.prototype.render = function (
+  selectConstructor.prototype.render = function render(
     this: SelectPromptInstance,
   ): void {
     originalRender.call(this);

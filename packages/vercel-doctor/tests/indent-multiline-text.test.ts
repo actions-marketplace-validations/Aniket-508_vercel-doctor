@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { indentMultilineText } from "../src/utils/indent-multiline-text.js";
 
-describe("indentMultilineText", () => {
+describe(indentMultilineText, () => {
   it("adds the prefix to a single line", () => {
     const indentedText = indentMultilineText(
       "Error: Something happened",

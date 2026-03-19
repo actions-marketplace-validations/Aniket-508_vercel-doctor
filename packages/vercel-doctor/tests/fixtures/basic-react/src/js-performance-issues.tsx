@@ -4,12 +4,12 @@ const CombineIterationsComponent = ({ items }: { items: number[] }) => {
 };
 
 const SpreadSortComponent = ({ items }: { items: number[] }) => {
-  const sorted = [...items].sort((first, second) => first - second);
+  const sorted = [...items].toSorted((first, second) => first - second);
   return <div>{sorted.join(",")}</div>;
 };
 
 const MinViaSortComponent = ({ items }: { items: number[] }) => {
-  const smallest = items.sort((first, second) => first - second)[0];
+  const smallest = items.toSorted((first, second) => first - second)[0];
   return <div>{smallest}</div>;
 };
 
@@ -24,10 +24,10 @@ const RegexpInLoopComponent = ({ items }: { items: string[] }) => {
 };
 
 const SetMapLookupsComponent = ({ items }: { items: string[] }) => {
-  const allowed = ["a", "b", "c"];
+  const allowed = new Set(["a", "b", "c"]);
   const filtered: string[] = [];
   for (const item of items) {
-    if (allowed.includes(item)) {
+    if (allowed.has(item)) {
       filtered.push(item);
     }
   }
@@ -39,15 +39,23 @@ const BatchDomCssComponent = () => {
     element.style.color = "red";
     element.style.backgroundColor = "blue";
   };
-  return <button onClick={(event) => applyStyles(event.currentTarget)}>Style</button>;
+  return (
+    <button onClick={(event) => applyStyles(event.currentTarget)}>Style</button>
+  );
 };
 
-const IndexMapsComponent = ({ users }: { users: { id: string; name: string }[] }) => {
+const IndexMapsComponent = ({
+  users,
+}: {
+  users: { id: string; name: string }[];
+}) => {
   const ids = ["1", "2", "3"];
   const found: string[] = [];
   for (const id of ids) {
     const user = users.find((innerUser) => innerUser.id === id);
-    if (user) found.push(user.name);
+    if (user) {
+      found.push(user.name);
+    }
   }
   return <div>{found.join(",")}</div>;
 };
@@ -81,7 +89,7 @@ const SequentialAwaitComponent = () => {
     const users = await fetch("/api/users");
     const posts = await fetch("/api/posts");
     const comments = await fetch("/api/comments");
-    return { users, posts, comments };
+    return { comments, posts, users };
   };
   return <button onClick={loadData}>Load</button>;
 };

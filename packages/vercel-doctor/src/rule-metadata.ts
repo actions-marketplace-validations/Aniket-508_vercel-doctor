@@ -1,25 +1,36 @@
-import { getQualifiedPluginRuleId, PLUGIN_RULE_IDS, VERCEL_RULE_IDS } from "./rule-ids.js";
-import type { PluginRuleMetadata, RuleCategoryDetails, RuleFixStrategy } from "./types.js";
+import {
+  getQualifiedPluginRuleId,
+  PLUGIN_RULE_IDS,
+  VERCEL_RULE_IDS,
+} from "./rule-ids.js";
+import type {
+  PluginRuleMetadata,
+  RuleCategoryDetails,
+  RuleFixStrategy,
+} from "./types.js";
 
 export const RULE_CATEGORY_NAMES = {
-  VERCEL: "Vercel",
-  PERFORMANCE: "Performance",
-  DEAD_CODE: "Dead Code",
-  NEXTJS: "Next.js",
-  FUNCTION_DURATION: "Function Duration",
-  INVOCATIONS: "Invocations",
-  IMAGE_OPTIMIZATION: "Image Optimization",
   CACHING: "Caching",
+  DEAD_CODE: "Dead Code",
+  FUNCTION_DURATION: "Function Duration",
+  IMAGE_OPTIMIZATION: "Image Optimization",
+  INVOCATIONS: "Invocations",
+  NEXTJS: "Next.js",
   OTHER: "Other",
+  PERFORMANCE: "Performance",
+  VERCEL: "Vercel",
 };
 
 export const RULE_CATEGORY_DETAILS: Record<string, RuleCategoryDetails> = {
   [RULE_CATEGORY_NAMES.VERCEL]: {
-    description: "Configuration and deployment patterns that affect Vercel billing and performance",
-    impact: "May increase function execution time, bandwidth costs, or build times",
+    description:
+      "Configuration and deployment patterns that affect Vercel billing and performance",
+    impact:
+      "May increase function execution time, bandwidth costs, or build times",
   },
   [RULE_CATEGORY_NAMES.PERFORMANCE]: {
-    description: "JavaScript/TypeScript code patterns that impact runtime performance",
+    description:
+      "JavaScript/TypeScript code patterns that impact runtime performance",
     impact: "May increase function duration and compute costs",
   },
   [RULE_CATEGORY_NAMES.DEAD_CODE]: {
@@ -27,7 +38,8 @@ export const RULE_CATEGORY_DETAILS: Record<string, RuleCategoryDetails> = {
     impact: "Increases bundle size and cold start times",
   },
   [RULE_CATEGORY_NAMES.NEXTJS]: {
-    description: "Next.js-specific patterns affecting caching, rendering, and optimization",
+    description:
+      "Next.js-specific patterns affecting caching, rendering, and optimization",
     impact: "May reduce cache hit rates and increase server load",
   },
   [RULE_CATEGORY_NAMES.FUNCTION_DURATION]: {
@@ -35,15 +47,18 @@ export const RULE_CATEGORY_DETAILS: Record<string, RuleCategoryDetails> = {
     impact: "Increases billed execution time and can slow user responses",
   },
   [RULE_CATEGORY_NAMES.INVOCATIONS]: {
-    description: "Patterns that trigger more server work or unnecessary requests",
+    description:
+      "Patterns that trigger more server work or unnecessary requests",
     impact: "Increases invocation volume and repeated compute costs",
   },
   [RULE_CATEGORY_NAMES.IMAGE_OPTIMIZATION]: {
-    description: "Image delivery patterns that affect optimization workload and bandwidth",
+    description:
+      "Image delivery patterns that affect optimization workload and bandwidth",
     impact: "Can increase image processing usage and asset transfer costs",
   },
   [RULE_CATEGORY_NAMES.CACHING]: {
-    description: "Caching and request semantics that affect reuse and cache hit rate",
+    description:
+      "Caching and request semantics that affect reuse and cache hit rate",
     impact: "Reduces cache effectiveness and increases uncached origin work",
   },
   [RULE_CATEGORY_NAMES.OTHER]: {
@@ -85,164 +100,199 @@ export const PLUGIN_RULE_METADATA: Record<string, PluginRuleMetadata> = {
   },
 };
 
-const createQualifiedPluginRuleMetadata = (): Record<string, PluginRuleMetadata> => {
+const createQualifiedPluginRuleMetadata = (): Record<
+  string,
+  PluginRuleMetadata
+> => {
   const qualifiedPluginRuleMetadata: Record<string, PluginRuleMetadata> = {};
 
   for (const [ruleId, ruleMetadata] of Object.entries(PLUGIN_RULE_METADATA)) {
-    qualifiedPluginRuleMetadata[getQualifiedPluginRuleId(ruleId)] = ruleMetadata;
+    qualifiedPluginRuleMetadata[getQualifiedPluginRuleId(ruleId)] =
+      ruleMetadata;
   }
 
   return qualifiedPluginRuleMetadata;
 };
 
-export const QUALIFIED_PLUGIN_RULE_METADATA = createQualifiedPluginRuleMetadata();
+export const QUALIFIED_PLUGIN_RULE_METADATA =
+  createQualifiedPluginRuleMetadata();
 
 export const RULE_FIX_STRATEGIES: Record<string, RuleFixStrategy> = {
   [VERCEL_RULE_IDS.NO_FORCE_DYNAMIC]: {
-    title: "Replace force-dynamic with revalidate",
+    after:
+      "export const revalidate = 3600 // or use cache: 'force-cache' in fetch",
     before: "export const dynamic = 'force-dynamic'",
-    after: "export const revalidate = 3600 // or use cache: 'force-cache' in fetch",
     explanation:
       "Use incremental static regeneration (ISR) or cacheable fetches instead of forcing dynamic rendering",
+    title: "Replace force-dynamic with revalidate",
   },
   [VERCEL_RULE_IDS.NO_NO_STORE_FETCH]: {
-    title: "Add caching to fetch calls",
-    before: "fetch(url, { cache: 'no-store' })",
     after: "fetch(url, { cache: 'force-cache', next: { revalidate: 3600 } })",
+    before: "fetch(url, { cache: 'no-store' })",
     explanation:
       "Use cacheable fetches with revalidation instead of no-store for data that doesn't need to be real-time",
+    title: "Add caching to fetch calls",
   },
   [VERCEL_RULE_IDS.PREFER_GET_STATIC_PROPS]: {
-    title: "Convert getServerSideProps to getStaticProps",
+    after:
+      "export async function getStaticProps() { ... } // Add revalidate for ISR",
     before: "export async function getServerSideProps() { ... }",
-    after: "export async function getStaticProps() { ... } // Add revalidate for ISR",
-    explanation: "Use static generation with ISR instead of server-side rendering when possible",
+    explanation:
+      "Use static generation with ISR instead of server-side rendering when possible",
+    title: "Convert getServerSideProps to getStaticProps",
   },
   [VERCEL_RULE_IDS.GET_STATIC_PROPS_CONSIDER_ISR]: {
-    title: "Add ISR to getStaticProps",
+    after:
+      "export async function getStaticProps() { return { props: {}, revalidate: 3600 } }",
     before: "export async function getStaticProps() { return { props: {} } }",
-    after: "export async function getStaticProps() { return { props: {}, revalidate: 3600 } }",
-    explanation: "Add revalidation to enable ISR and reduce build times for large sites",
+    explanation:
+      "Add revalidation to enable ISR and reduce build times for large sites",
+    title: "Add ISR to getStaticProps",
   },
   [VERCEL_RULE_IDS.EDGE_HEAVY_IMPORT]: {
-    title: "Move heavy imports to Node runtime",
-    before: "import { heavy } from 'heavy-module' // in edge runtime",
     after: "// Move to Node.js runtime handler or use dynamic import",
+    before: "import { heavy } from 'heavy-module' // in edge runtime",
     explanation: "Heavy modules should run in Node.js runtime, not edge",
+    title: "Move heavy imports to Node runtime",
   },
   [VERCEL_RULE_IDS.EDGE_SEQUENTIAL_AWAIT]: {
-    title: "Parallelize independent awaits",
-    before: "const a = await fetchA();\nconst b = await fetchB();",
     after: "const [a, b] = await Promise.all([fetchA(), fetchB()]);",
-    explanation: "Use Promise.all() to run independent async operations in parallel",
+    before: "const a = await fetchA();\nconst b = await fetchB();",
+    explanation:
+      "Use Promise.all() to run independent async operations in parallel",
+    title: "Parallelize independent awaits",
   },
   [VERCEL_RULE_IDS.MISSING_CACHE_POLICY]: {
-    title: "Add Cache-Control headers",
+    after:
+      "return Response.json(data, { headers: { 'Cache-Control': 's-maxage=3600' } })",
     before: "return Response.json(data)",
-    after: "return Response.json(data, { headers: { 'Cache-Control': 's-maxage=3600' } })",
-    explanation: "Add explicit cache headers to enable CDN caching for API responses",
+    explanation:
+      "Add explicit cache headers to enable CDN caching for API responses",
+    title: "Add Cache-Control headers",
   },
   [VERCEL_RULE_IDS.IMAGE_GLOBAL_UNOPTIMIZED]: {
-    title: "Enable image optimization",
-    before: "images: { unoptimized: true }",
     after: "images: { remotePatterns: [{ hostname: 'example.com' }] }",
-    explanation: "Remove unoptimized flag and configure domains for Vercel Image Optimization",
+    before: "images: { unoptimized: true }",
+    explanation:
+      "Remove unoptimized flag and configure domains for Vercel Image Optimization",
+    title: "Enable image optimization",
   },
   [VERCEL_RULE_IDS.IMAGE_REMOTE_PATTERN_TOO_BROAD]: {
-    title: "Restrict remotePatterns pathname",
-    before: "{ hostname: 'cdn.example.com', pathname: '/**' }",
     after: "{ hostname: 'cdn.example.com', pathname: '/images/**' }",
-    explanation: "Use specific path patterns instead of broad wildcards to prevent abuse",
+    before: "{ hostname: 'cdn.example.com', pathname: '/**' }",
+    explanation:
+      "Use specific path patterns instead of broad wildcards to prevent abuse",
+    title: "Restrict remotePatterns pathname",
   },
   [VERCEL_RULE_IDS.IMAGE_SVG_WITHOUT_UNOPTIMIZED]: {
-    title: "Add unoptimized for SVG",
-    before: "<Image src='/icon.svg' width={32} height={32} />",
     after: "<Image src='/icon.svg' width={32} height={32} unoptimized />",
-    explanation: "SVGs don't benefit from image optimization, so mark them as unoptimized",
+    before: "<Image src='/icon.svg' width={32} height={32} />",
+    explanation:
+      "SVGs don't benefit from image optimization, so mark them as unoptimized",
+    title: "Add unoptimized for SVG",
   },
   [VERCEL_RULE_IDS.SUGGEST_TURBOPACK_BUILD_CACHE]: {
-    title: "Enable Turbopack build cache",
-    before: "experimental: { ... }",
     after: "experimental: { turbopackFileSystemCacheForBuild: true }",
-    explanation: "Enable Turbopack file system cache to reduce build times (Next.js 16+)",
+    before: "experimental: { ... }",
+    explanation:
+      "Enable Turbopack file system cache to reduce build times (Next.js 16+)",
+    title: "Enable Turbopack build cache",
   },
   [VERCEL_RULE_IDS.SEQUENTIAL_DATABASE_AWAIT]: {
-    title: "Parallelize database queries",
-    before: "const user = await db.user.findUnique();\nconst posts = await db.post.findMany();",
     after:
       "const [user, posts] = await Promise.all([\n  db.user.findUnique(),\n  db.post.findMany()\n]);",
-    explanation: "Use Promise.all() for independent database queries to reduce function duration",
+    before:
+      "const user = await db.user.findUnique();\nconst posts = await db.post.findMany();",
+    explanation:
+      "Use Promise.all() for independent database queries to reduce function duration",
+    title: "Parallelize database queries",
   },
   [VERCEL_RULE_IDS.CONSIDER_BUN_RUNTIME]: {
-    title: "Switch to Bun runtime",
-    before: "// Using Node.js",
     after: "{ 'packageManager': 'bun@1.x' } // in package.json",
-    explanation: "Configure Bun runtime in package.json for faster installs and builds",
+    before: "// Using Node.js",
+    explanation:
+      "Configure Bun runtime in package.json for faster installs and builds",
+    title: "Switch to Bun runtime",
   },
   [VERCEL_RULE_IDS.AVOID_PLATFORM_CRON]: {
-    title: "Move cron to GitHub Actions or Cloudflare",
-    before: "{ 'crons': [{ 'path': '/api/cron', 'schedule': '0 0 * * *' }] }",
     after: "// Use GitHub Actions scheduled workflows instead",
-    explanation: "Move scheduled jobs to external services to reduce Vercel function invocations",
+    before: "{ 'crons': [{ 'path': '/api/cron', 'schedule': '0 0 * * *' }] }",
+    explanation:
+      "Move scheduled jobs to external services to reduce Vercel function invocations",
+    title: "Move cron to GitHub Actions or Cloudflare",
   },
   [VERCEL_RULE_IDS.CONSIDER_FLUID_COMPUTE]: {
-    title: "Evaluate Fluid Compute",
+    after:
+      "// Enable Fluid Compute in project settings for variable latency workloads",
     before: "// Standard Node.js runtime",
-    after: "// Enable Fluid Compute in project settings for variable latency workloads",
-    explanation: "Consider Fluid Compute for workloads with variable latency or bursty traffic",
+    explanation:
+      "Consider Fluid Compute for workloads with variable latency or bursty traffic",
+    title: "Evaluate Fluid Compute",
   },
   [VERCEL_RULE_IDS.LARGE_STATIC_ASSET]: {
-    title: "Move assets to external CDN",
-    before: "// Large files in /public folder",
     after: "// Upload to R2/S3 and serve via CDN",
-    explanation: "Move large static assets to external storage to reduce bandwidth costs",
+    before: "// Large files in /public folder",
+    explanation:
+      "Move large static assets to external storage to reduce bandwidth costs",
+    title: "Move assets to external CDN",
   },
   [VERCEL_RULE_IDS.SUGGEST_DEPLOY_ARCHIVE]: {
-    title: "Use archive deployment",
-    before: "vercel deploy",
     after: "vercel deploy --archive=tgz",
-    explanation: "Use archive deployment for large projects to avoid rate limits",
+    before: "vercel deploy",
+    explanation:
+      "Use archive deployment for large projects to avoid rate limits",
+    title: "Use archive deployment",
   },
   [VERCEL_RULE_IDS.MISSING_FUNCTION_TIMEOUT]: {
-    title: "Add maxDuration to function config",
-    before: `"functions": { "api/*.ts": { "runtime": "nodejs18.x" } }`,
     after: `"functions": { "api/*.ts": { "runtime": "nodejs18.x", "maxDuration": 30 } }`,
-    explanation: "Add maxDuration (in seconds) to prevent runaway functions and control costs",
+    before: `"functions": { "api/*.ts": { "runtime": "nodejs18.x" } }`,
+    explanation:
+      "Add maxDuration (in seconds) to prevent runaway functions and control costs",
+    title: "Add maxDuration to function config",
   },
   [PLUGIN_RULE_IDS.ASYNC_PARALLEL]: {
+    after:
+      "const [a, b, c] = await Promise.all([fetchA(), fetchB(), fetchC()]);",
+    before:
+      "const a = await fetchA();\nconst b = await fetchB();\nconst c = await fetchC();",
+    explanation:
+      "Run independent async operations in parallel to reduce total execution time",
     title: "Parallelize sequential awaits",
-    before: "const a = await fetchA();\nconst b = await fetchB();\nconst c = await fetchC();",
-    after: "const [a, b, c] = await Promise.all([fetchA(), fetchB(), fetchC()]);",
-    explanation: "Run independent async operations in parallel to reduce total execution time",
   },
   [PLUGIN_RULE_IDS.NEXTJS_NO_CLIENT_FETCH_FOR_SERVER_DATA]: {
-    title: "Move fetch to server component",
-    before: "'use client'\nuseEffect(() => { fetch('/api/data') }, [])",
     after: "// Server component\nconst data = await fetch('/api/data')",
-    explanation: "Fetch data in server components instead of client-side useEffect",
+    before: "'use client'\nuseEffect(() => { fetch('/api/data') }, [])",
+    explanation:
+      "Fetch data in server components instead of client-side useEffect",
+    title: "Move fetch to server component",
   },
   [PLUGIN_RULE_IDS.NEXTJS_LINK_PREFETCH_DEFAULT]: {
-    title: "Disable default prefetch",
-    before: "<Link href='/page'>Page</Link>",
     after: "<Link href='/page' prefetch={false}>Page</Link>",
-    explanation: "Disable prefetch for non-critical links to reduce function invocations",
+    before: "<Link href='/page'>Page</Link>",
+    explanation:
+      "Disable prefetch for non-critical links to reduce function invocations",
+    title: "Disable default prefetch",
   },
   [PLUGIN_RULE_IDS.NEXTJS_IMAGE_MISSING_SIZES]: {
-    title: "Add sizes prop to Image",
-    before: "<Image src='...' fill />",
     after: "<Image src='...' fill sizes='(max-width: 768px) 100vw, 50vw' />",
-    explanation: "Add sizes attribute for responsive images to optimize download size",
+    before: "<Image src='...' fill />",
+    explanation:
+      "Add sizes attribute for responsive images to optimize download size",
+    title: "Add sizes prop to Image",
   },
   [PLUGIN_RULE_IDS.NEXTJS_NO_SIDE_EFFECT_IN_GET_HANDLER]: {
+    after:
+      "export async function POST() { await db.update(); return Response.json({}) }",
+    before:
+      "export async function GET() { await db.update(); return Response.json({}) }",
+    explanation:
+      "Use POST for mutations to prevent CSRF and unintended prefetch triggers",
     title: "Move side effects to POST handler",
-    before: "export async function GET() { await db.update(); return Response.json({}) }",
-    after: "export async function POST() { await db.update(); return Response.json({}) }",
-    explanation: "Use POST for mutations to prevent CSRF and unintended prefetch triggers",
   },
   [PLUGIN_RULE_IDS.SERVER_AFTER_NONBLOCKING]: {
-    title: "Wrap logging in after()",
-    before: "console.log('done'); analytics.track(event);",
     after: "after(() => { console.log('done'); analytics.track(event); });",
+    before: "console.log('done'); analytics.track(event);",
     explanation: "Use after() to run non-critical work after response is sent",
+    title: "Wrap logging in after()",
   },
 };
