@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+
 import { NpmIcon, YarnIcon, PnpmIcon, BunIcon } from "@/components/icons";
 
 export interface PackageManager {

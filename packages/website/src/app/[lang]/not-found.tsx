@@ -1,14 +1,20 @@
 "use client";
 
+import { BookOpenIcon, HomeIcon } from "lucide-react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
+import { EmptyContent } from "@/components/ui/empty";
 import { ROUTES } from "@/constants/routes";
 import { withLocalePrefix } from "@/i18n/navigation";
 import { getTranslation } from "@/translations";
-import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
-import { EmptyContent } from "@/components/ui/empty";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { BookOpenIcon, HomeIcon } from "lucide-react";
 
 const NotFoundPage = () => {
   const { lang } = useParams<{ lang: string }>();
@@ -17,7 +23,7 @@ const NotFoundPage = () => {
   return (
     <Empty>
       <EmptyHeader>
-        <EmptyTitle className="font-black font-mono text-8xl">
+        <EmptyTitle className="font-mono text-8xl font-black">
           {translation.notFound.heading}
         </EmptyTitle>
         <EmptyDescription className="text-nowrap">

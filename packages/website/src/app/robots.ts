@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+
 import { SITE } from "@/constants/site";
 
 const robots = (): MetadataRoute.Robots => ({

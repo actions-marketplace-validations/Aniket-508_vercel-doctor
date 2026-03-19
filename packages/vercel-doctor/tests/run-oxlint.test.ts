@@ -1,5 +1,7 @@
 import path from "node:path";
+
 import { describe, expect, it } from "vitest";
+
 import type { Diagnostic } from "../src/types.js";
 import { runOxlint } from "../src/utils/run-oxlint.js";
 
@@ -7,8 +9,10 @@ const FIXTURES_DIRECTORY = path.resolve(import.meta.dirname, "fixtures");
 const BASIC_REACT_DIRECTORY = path.join(FIXTURES_DIRECTORY, "basic-react");
 const NEXTJS_APP_DIRECTORY = path.join(FIXTURES_DIRECTORY, "nextjs-app");
 
-const findDiagnosticsByRule = (diagnostics: Diagnostic[], rule: string): Diagnostic[] =>
-  diagnostics.filter((diagnostic) => diagnostic.rule === rule);
+const findDiagnosticsByRule = (
+  diagnostics: Diagnostic[],
+  rule: string,
+): Diagnostic[] => diagnostics.filter((diagnostic) => diagnostic.rule === rule);
 
 interface RuleTestCase {
   fixture: string;
@@ -27,8 +31,10 @@ const describeRules = (
       it(`${ruleName} (${testCase.fixture} → ${testCase.ruleSource})`, () => {
         const issues = findDiagnosticsByRule(getDiagnostics(), ruleName);
         expect(issues.length).toBeGreaterThan(0);
-        if (testCase.severity) expect(issues[0].severity).toBe(testCase.severity);
-        if (testCase.category) expect(issues[0].category).toBe(testCase.category);
+        if (testCase.severity)
+          expect(issues[0].severity).toBe(testCase.severity);
+        if (testCase.category)
+          expect(issues[0].category).toBe(testCase.category);
       });
     }
   });
@@ -39,7 +45,11 @@ let nextjsDiagnostics: Diagnostic[];
 
 describe("runOxlint", () => {
   it("loads basic-react diagnostics", async () => {
-    basicReactDiagnostics = await runOxlint(BASIC_REACT_DIRECTORY, true, "unknown");
+    basicReactDiagnostics = await runOxlint(
+      BASIC_REACT_DIRECTORY,
+      true,
+      "unknown",
+    );
     expect(basicReactDiagnostics.length).toBeGreaterThan(0);
   });
 

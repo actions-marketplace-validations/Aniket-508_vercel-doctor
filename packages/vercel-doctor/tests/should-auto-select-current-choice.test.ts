@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { shouldAutoSelectCurrentChoice } from "../src/utils/should-auto-select-current-choice.js";
 
 describe("shouldAutoSelectCurrentChoice", () => {
@@ -30,13 +31,19 @@ describe("shouldAutoSelectCurrentChoice", () => {
   });
 
   it("returns false when all choices are disabled and nothing is selected", () => {
-    const result = shouldAutoSelectCurrentChoice([{ disabled: true }, { disabled: true }], 0);
+    const result = shouldAutoSelectCurrentChoice(
+      [{ disabled: true }, { disabled: true }],
+      0,
+    );
 
     expect(result).toBe(false);
   });
 
   it("returns false when cursor is out of bounds", () => {
-    const result = shouldAutoSelectCurrentChoice([{ selected: false }, { selected: false }], 5);
+    const result = shouldAutoSelectCurrentChoice(
+      [{ selected: false }, { selected: false }],
+      5,
+    );
 
     expect(result).toBe(false);
   });
@@ -54,7 +61,10 @@ describe("shouldAutoSelectCurrentChoice", () => {
   });
 
   it("returns false when cursor is negative", () => {
-    const result = shouldAutoSelectCurrentChoice([{ selected: false }, { selected: false }], -1);
+    const result = shouldAutoSelectCurrentChoice(
+      [{ selected: false }, { selected: false }],
+      -1,
+    );
 
     expect(result).toBe(false);
   });

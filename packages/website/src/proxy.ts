@@ -1,8 +1,11 @@
 import { createI18nMiddleware } from "fumadocs-core/i18n/middleware";
+
 import { i18n } from "@/i18n/config";
 
 export default createI18nMiddleware(i18n);
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|og|share|llms|install-skill|sitemap|.*\\..*).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|og|share|llms|install-skill|sitemap|.*\\..*).*)",
+  ],
 };

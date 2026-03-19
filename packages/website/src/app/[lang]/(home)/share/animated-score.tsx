@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
+import ScoreBar from "@/components/score-bar";
 import { PERFECT_SCORE } from "@/constants/score";
+import easeOutCubic from "@/utils/ease-out-cubic";
 import getScoreColorClass from "@/utils/get-score-color-class";
 import getScoreLabel from "@/utils/get-score-label";
-import easeOutCubic from "@/utils/ease-out-cubic";
-import ScoreBar from "@/components/score-bar";
 
 const SCORE_BAR_WIDTH = 30;
 const SCORE_FRAME_COUNT = 20;
@@ -20,7 +21,9 @@ const AnimatedScore = ({ targetScore }: { targetScore: number }) => {
 
     const animate = () => {
       if (cancelled || frame > SCORE_FRAME_COUNT) return;
-      setAnimatedScore(Math.round(easeOutCubic(frame / SCORE_FRAME_COUNT) * targetScore));
+      setAnimatedScore(
+        Math.round(easeOutCubic(frame / SCORE_FRAME_COUNT) * targetScore),
+      );
       frame++;
       setTimeout(animate, SCORE_FRAME_DELAY_MS);
     };

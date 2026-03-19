@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+
 import { afterAll, describe, expect, it, vi } from "vitest";
+
 import { scan } from "../src/scan.js";
 
 const FIXTURES_DIRECTORY = path.resolve(import.meta.dirname, "fixtures");
@@ -20,7 +22,9 @@ vi.mock("ora", () => ({
   }),
 }));
 
-const noReactTempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "vercel-doctor-test-"));
+const noReactTempDirectory = fs.mkdtempSync(
+  path.join(os.tmpdir(), "vercel-doctor-test-"),
+);
 fs.writeFileSync(
   path.join(noReactTempDirectory, "package.json"),
   JSON.stringify({ name: "no-react", dependencies: {} }),
@@ -46,9 +50,9 @@ describe("scan", () => {
   it("throws when React dependency is missing", async () => {
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     try {
-      await expect(scan(noReactTempDirectory, { lint: true, deadCode: false })).rejects.toThrow(
-        "No React dependency found",
-      );
+      await expect(
+        scan(noReactTempDirectory, { lint: true, deadCode: false }),
+      ).rejects.toThrow("No React dependency found");
     } finally {
       consoleSpy.mockRestore();
     }

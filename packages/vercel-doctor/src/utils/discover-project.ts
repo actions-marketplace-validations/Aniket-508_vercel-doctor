@@ -1,7 +1,11 @@
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { spawnSync } from "node:child_process";
-import { GIT_LS_FILES_MAX_BUFFER_BYTES, SOURCE_FILE_PATTERN } from "../constants.js";
+
+import {
+  GIT_LS_FILES_MAX_BUFFER_BYTES,
+  SOURCE_FILE_PATTERN,
+} from "../constants.js";
 import type {
   DependencyInfo,
   Framework,
@@ -33,11 +37,15 @@ export const formatFrameworkName = (framework: Framework): string =>
   FRAMEWORK_DISPLAY_NAMES[framework];
 
 const countSourceFiles = (rootDirectory: string): number => {
-  const result = spawnSync("git", ["ls-files", "--cached", "--others", "--exclude-standard"], {
-    cwd: rootDirectory,
-    encoding: "utf-8",
-    maxBuffer: GIT_LS_FILES_MAX_BUFFER_BYTES,
-  });
+  const result = spawnSync(
+    "git",
+    ["ls-files", "--cached", "--others", "--exclude-standard"],
+    {
+      cwd: rootDirectory,
+      encoding: "utf-8",
+      maxBuffer: GIT_LS_FILES_MAX_BUFFER_BYTES,
+    },
+  );
 
   if (result.error || result.status !== 0) {
     return 0;
@@ -45,17 +53,23 @@ const countSourceFiles = (rootDirectory: string): number => {
 
   return result.stdout
     .split("\n")
-    .filter((filePath) => filePath.length > 0 && SOURCE_FILE_PATTERN.test(filePath)).length;
+    .filter(
+      (filePath) => filePath.length > 0 && SOURCE_FILE_PATTERN.test(filePath),
+    ).length;
 };
 
-const collectAllDependencies = (packageJson: PackageJson): Record<string, string> => ({
+const collectAllDependencies = (
+  packageJson: PackageJson,
+): Record<string, string> => ({
   ...packageJson.peerDependencies,
   ...packageJson.dependencies,
   ...packageJson.devDependencies,
 });
 
 const detectFramework = (dependencies: Record<string, string>): Framework => {
-  for (const [packageName, frameworkName] of Object.entries(FRAMEWORK_PACKAGES)) {
+  for (const [packageName, frameworkName] of Object.entries(
+    FRAMEWORK_PACKAGES,
+  )) {
     if (dependencies[packageName]) {
       return frameworkName;
     }
@@ -90,7 +104,11 @@ const parsePnpmWorkspacePatterns = (rootDirectory: string): string[] => {
     }
     if (isInsidePackagesBlock && trimmed.startsWith("-")) {
       patterns.push(trimmed.replace(/^-\s*/, "").replace(/["']/g, ""));
-    } else if (isInsidePackagesBlock && trimmed.length > 0 && !trimmed.startsWith("#")) {
+    } else if (
+      isInsidePackagesBlock &&
+      trimmed.length > 0 &&
+      !trimmed.startsWith("#")
+    ) {
       isInsidePackagesBlock = false;
     }
   }
@@ -98,7 +116,10 @@ const parsePnpmWorkspacePatterns = (rootDirectory: string): string[] => {
   return patterns;
 };
 
-const getWorkspacePatterns = (rootDirectory: string, packageJson: PackageJson): string[] => {
+const getWorkspacePatterns = (
+  rootDirectory: string,
+  packageJson: PackageJson,
+): string[] => {
   const pnpmPatterns = parsePnpmWorkspacePatterns(rootDirectory);
   if (pnpmPatterns.length > 0) return pnpmPatterns;
 
@@ -113,20 +134,32 @@ const getWorkspacePatterns = (rootDirectory: string, packageJson: PackageJson): 
   return [];
 };
 
-const resolveWorkspaceDirectories = (rootDirectory: string, pattern: string): string[] => {
+const resolveWorkspaceDirectories = (
+  rootDirectory: string,
+  pattern: string,
+): string[] => {
   const cleanPattern = pattern.replace(/["']/g, "").replace(/\/\*\*$/, "/*");
 
   if (!cleanPattern.includes("*")) {
     const directoryPath = path.join(rootDirectory, cleanPattern);
-    if (fs.existsSync(directoryPath) && fs.existsSync(path.join(directoryPath, "package.json"))) {
+    if (
+      fs.existsSync(directoryPath) &&
+      fs.existsSync(path.join(directoryPath, "package.json"))
+    ) {
       return [directoryPath];
     }
     return [];
   }
 
-  const baseDirectory = path.join(rootDirectory, cleanPattern.slice(0, cleanPattern.indexOf("*")));
+  const baseDirectory = path.join(
+    rootDirectory,
+    cleanPattern.slice(0, cleanPattern.indexOf("*")),
+  );
 
-  if (!fs.existsSync(baseDirectory) || !fs.statSync(baseDirectory).isDirectory()) {
+  if (
+    !fs.existsSync(baseDirectory) ||
+    !fs.statSync(baseDirectory).isDirectory()
+  ) {
     return [];
   }
 
@@ -135,7 +168,8 @@ const resolveWorkspaceDirectories = (rootDirectory: string, pattern: string): st
     .map((entry) => path.join(baseDirectory, entry))
     .filter(
       (entryPath) =>
-        fs.statSync(entryPath).isDirectory() && fs.existsSync(path.join(entryPath, "package.json")),
+        fs.statSync(entryPath).isDirectory() &&
+        fs.existsSync(path.join(entryPath, "package.json")),
     );
 };
 
@@ -144,7 +178,10 @@ const isMonorepoRoot = (directory: string): boolean => {
   const packageJsonPath = path.join(directory, "package.json");
   if (!fs.existsSync(packageJsonPath)) return false;
   const packageJson = readPackageJson(packageJsonPath);
-  return Array.isArray(packageJson.workspaces) || Boolean(packageJson.workspaces?.packages);
+  return (
+    Array.isArray(packageJson.workspaces) ||
+    Boolean(packageJson.workspaces?.packages)
+  );
 };
 
 const findMonorepoRoot = (startDirectory: string): string | null => {
@@ -158,7 +195,9 @@ const findMonorepoRoot = (startDirectory: string): string | null => {
   return null;
 };
 
-const findDependencyInfoFromMonorepoRoot = (directory: string): DependencyInfo => {
+const findDependencyInfoFromMonorepoRoot = (
+  directory: string,
+): DependencyInfo => {
   const monorepoRoot = findMonorepoRoot(directory);
   if (!monorepoRoot) {
     return {
@@ -169,19 +208,28 @@ const findDependencyInfoFromMonorepoRoot = (directory: string): DependencyInfo =
     };
   }
 
-  const rootPackageJson = readPackageJson(path.join(monorepoRoot, "package.json"));
+  const rootPackageJson = readPackageJson(
+    path.join(monorepoRoot, "package.json"),
+  );
   const rootInfo = extractDependencyInfo(rootPackageJson);
   const workspaceInfo = findReactInWorkspaces(monorepoRoot, rootPackageJson);
 
   return {
     reactVersion: rootInfo.reactVersion ?? workspaceInfo.reactVersion,
-    framework: rootInfo.framework !== "unknown" ? rootInfo.framework : workspaceInfo.framework,
+    framework:
+      rootInfo.framework !== "unknown"
+        ? rootInfo.framework
+        : workspaceInfo.framework,
     nextVersion: rootInfo.nextVersion ?? workspaceInfo.nextVersion,
-    nextMajorVersion: rootInfo.nextMajorVersion ?? workspaceInfo.nextMajorVersion,
+    nextMajorVersion:
+      rootInfo.nextMajorVersion ?? workspaceInfo.nextMajorVersion,
   };
 };
 
-const findReactInWorkspaces = (rootDirectory: string, packageJson: PackageJson): DependencyInfo => {
+const findReactInWorkspaces = (
+  rootDirectory: string,
+  packageJson: PackageJson,
+): DependencyInfo => {
   const patterns = getWorkspacePatterns(rootDirectory, packageJson);
   const result: DependencyInfo = {
     reactVersion: null,
@@ -194,7 +242,9 @@ const findReactInWorkspaces = (rootDirectory: string, packageJson: PackageJson):
     const directories = resolveWorkspaceDirectories(rootDirectory, pattern);
 
     for (const workspaceDirectory of directories) {
-      const workspacePackageJson = readPackageJson(path.join(workspaceDirectory, "package.json"));
+      const workspacePackageJson = readPackageJson(
+        path.join(workspaceDirectory, "package.json"),
+      );
       const info = extractDependencyInfo(workspacePackageJson);
 
       if (info.reactVersion && !result.reactVersion) {
@@ -231,14 +281,24 @@ const hasReactDependency = (packageJson: PackageJson): boolean => {
   );
 };
 
-export const discoverReactSubprojects = (rootDirectory: string): WorkspacePackage[] => {
-  if (!fs.existsSync(rootDirectory) || !fs.statSync(rootDirectory).isDirectory()) return [];
+export const discoverReactSubprojects = (
+  rootDirectory: string,
+): WorkspacePackage[] => {
+  if (
+    !fs.existsSync(rootDirectory) ||
+    !fs.statSync(rootDirectory).isDirectory()
+  )
+    return [];
 
   const entries = fs.readdirSync(rootDirectory, { withFileTypes: true });
   const packages: WorkspacePackage[] = [];
 
   for (const entry of entries) {
-    if (!entry.isDirectory() || entry.name.startsWith(".") || entry.name === "node_modules") {
+    if (
+      !entry.isDirectory() ||
+      entry.name.startsWith(".") ||
+      entry.name === "node_modules"
+    ) {
       continue;
     }
 
@@ -256,7 +316,9 @@ export const discoverReactSubprojects = (rootDirectory: string): WorkspacePackag
   return packages;
 };
 
-export const listWorkspacePackages = (rootDirectory: string): WorkspacePackage[] => {
+export const listWorkspacePackages = (
+  rootDirectory: string,
+): WorkspacePackage[] => {
   const packageJsonPath = path.join(rootDirectory, "package.json");
   if (!fs.existsSync(packageJsonPath)) return [];
 
@@ -269,11 +331,14 @@ export const listWorkspacePackages = (rootDirectory: string): WorkspacePackage[]
   for (const pattern of patterns) {
     const directories = resolveWorkspaceDirectories(rootDirectory, pattern);
     for (const workspaceDirectory of directories) {
-      const workspacePackageJson = readPackageJson(path.join(workspaceDirectory, "package.json"));
+      const workspacePackageJson = readPackageJson(
+        path.join(workspaceDirectory, "package.json"),
+      );
 
       if (!hasReactDependency(workspacePackageJson)) continue;
 
-      const name = workspacePackageJson.name ?? path.basename(workspaceDirectory);
+      const name =
+        workspacePackageJson.name ?? path.basename(workspaceDirectory);
       packages.push({ name, directory: workspaceDirectory });
     }
   }
@@ -291,7 +356,12 @@ export const discoverProject = (directory: string): ProjectInfo => {
   let { reactVersion, framework, nextVersion, nextMajorVersion } =
     extractDependencyInfo(packageJson);
 
-  if (!reactVersion || framework === "unknown" || !nextVersion || nextMajorVersion === null) {
+  if (
+    !reactVersion ||
+    framework === "unknown" ||
+    !nextVersion ||
+    nextMajorVersion === null
+  ) {
     const workspaceInfo = findReactInWorkspaces(directory, packageJson);
     if (!reactVersion && workspaceInfo.reactVersion) {
       reactVersion = workspaceInfo.reactVersion;
@@ -308,7 +378,10 @@ export const discoverProject = (directory: string): ProjectInfo => {
   }
 
   if (
-    (!reactVersion || framework === "unknown" || !nextVersion || nextMajorVersion === null) &&
+    (!reactVersion ||
+      framework === "unknown" ||
+      !nextVersion ||
+      nextMajorVersion === null) &&
     !isMonorepoRoot(directory)
   ) {
     const monorepoInfo = findDependencyInfoFromMonorepoRoot(directory);

@@ -1,4 +1,5 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+
 import {
   BACKGROUND_COLOR,
   DIAGNOSTICS,
@@ -50,24 +51,35 @@ export const AgentHandoff = () => {
     },
   );
 
-  const allIssuesShown = frame >= ISSUES_APPEAR_FRAME + DIAGNOSTICS.length * ISSUES_INTERVAL_FRAMES;
+  const allIssuesShown =
+    frame >= ISSUES_APPEAR_FRAME + DIAGNOSTICS.length * ISSUES_INTERVAL_FRAMES;
 
-  const spinnerChar = SPINNER_CHARS[Math.floor(frame / SPINNER_SPEED) % SPINNER_CHARS.length];
+  const spinnerChar =
+    SPINNER_CHARS[Math.floor(frame / SPINNER_SPEED) % SPINNER_CHARS.length];
 
   const fixedCount = Math.max(
     0,
-    Math.min(DIAGNOSTICS.length, Math.floor((frame - FIX_START_FRAME) / FIX_INTERVAL_FRAMES) + 1),
+    Math.min(
+      DIAGNOSTICS.length,
+      Math.floor((frame - FIX_START_FRAME) / FIX_INTERVAL_FRAMES) + 1,
+    ),
   );
   const isFixing = frame >= FIX_START_FRAME;
   const allFixed = fixedCount >= DIAGNOSTICS.length;
 
-  const allFixedFrame = FIX_START_FRAME + DIAGNOSTICS.length * FIX_INTERVAL_FRAMES;
+  const allFixedFrame =
+    FIX_START_FRAME + DIAGNOSTICS.length * FIX_INTERVAL_FRAMES;
 
-  const doneOpacity = interpolate(frame, [allFixedFrame, allFixedFrame + 10], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
+  const doneOpacity = interpolate(
+    frame,
+    [allFixedFrame, allFixedFrame + 10],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.cubic),
+    },
+  );
 
   return (
     <AbsoluteFill
@@ -147,21 +159,32 @@ export const AgentHandoff = () => {
 
       <div>
         {DIAGNOSTICS.map((diagnostic, index) => {
-          const appearFrame = ISSUES_APPEAR_FRAME + index * ISSUES_INTERVAL_FRAMES;
+          const appearFrame =
+            ISSUES_APPEAR_FRAME + index * ISSUES_INTERVAL_FRAMES;
           const localFrame = frame - appearFrame;
-          const itemOpacity = interpolate(localFrame, [0, ISSUES_FADE_FRAMES], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-            easing: Easing.out(Easing.cubic),
-          });
+          const itemOpacity = interpolate(
+            localFrame,
+            [0, ISSUES_FADE_FRAMES],
+            [0, 1],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: Easing.out(Easing.cubic),
+            },
+          );
 
           const isItemFixed = isFixing && index < fixedCount;
           const fixFrame = FIX_START_FRAME + index * FIX_INTERVAL_FRAMES;
-          const fixProgress = interpolate(frame - fixFrame, [0, FIX_FADE_FRAMES], [0, 1], {
-            extrapolateLeft: "clamp",
-            extrapolateRight: "clamp",
-            easing: Easing.out(Easing.cubic),
-          });
+          const fixProgress = interpolate(
+            frame - fixFrame,
+            [0, FIX_FADE_FRAMES],
+            [0, 1],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: Easing.out(Easing.cubic),
+            },
+          );
 
           return (
             <div
@@ -170,14 +193,17 @@ export const AgentHandoff = () => {
                 fontFamily,
                 fontSize: DIAGNOSTIC_FONT_SIZE_PX,
                 lineHeight: 1.7,
-                color: isItemFixed && fixProgress > 0.3 ? MUTED_COLOR : TEXT_COLOR,
+                color:
+                  isItemFixed && fixProgress > 0.3 ? MUTED_COLOR : TEXT_COLOR,
                 opacity: itemOpacity,
-                textDecoration: isItemFixed && fixProgress > 0.3 ? "line-through" : "none",
+                textDecoration:
+                  isItemFixed && fixProgress > 0.3 ? "line-through" : "none",
               }}
             >
               <span
                 style={{
-                  color: isItemFixed && fixProgress > 0.3 ? GREEN_COLOR : RED_COLOR,
+                  color:
+                    isItemFixed && fixProgress > 0.3 ? GREEN_COLOR : RED_COLOR,
                 }}
               >
                 {isItemFixed && fixProgress > 0.3 ? " ✓" : " ✗"}

@@ -1,8 +1,15 @@
-import path from "node:path";
 import { writeFileSync, mkdirSync } from "node:fs";
+import path from "node:path";
+
 import { Command } from "commander";
+
 import { scan } from "./scan.js";
 import type { Diagnostic, DiffInfo, ScanOptions } from "./types.js";
+import {
+  generateMarkdownReport,
+  generateAIPrompts,
+  generateAIPromptsMarkdown,
+} from "./utils/generate-report.js";
 import { filterSourceFiles, getDiffInfo } from "./utils/get-diff-files.js";
 import { handleError } from "./utils/handle-error.js";
 import { highlighter } from "./utils/highlighter.js";
@@ -11,11 +18,6 @@ import { logger } from "./utils/logger.js";
 import { prompts } from "./utils/prompts.js";
 import { selectProjects } from "./utils/select-projects.js";
 import { maybePromptSkillInstall } from "./utils/skill-prompt.js";
-import {
-  generateMarkdownReport,
-  generateAIPrompts,
-  generateAIPromptsMarkdown,
-} from "./utils/generate-report.js";
 
 const VERSION = process.env.VERSION ?? "0.0.0";
 
@@ -53,7 +55,9 @@ const resolveDiffMode = async (
   if (effectiveDiff !== undefined && effectiveDiff !== false) {
     if (diffInfo) return true;
     if (!isScoreOnly) {
-      logger.warn("No feature branch or uncommitted changes detected. Running full scan.");
+      logger.warn(
+        "No feature branch or uncommitted changes detected. Running full scan.",
+      );
       logger.break();
     }
     return false;
@@ -89,10 +93,19 @@ const program = new Command()
   .option("--verbose", "show file details per rule")
   .option("--score", "output only the score")
   .option("-y, --yes", "skip prompts, scan all workspace projects")
-  .option("--project <name>", "select workspace project (comma-separated for multiple)")
+  .option(
+    "--project <name>",
+    "select workspace project (comma-separated for multiple)",
+  )
   .option("--diff [base]", "scan only files changed vs base branch")
-  .option("--offline", "skip telemetry (anonymous, not stored, only used to calculate score)")
-  .option("--output <format>", 'output format: "human" (default), "json", or "markdown"')
+  .option(
+    "--offline",
+    "skip telemetry (anonymous, not stored, only used to calculate score)",
+  )
+  .option(
+    "--output <format>",
+    'output format: "human" (default), "json", or "markdown"',
+  )
   .option("--report <file>", "write human-readable report to file")
   .option(
     "--ai-prompts <file>",
@@ -114,11 +127,15 @@ const program = new Command()
         program.getOptionValueSource(optionName) === "cli";
 
       const scanOptions: ScanOptions = {
-        lint: isCliOverride("lint") ? flags.lint : (userConfig?.lint ?? flags.lint),
+        lint: isCliOverride("lint")
+          ? flags.lint
+          : (userConfig?.lint ?? flags.lint),
         deadCode: isCliOverride("deadCode")
           ? flags.deadCode
           : (userConfig?.deadCode ?? flags.deadCode),
-        verbose: isCliOverride("verbose") ? Boolean(flags.verbose) : (userConfig?.verbose ?? false),
+        verbose: isCliOverride("verbose")
+          ? Boolean(flags.verbose)
+          : (userConfig?.verbose ?? false),
         scoreOnly: isScoreOnly,
         offline: flags.offline,
         output: flags.output ?? "human",
@@ -132,15 +149,19 @@ const program = new Command()
         process.env.OPENCODE,
         process.env.AMP_HOME,
       ].some(Boolean);
-      const shouldSkipPrompts = flags.yes || isAutomatedEnvironment || !process.stdin.isTTY;
+      const shouldSkipPrompts =
+        flags.yes || isAutomatedEnvironment || !process.stdin.isTTY;
       const projectDirectories = await selectProjects(
         resolvedDirectory,
         flags.project,
         shouldSkipPrompts,
       );
 
-      const effectiveDiff = isCliOverride("diff") ? flags.diff : userConfig?.diff;
-      const explicitBaseBranch = typeof effectiveDiff === "string" ? effectiveDiff : undefined;
+      const effectiveDiff = isCliOverride("diff")
+        ? flags.diff
+        : userConfig?.diff;
+      const explicitBaseBranch =
+        typeof effectiveDiff === "string" ? effectiveDiff : undefined;
       const diffInfo = getDiffInfo(resolvedDirectory, explicitBaseBranch);
       const isDiffMode = await resolveDiffMode(
         diffInfo,
@@ -167,12 +188,19 @@ const program = new Command()
       for (const projectDirectory of projectDirectories) {
         let includePaths: string[] | undefined;
         if (isDiffMode) {
-          const projectDiffInfo = getDiffInfo(projectDirectory, explicitBaseBranch);
+          const projectDiffInfo = getDiffInfo(
+            projectDirectory,
+            explicitBaseBranch,
+          );
           if (projectDiffInfo) {
-            const changedSourceFiles = filterSourceFiles(projectDiffInfo.changedFiles);
+            const changedSourceFiles = filterSourceFiles(
+              projectDiffInfo.changedFiles,
+            );
             if (changedSourceFiles.length === 0) {
               if (!isScoreOnly) {
-                logger.dim(`No changed source files in ${projectDirectory}, skipping.`);
+                logger.dim(
+                  `No changed source files in ${projectDirectory}, skipping.`,
+                );
                 logger.break();
               }
               continue;
@@ -195,7 +223,10 @@ const program = new Command()
         // #3: Wrapped in try-catch so a bad path doesn't crash after all the expensive scan work.
         if (flags.report) {
           const projectName = path.basename(path.resolve(projectDirectory));
-          const markdownReport = generateMarkdownReport(scanResult.diagnostics, projectName);
+          const markdownReport = generateMarkdownReport(
+            scanResult.diagnostics,
+            projectName,
+          );
           try {
             mkdirSync(path.dirname(flags.report), { recursive: true });
             writeFileSync(flags.report, markdownReport);
@@ -203,20 +234,27 @@ const program = new Command()
             logger.success(`Report written to ${flags.report}`);
           } catch (error) {
             logger.break();
-            logger.error(`Failed to write report to ${flags.report}: ${String(error)}`);
+            logger.error(
+              `Failed to write report to ${flags.report}: ${String(error)}`,
+            );
           }
         }
 
         if (flags.aiPrompts) {
           const isMarkdown =
-            flags.aiPrompts.endsWith(".md") || flags.aiPrompts.endsWith(".markdown");
+            flags.aiPrompts.endsWith(".md") ||
+            flags.aiPrompts.endsWith(".markdown");
           try {
             if (isMarkdown) {
-              const markdownContent = generateAIPromptsMarkdown(scanResult.diagnostics);
+              const markdownContent = generateAIPromptsMarkdown(
+                scanResult.diagnostics,
+              );
               mkdirSync(path.dirname(flags.aiPrompts), { recursive: true });
               writeFileSync(flags.aiPrompts, markdownContent);
               logger.break();
-              logger.success(`AI prompts (Markdown) written to ${flags.aiPrompts}`);
+              logger.success(
+                `AI prompts (Markdown) written to ${flags.aiPrompts}`,
+              );
               logger.dim(
                 `Open this file and copy any prompt to paste into Cursor, Claude, or Windsurf.`,
               );
@@ -226,7 +264,10 @@ const program = new Command()
                 aiPrompts.map(({ key, prompt }) => [key, prompt]),
               );
               mkdirSync(path.dirname(flags.aiPrompts), { recursive: true });
-              writeFileSync(flags.aiPrompts, JSON.stringify(promptsObject, null, 2));
+              writeFileSync(
+                flags.aiPrompts,
+                JSON.stringify(promptsObject, null, 2),
+              );
               logger.break();
               logger.success(`AI prompts (JSON) written to ${flags.aiPrompts}`);
               logger.dim(
@@ -235,7 +276,9 @@ const program = new Command()
             }
           } catch (error) {
             logger.break();
-            logger.error(`Failed to write AI prompts to ${flags.aiPrompts}: ${String(error)}`);
+            logger.error(
+              `Failed to write AI prompts to ${flags.aiPrompts}: ${String(error)}`,
+            );
           }
         }
 

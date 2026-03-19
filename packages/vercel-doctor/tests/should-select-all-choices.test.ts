@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { shouldSelectAllChoices } from "../src/utils/should-select-all-choices.js";
 
 describe("shouldSelectAllChoices", () => {

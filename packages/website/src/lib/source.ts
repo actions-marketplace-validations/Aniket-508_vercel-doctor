@@ -1,6 +1,7 @@
-import { docs } from "fumadocs-mdx:collections/server";
 import { type InferPageType, loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
+import { docs } from "fumadocs-mdx:collections/server";
+
 import { i18n } from "@/i18n/config";
 
 export const source = loader({
@@ -12,7 +13,9 @@ export const source = loader({
 
 export function getPageImage(page: InferPageType<typeof source>) {
   const pathSegments =
-    page.locale === i18n.defaultLanguage ? page.slugs : [page.locale, ...page.slugs];
+    page.locale === i18n.defaultLanguage
+      ? page.slugs
+      : [page.locale, ...page.slugs];
   const segments = [...pathSegments, "image.webp"];
 
   return {

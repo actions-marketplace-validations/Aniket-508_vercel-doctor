@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import plugin from "../src/plugin/index.js";
+import type { Diagnostic } from "../src/types.js";
 import {
   RULE_FIX_STRATEGIES,
   generateAIPrompts,
@@ -8,7 +10,6 @@ import {
   generateMarkdownReport,
   groupDiagnosticsByCategory,
 } from "../src/utils/generate-report.js";
-import type { Diagnostic } from "../src/types.js";
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -39,8 +40,8 @@ describe("RULE_FIX_STRATEGIES", () => {
       expect(key).toMatch(/^[a-z][a-z0-9-]+$/);
     }
     // Plugin rule keys in RULE_FIX_STRATEGIES must be a subset of registered plugin rules
-    const pluginRulesInStrategies = Object.keys(RULE_FIX_STRATEGIES).filter((k) =>
-      registeredPluginRules.has(k),
+    const pluginRulesInStrategies = Object.keys(RULE_FIX_STRATEGIES).filter(
+      (k) => registeredPluginRules.has(k),
     );
     // Every plugin rule key found in strategies must still exist in the plugin
     for (const key of pluginRulesInStrategies) {
@@ -70,12 +71,16 @@ describe("groupDiagnosticsByCategory", () => {
   });
 
   it("falls back to known descriptions for known categories", () => {
-    const sections = groupDiagnosticsByCategory([makeDiagnostic({ category: "Performance" })]);
+    const sections = groupDiagnosticsByCategory([
+      makeDiagnostic({ category: "Performance" }),
+    ]);
     expect(sections[0].description).toContain("runtime performance");
   });
 
   it("uses generic description for unknown categories", () => {
-    const sections = groupDiagnosticsByCategory([makeDiagnostic({ category: "UnknownCategory" })]);
+    const sections = groupDiagnosticsByCategory([
+      makeDiagnostic({ category: "UnknownCategory" }),
+    ]);
     expect(sections[0].description).toBe("General code quality issues");
   });
 
@@ -134,7 +139,9 @@ describe("generateAIPrompts", () => {
       column: 10,
     });
     const [entry] = generateAIPrompts([diag]);
-    expect(entry.key).toBe("vercel/vercel-no-force-dynamic::/app/page.tsx:42:10");
+    expect(entry.key).toBe(
+      "vercel/vercel-no-force-dynamic::/app/page.tsx:42:10",
+    );
   });
 
   it("returns empty array for empty input", () => {
@@ -144,10 +151,14 @@ describe("generateAIPrompts", () => {
   it("adds better-all codemod prompt for async-parallel diagnostics", () => {
     const diagnostics = [makeDiagnostic({ rule: "async-parallel" })];
     const result = generateAIPrompts(diagnostics);
-    const codemodPrompt = result.find((entry) => entry.key === "vercel-doctor/better-all-codemod");
+    const codemodPrompt = result.find(
+      (entry) => entry.key === "vercel-doctor/better-all-codemod",
+    );
 
     expect(codemodPrompt).toBeDefined();
-    expect(codemodPrompt?.prompt).toContain("Only after checks pass, apply the codemod changes.");
+    expect(codemodPrompt?.prompt).toContain(
+      "Only after checks pass, apply the codemod changes.",
+    );
   });
 });
 
@@ -171,7 +182,11 @@ describe("generateHumanReadableReport", () => {
 
 describe("generateMarkdownReport", () => {
   it("returns no-issues block for empty diagnostics", () => {
-    const report = generateMarkdownReport([], "my-project", "2024-01-01T00:00:00.000Z");
+    const report = generateMarkdownReport(
+      [],
+      "my-project",
+      "2024-01-01T00:00:00.000Z",
+    );
     expect(report).toContain("No issues found");
   });
 
@@ -204,8 +219,12 @@ describe("generateAIPromptsMarkdown", () => {
   });
 
   it("includes better-all codemod section for async-parallel diagnostics", () => {
-    const report = generateAIPromptsMarkdown([makeDiagnostic({ rule: "async-parallel" })]);
+    const report = generateAIPromptsMarkdown([
+      makeDiagnostic({ rule: "async-parallel" }),
+    ]);
     expect(report).toContain("Codemod: Promise.all to better-all");
-    expect(report).toContain("Only after checks pass, apply the codemod changes.");
+    expect(report).toContain(
+      "Only after checks pass, apply the codemod changes.",
+    );
   });
 });

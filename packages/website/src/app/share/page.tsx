@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { RootProvider } from "fumadocs-ui/provider/next";
+import type { Metadata } from "next";
+
 import { i18n } from "@/i18n/config";
 import { provider } from "@/i18n/ui";
 import { baseOptions } from "@/lib/layout.shared";
@@ -8,6 +9,7 @@ import {
   getShareSearchParamsFromRecord,
   type ShareSearchParams,
 } from "@/utils/get-share-page-data";
+
 import LocalizedSharePage, {
   generateMetadata as generateLocalizedShareMetadata,
 } from "../[lang]/(home)/share/page";
@@ -20,7 +22,8 @@ interface SharePageSearchParams {
 
 const getNormalizedShareSearchParams = async (
   searchParams: Promise<Record<string, string | string[] | undefined>>,
-): Promise<ShareSearchParams> => getShareSearchParamsFromRecord(await searchParams);
+): Promise<ShareSearchParams> =>
+  getShareSearchParamsFromRecord(await searchParams);
 
 export const generateMetadata = async ({
   searchParams,

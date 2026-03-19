@@ -4,10 +4,19 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { ERROR_PREVIEW_LENGTH_CHARS, JSX_FILE_PATTERN } from "../constants.js";
 import { createOxlintConfig } from "../oxlint-config.js";
-import { RULE_CATEGORY_NAMES, QUALIFIED_PLUGIN_RULE_METADATA } from "../rule-metadata.js";
-import type { CleanedDiagnostic, Diagnostic, Framework, OxlintOutput } from "../types.js";
+import {
+  RULE_CATEGORY_NAMES,
+  QUALIFIED_PLUGIN_RULE_METADATA,
+} from "../rule-metadata.js";
+import type {
+  CleanedDiagnostic,
+  Diagnostic,
+  Framework,
+  OxlintOutput,
+} from "../types.js";
 import { neutralizeDisableDirectives } from "./neutralize-disable-directives.js";
 
 const esmRequire = createRequire(import.meta.url);
@@ -38,7 +47,10 @@ const parseRuleCode = (code: string): { plugin: string; rule: string } => {
 
 const resolveOxlintBinary = (): string => {
   const oxlintMainPath = esmRequire.resolve("oxlint");
-  const oxlintPackageDirectory = path.resolve(path.dirname(oxlintMainPath), "..");
+  const oxlintPackageDirectory = path.resolve(
+    path.dirname(oxlintMainPath),
+    "..",
+  );
   return path.join(oxlintPackageDirectory, "bin", "oxlint");
 };
 
@@ -47,7 +59,10 @@ const resolvePluginPath = (): string => {
   const pluginPath = path.join(currentDirectory, "vercel-doctor-plugin.js");
   if (fs.existsSync(pluginPath)) return pluginPath;
 
-  const distPluginPath = path.resolve(currentDirectory, "../../dist/vercel-doctor-plugin.js");
+  const distPluginPath = path.resolve(
+    currentDirectory,
+    "../../dist/vercel-doctor-plugin.js",
+  );
   if (fs.existsSync(distPluginPath)) return distPluginPath;
 
   return pluginPath;
@@ -67,7 +82,10 @@ export const runOxlint = async (
     return [];
   }
 
-  const configPath = path.join(os.tmpdir(), `vercel-doctor-oxlintrc-${process.pid}.json`);
+  const configPath = path.join(
+    os.tmpdir(),
+    `vercel-doctor-oxlintrc-${process.pid}.json`,
+  );
   const pluginPath = resolvePluginPath();
   const config = createOxlintConfig({ pluginPath, framework });
   const restoreDisableDirectives = neutralizeDisableDirectives(rootDirectory);
@@ -99,11 +117,15 @@ export const runOxlint = async (
       child.stdout.on("data", (buffer: Buffer) => stdoutBuffers.push(buffer));
       child.stderr.on("data", (buffer: Buffer) => stderrBuffers.push(buffer));
 
-      child.on("error", (error) => reject(new Error(`Failed to run oxlint: ${error.message}`)));
+      child.on("error", (error) =>
+        reject(new Error(`Failed to run oxlint: ${error.message}`)),
+      );
       child.on("close", () => {
         const output = Buffer.concat(stdoutBuffers).toString("utf-8").trim();
         if (!output) {
-          const stderrOutput = Buffer.concat(stderrBuffers).toString("utf-8").trim();
+          const stderrOutput = Buffer.concat(stderrBuffers)
+            .toString("utf-8")
+            .trim();
           if (stderrOutput) {
             reject(new Error(`Failed to run oxlint: ${stderrOutput}`));
             return;
@@ -127,12 +149,20 @@ export const runOxlint = async (
     }
 
     return output.diagnostics
-      .filter((diagnostic) => diagnostic.code && JSX_FILE_PATTERN.test(diagnostic.filename))
+      .filter(
+        (diagnostic) =>
+          diagnostic.code && JSX_FILE_PATTERN.test(diagnostic.filename),
+      )
       .map((diagnostic) => {
         const { plugin, rule } = parseRuleCode(diagnostic.code);
         const primaryLabel = diagnostic.labels[0];
 
-        const cleaned = cleanDiagnosticMessage(diagnostic.message, diagnostic.help, plugin, rule);
+        const cleaned = cleanDiagnosticMessage(
+          diagnostic.message,
+          diagnostic.help,
+          plugin,
+          rule,
+        );
 
         return {
           filePath: diagnostic.filename,

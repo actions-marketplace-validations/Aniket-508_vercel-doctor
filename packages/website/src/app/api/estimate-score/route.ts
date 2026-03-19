@@ -1,6 +1,6 @@
 import { API_CORS_HEADERS } from "@/constants/api";
-import getScoreLabel from "@/utils/get-score-label";
 import { countUniqueRules, scoreFromRuleCounts } from "@/utils/calculate-score";
+import getScoreLabel from "@/utils/get-score-label";
 import { isValidDiagnostic } from "@/utils/validate-diagnostic";
 
 const ERROR_ESTIMATED_FIX_RATE = 0.85;
@@ -19,7 +19,9 @@ export const POST = async (request: Request): Promise<Response> => {
     );
   }
 
-  const isValidPayload = body.diagnostics.every((entry: unknown) => isValidDiagnostic(entry));
+  const isValidPayload = body.diagnostics.every((entry: unknown) =>
+    isValidDiagnostic(entry),
+  );
 
   if (!isValidPayload) {
     return Response.json(
@@ -31,7 +33,9 @@ export const POST = async (request: Request): Promise<Response> => {
     );
   }
 
-  const { errorRuleCount, warningRuleCount } = countUniqueRules(body.diagnostics);
+  const { errorRuleCount, warningRuleCount } = countUniqueRules(
+    body.diagnostics,
+  );
 
   const currentScore = scoreFromRuleCounts(errorRuleCount, warningRuleCount);
 

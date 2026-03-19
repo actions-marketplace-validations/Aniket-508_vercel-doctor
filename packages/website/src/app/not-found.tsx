@@ -1,3 +1,8 @@
+import { HomeIcon } from "lucide-react";
+import { BookOpenIcon } from "lucide-react";
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -5,15 +10,11 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Button } from "@/components/ui/button";
-import { HomeIcon } from "lucide-react";
-import Link from "next/link";
-import { BookOpenIcon } from "lucide-react";
 
 const NotFoundPage = () => (
   <Empty>
     <EmptyHeader>
-      <EmptyTitle className="font-black font-mono text-8xl">404</EmptyTitle>
+      <EmptyTitle className="font-mono text-8xl font-black">404</EmptyTitle>
       <EmptyDescription className="text-nowrap">
         The page you're looking for might have been <br />
         moved or doesn't exist.

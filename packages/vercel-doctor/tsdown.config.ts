@@ -1,4 +1,5 @@
 import fs from "node:fs";
+
 import { defineConfig } from "tsdown";
 
 const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8")) as {

@@ -1,12 +1,13 @@
 import { DisclaimerBanner } from "@/components/landing/disclaimer-banner";
-import { Hero } from "@/components/landing/hero";
-import { Testimonials } from "@/components/landing/testimonials";
-import { PreFooter } from "@/components/landing/pre-footer";
 import { Footer } from "@/components/landing/footer";
+import { Hero } from "@/components/landing/hero";
+import { PreFooter } from "@/components/landing/pre-footer";
+import { Testimonials } from "@/components/landing/testimonials";
 import { i18n } from "@/i18n/config";
 import { getTranslation } from "@/translations";
 
-export const generateStaticParams = () => i18n.languages.map((lang) => ({ lang }));
+export const generateStaticParams = () =>
+  i18n.languages.map((lang) => ({ lang }));
 
 const HomePage = async ({ params }: { params: Promise<{ lang: string }> }) => {
   const { lang } = await params;

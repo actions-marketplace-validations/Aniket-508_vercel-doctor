@@ -1,4 +1,5 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+
 import {
   BACKGROUND_COLOR,
   BOX_BOTTOM,
@@ -8,7 +9,11 @@ import {
   SCORE_BAR_WIDTH,
 } from "../constants";
 import { fontFamily } from "../utils/font";
-import { getDoctorFace, getScoreColor, getScoreLabel } from "../utils/score-display";
+import {
+  getDoctorFace,
+  getScoreColor,
+  getScoreLabel,
+} from "../utils/score-display";
 
 const SCORE_ANIMATION_FRAMES = 25;
 const SCORE_FONT_SIZE_PX = 96;
@@ -19,16 +24,23 @@ const SCORE_BAR_FONT_SIZE_PX = 44;
 export const ScoreReveal = () => {
   const frame = useCurrentFrame();
 
-  const scoreProgress = interpolate(frame, [0, SCORE_ANIMATION_FRAMES], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.linear,
-  });
+  const scoreProgress = interpolate(
+    frame,
+    [0, SCORE_ANIMATION_FRAMES],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.linear,
+    },
+  );
 
   const currentScore = Math.round(scoreProgress * PERFECT_SCORE);
   const scoreColor = getScoreColor(currentScore);
   const [eyes, mouth] = getDoctorFace(currentScore);
-  const filledBarCount = Math.round((currentScore / PERFECT_SCORE) * SCORE_BAR_WIDTH);
+  const filledBarCount = Math.round(
+    (currentScore / PERFECT_SCORE) * SCORE_BAR_WIDTH,
+  );
   const emptyBarCount = SCORE_BAR_WIDTH - filledBarCount;
 
   return (
@@ -97,8 +109,12 @@ export const ScoreReveal = () => {
               fontFamily,
             }}
           >
-            <span style={{ color: scoreColor }}>{"█".repeat(filledBarCount)}</span>
-            <span style={{ color: "#525252" }}>{"░".repeat(emptyBarCount)}</span>
+            <span style={{ color: scoreColor }}>
+              {"█".repeat(filledBarCount)}
+            </span>
+            <span style={{ color: "#525252" }}>
+              {"░".repeat(emptyBarCount)}
+            </span>
           </div>
         </div>
       </div>

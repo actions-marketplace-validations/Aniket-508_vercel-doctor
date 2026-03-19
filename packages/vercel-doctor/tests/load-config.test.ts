@@ -1,10 +1,14 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
 import { loadConfig } from "../src/utils/load-config.js";
 
-const tempRootDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "vercel-doctor-config-test-"));
+const tempRootDirectory = fs.mkdtempSync(
+  path.join(os.tmpdir(), "vercel-doctor-config-test-"),
+);
 
 afterAll(() => {
   fs.rmSync(tempRootDirectory, { recursive: true, force: true });
@@ -43,7 +47,10 @@ describe("loadConfig", () => {
     let packageJsonDirectory: string;
 
     beforeAll(() => {
-      packageJsonDirectory = path.join(tempRootDirectory, "with-package-json-config");
+      packageJsonDirectory = path.join(
+        tempRootDirectory,
+        "with-package-json-config",
+      );
       fs.mkdirSync(packageJsonDirectory, { recursive: true });
       fs.writeFileSync(
         path.join(packageJsonDirectory, "package.json"),
@@ -172,7 +179,9 @@ describe("loadConfig", () => {
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
       const config = loadConfig(invalidJsonDirectory);
       expect(config).toBeNull();
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Failed to parse"));
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Failed to parse"),
+      );
       warnSpy.mockRestore();
     });
 
@@ -180,12 +189,17 @@ describe("loadConfig", () => {
       const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
       const config = loadConfig(nonObjectDirectory);
       expect(config).toBeNull();
-      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("must be a JSON object"));
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("must be a JSON object"),
+      );
       warnSpy.mockRestore();
     });
 
     it("ignores non-object vercelDoctor key in package.json", () => {
-      const arrayConfigDirectory = path.join(tempRootDirectory, "array-pkg-config");
+      const arrayConfigDirectory = path.join(
+        tempRootDirectory,
+        "array-pkg-config",
+      );
       fs.mkdirSync(arrayConfigDirectory, { recursive: true });
       fs.writeFileSync(
         path.join(arrayConfigDirectory, "package.json"),

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+
 import { LogoMark } from "@/components/logo";
 
 interface DocsOgImageProps {

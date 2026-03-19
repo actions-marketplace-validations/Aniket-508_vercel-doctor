@@ -1,5 +1,9 @@
 import { execSync } from "node:child_process";
-import { DEFAULT_BRANCH_CANDIDATES, SOURCE_FILE_PATTERN } from "../constants.js";
+
+import {
+  DEFAULT_BRANCH_CANDIDATES,
+  SOURCE_FILE_PATTERN,
+} from "../constants.js";
 import type { DiffInfo } from "../types.js";
 
 const getCurrentBranch = (directory: string): string | null => {
@@ -39,7 +43,10 @@ const detectDefaultBranch = (directory: string): string | null => {
   }
 };
 
-const getChangedFilesSinceBranch = (directory: string, baseBranch: string): string[] => {
+const getChangedFilesSinceBranch = (
+  directory: string,
+  baseBranch: string,
+): string[] => {
   try {
     const mergeBase = execSync(`git merge-base ${baseBranch} HEAD`, {
       cwd: directory,
@@ -48,10 +55,13 @@ const getChangedFilesSinceBranch = (directory: string, baseBranch: string): stri
       .toString()
       .trim();
 
-    const output = execSync(`git diff --name-only --diff-filter=ACMR --relative ${mergeBase}`, {
-      cwd: directory,
-      stdio: "pipe",
-    })
+    const output = execSync(
+      `git diff --name-only --diff-filter=ACMR --relative ${mergeBase}`,
+      {
+        cwd: directory,
+        stdio: "pipe",
+      },
+    )
       .toString()
       .trim();
 
@@ -64,10 +74,13 @@ const getChangedFilesSinceBranch = (directory: string, baseBranch: string): stri
 
 const getUncommittedChangedFiles = (directory: string): string[] => {
   try {
-    const output = execSync("git diff --name-only --diff-filter=ACMR --relative HEAD", {
-      cwd: directory,
-      stdio: "pipe",
-    })
+    const output = execSync(
+      "git diff --name-only --diff-filter=ACMR --relative HEAD",
+      {
+        cwd: directory,
+        stdio: "pipe",
+      },
+    )
       .toString()
       .trim();
     if (!output) return [];
@@ -77,7 +90,10 @@ const getUncommittedChangedFiles = (directory: string): string[] => {
   }
 };
 
-export const getDiffInfo = (directory: string, explicitBaseBranch?: string): DiffInfo | null => {
+export const getDiffInfo = (
+  directory: string,
+  explicitBaseBranch?: string,
+): DiffInfo | null => {
   const currentBranch = getCurrentBranch(directory);
   if (!currentBranch) return null;
 
@@ -87,7 +103,12 @@ export const getDiffInfo = (directory: string, explicitBaseBranch?: string): Dif
   if (currentBranch === baseBranch) {
     const uncommittedFiles = getUncommittedChangedFiles(directory);
     if (uncommittedFiles.length === 0) return null;
-    return { currentBranch, baseBranch, changedFiles: uncommittedFiles, isCurrentChanges: true };
+    return {
+      currentBranch,
+      baseBranch,
+      changedFiles: uncommittedFiles,
+      isCurrentChanges: true,
+    };
   }
 
   const changedFiles = getChangedFilesSinceBranch(directory, baseBranch);

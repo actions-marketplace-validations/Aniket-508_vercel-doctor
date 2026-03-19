@@ -1,5 +1,7 @@
 import { createRequire } from "node:module";
+
 import basePrompts, { type PromptObject, type Answers } from "prompts";
+
 import type { PromptMultiselectContext } from "../types.js";
 import { logger } from "./logger.js";
 import { shouldAutoSelectCurrentChoice } from "./should-auto-select-current-choice.js";
@@ -65,7 +67,9 @@ const patchMultiselectSubmit = (): void => {
   const multiselectPromptConstructor = require(PROMPTS_MULTISELECT_MODULE_PATH);
   const originalSubmit = multiselectPromptConstructor.prototype.submit;
 
-  multiselectPromptConstructor.prototype.submit = function (this: PromptMultiselectContext): void {
+  multiselectPromptConstructor.prototype.submit = function (
+    this: PromptMultiselectContext,
+  ): void {
     if (shouldAutoSelectCurrentChoice(this.value, this.cursor)) {
       this.value[this.cursor].selected = true;
     }
@@ -90,7 +94,9 @@ const patchSelectBanner = (): void => {
   const promptsClear = require("prompts/lib/util/clear");
   const originalRender = selectConstructor.prototype.render;
 
-  selectConstructor.prototype.render = function (this: SelectPromptInstance): void {
+  selectConstructor.prototype.render = function (
+    this: SelectPromptInstance,
+  ): void {
     originalRender.call(this);
 
     const banner = selectBannerMap.get(this.cursor);

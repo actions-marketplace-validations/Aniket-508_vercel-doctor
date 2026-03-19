@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import { LINK } from "@/constants/links";
 import { SITE } from "@/constants/site";
 

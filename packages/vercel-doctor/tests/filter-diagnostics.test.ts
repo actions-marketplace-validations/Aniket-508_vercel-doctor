@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import type { Diagnostic, VercelDoctorConfig } from "../src/types.js";
 import { filterIgnoredDiagnostics } from "../src/utils/filter-diagnostics.js";
 
@@ -58,8 +59,16 @@ describe("filterIgnoredDiagnostics", () => {
 
   it("filters by both rules and files together", () => {
     const diagnostics = [
-      createDiagnostic({ plugin: "react", rule: "no-danger", filePath: "src/app.tsx" }),
-      createDiagnostic({ plugin: "knip", rule: "exports", filePath: "src/generated/api.tsx" }),
+      createDiagnostic({
+        plugin: "react",
+        rule: "no-danger",
+        filePath: "src/app.tsx",
+      }),
+      createDiagnostic({
+        plugin: "knip",
+        rule: "exports",
+        filePath: "src/generated/api.tsx",
+      }),
       createDiagnostic({
         plugin: "vercel-doctor",
         rule: "no-giant-component",

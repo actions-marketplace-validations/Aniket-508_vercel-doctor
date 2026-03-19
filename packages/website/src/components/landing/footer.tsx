@@ -1,6 +1,6 @@
+import { XIcon, LlmsIcon } from "@/components/icons";
 import { LINK } from "@/constants/links";
 import { SITE } from "@/constants/site";
-import { XIcon, LlmsIcon } from "@/components/icons";
 import type { Translation } from "@/translations";
 
 interface FooterProps {
@@ -8,15 +8,15 @@ interface FooterProps {
 }
 
 export const Footer = ({ translation }: FooterProps) => (
-  <footer className="border-t border-fd-border mt-auto">
-    <div className="mx-auto flex max-w-fd-container flex-col items-center justify-between gap-4 px-4 md:px-12 py-6 text-sm text-fd-muted-foreground sm:flex-row">
+  <footer className="border-fd-border mt-auto border-t">
+    <div className="max-w-fd-container text-fd-muted-foreground mx-auto flex flex-col items-center justify-between gap-4 px-4 py-6 text-sm sm:flex-row md:px-12">
       <p className="text-center sm:text-left">
         {translation.footer.builtBy}{" "}
         <a
           href={LINK.PORTFOLIO}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-fd-foreground underline underline-offset-4"
+          className="text-fd-foreground font-medium underline underline-offset-4"
         >
           {SITE.AUTHOR.NAME}
         </a>
@@ -25,7 +25,7 @@ export const Footer = ({ translation }: FooterProps) => (
           href="https://vercel.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-fd-foreground underline underline-offset-4"
+          className="text-fd-foreground font-medium underline underline-offset-4"
         >
           Vercel
         </a>
@@ -34,7 +34,7 @@ export const Footer = ({ translation }: FooterProps) => (
           href={LINK.GITHUB}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium text-fd-foreground underline underline-offset-4"
+          className="text-fd-foreground font-medium underline underline-offset-4"
         >
           GitHub
         </a>
@@ -46,14 +46,14 @@ export const Footer = ({ translation }: FooterProps) => (
           href={LINK.TWITTER}
           target="_blank"
           rel="noopener noreferrer"
-          className="transition-colors hover:text-fd-foreground"
+          className="hover:text-fd-foreground transition-colors"
           aria-label={translation.footer.twitter}
         >
           <XIcon className="size-4" />
         </a>
         <a
           href={LINK.LLMS}
-          className="transition-colors hover:text-fd-foreground"
+          className="hover:text-fd-foreground transition-colors"
           aria-label={translation.footer.llms}
         >
           <LlmsIcon className="size-4" />

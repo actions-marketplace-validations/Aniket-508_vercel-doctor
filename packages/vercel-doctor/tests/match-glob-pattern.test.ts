@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { matchGlobPattern } from "../src/utils/match-glob-pattern.js";
 
 describe("matchGlobPattern", () => {
@@ -14,21 +15,33 @@ describe("matchGlobPattern", () => {
   });
 
   it("matches double wildcard at the end", () => {
-    expect(matchGlobPattern("src/generated/foo.tsx", "src/generated/**")).toBe(true);
-    expect(matchGlobPattern("src/generated/bar/baz.tsx", "src/generated/**")).toBe(true);
-    expect(matchGlobPattern("src/other/foo.tsx", "src/generated/**")).toBe(false);
+    expect(matchGlobPattern("src/generated/foo.tsx", "src/generated/**")).toBe(
+      true,
+    );
+    expect(
+      matchGlobPattern("src/generated/bar/baz.tsx", "src/generated/**"),
+    ).toBe(true);
+    expect(matchGlobPattern("src/other/foo.tsx", "src/generated/**")).toBe(
+      false,
+    );
   });
 
   it("matches double wildcard with trailing slash and filename", () => {
     expect(matchGlobPattern("src/foo/test.ts", "src/**/test.ts")).toBe(true);
-    expect(matchGlobPattern("src/foo/bar/test.ts", "src/**/test.ts")).toBe(true);
+    expect(matchGlobPattern("src/foo/bar/test.ts", "src/**/test.ts")).toBe(
+      true,
+    );
     expect(matchGlobPattern("src/test.ts", "src/**/test.ts")).toBe(true);
   });
 
   it("matches double wildcard at the start", () => {
-    expect(matchGlobPattern("src/components/Button.tsx", "**/*.tsx")).toBe(true);
+    expect(matchGlobPattern("src/components/Button.tsx", "**/*.tsx")).toBe(
+      true,
+    );
     expect(matchGlobPattern("Button.tsx", "**/*.tsx")).toBe(true);
-    expect(matchGlobPattern("deep/nested/path/file.tsx", "**/*.tsx")).toBe(true);
+    expect(matchGlobPattern("deep/nested/path/file.tsx", "**/*.tsx")).toBe(
+      true,
+    );
     expect(matchGlobPattern("file.ts", "**/*.tsx")).toBe(false);
   });
 
@@ -43,6 +56,8 @@ describe("matchGlobPattern", () => {
   });
 
   it("normalizes backslashes to forward slashes", () => {
-    expect(matchGlobPattern("src\\generated\\foo.tsx", "src/generated/**")).toBe(true);
+    expect(
+      matchGlobPattern("src\\generated\\foo.tsx", "src/generated/**"),
+    ).toBe(true);
   });
 });

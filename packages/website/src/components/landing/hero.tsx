@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import { ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
-import { LINK } from "@/constants/links";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+
 import { GithubIcon } from "@/components/icons";
-import { SectionContainer, SectionContent } from "./section-layout";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@/components/ui/select";
 import { SKILLS_COMMAND } from "@/constants/command";
+import { LINK } from "@/constants/links";
 import { PACKAGE_MANAGERS } from "@/constants/package-managers";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import type { Translation } from "@/translations";
 import { ROUTES } from "@/constants/routes";
 import { withLocalePrefix } from "@/i18n/navigation";
+import type { Translation } from "@/translations";
+
+import { SectionContainer, SectionContent } from "./section-layout";
 
 interface HeroProps {
   translation: Translation;
@@ -32,11 +39,13 @@ const SkillsCommand = ({ translation }: { translation: Translation }) => {
     <button
       type="button"
       onClick={copyCommand}
-      className="cursor-copy inline-flex items-center gap-2 rounded-full border-x border-fd-border bg-fd-muted/60 px-4 py-1.5 text-xs font-mono text-fd-muted-foreground transition-colors hover:bg-fd-muted/80 hover:text-fd-foreground"
+      className="border-fd-border bg-fd-muted/60 text-fd-muted-foreground hover:bg-fd-muted/80 hover:text-fd-foreground inline-flex cursor-copy items-center gap-2 rounded-full border-x px-4 py-1.5 font-mono text-xs transition-colors"
       aria-label={translation.hero.copyCommand}
     >
       {didCopy ? (
-        <span className="text-green-600 dark:text-green-400">{translation.hero.copied}</span>
+        <span className="text-green-600 dark:text-green-400">
+          {translation.hero.copied}
+        </span>
       ) : (
         <>
           <span className="text-fd-foreground">$</span>
@@ -50,7 +59,9 @@ const SkillsCommand = ({ translation }: { translation: Translation }) => {
 const DEFAULT_PACKAGE_MANAGER = "npm";
 
 const CommandBlock = ({ translation }: { translation: Translation }) => {
-  const [selectedPackageManager, setSelectedPackageManager] = useState(DEFAULT_PACKAGE_MANAGER);
+  const [selectedPackageManager, setSelectedPackageManager] = useState(
+    DEFAULT_PACKAGE_MANAGER,
+  );
   const [didCopy, setDidCopy] = useState(false);
 
   const activeManager = PACKAGE_MANAGERS.find(
@@ -66,31 +77,36 @@ const CommandBlock = ({ translation }: { translation: Translation }) => {
 
   return (
     <div className="relative flex w-full max-w-md items-center p-px">
-      <div className="z-10 flex w-full items-center bg-fd-muted justify-between gap-2 rounded-md pl-4 pr-2 py-1">
+      <div className="bg-fd-muted z-10 flex w-full items-center justify-between gap-2 rounded-md py-1 pr-2 pl-4">
         <button
           type="button"
           onClick={copyCommand}
           className="flex min-w-0 cursor-copy items-center gap-2"
         >
-          <p className="shrink-0 select-none space-x-1 font-mono text-xs tracking-tighter sm:text-sm">
+          <p className="shrink-0 space-x-1 font-mono text-xs tracking-tighter select-none sm:text-sm">
             <span>
               <span className="text-sky-500">git:</span>
               <span className="text-red-400">(main)</span>
             </span>
-            <span className="italic text-amber-600">x</span>
+            <span className="text-amber-600 italic">x</span>
           </p>
-          <p className="relative inline truncate font-mono text-xs tracking-tight text-fd-foreground opacity-90 md:text-sm">
+          <p className="text-fd-foreground relative inline truncate font-mono text-xs tracking-tight opacity-90 md:text-sm">
             {didCopy ? (
-              <span className="text-green-600 dark:text-green-400">{translation.hero.copied}</span>
+              <span className="text-green-600 dark:text-green-400">
+                {translation.hero.copied}
+              </span>
             ) : (
               activeManager?.command
             )}
           </p>
         </button>
 
-        <Select value={selectedPackageManager} onValueChange={setSelectedPackageManager}>
+        <Select
+          value={selectedPackageManager}
+          onValueChange={setSelectedPackageManager}
+        >
           <SelectTrigger
-            className="h-7 w-auto gap-1 rounded-md border-none bg-transparent pl-2 pr-1 shadow-none hover:bg-fd-foreground/5"
+            className="hover:bg-fd-foreground/5 h-7 w-auto gap-1 rounded-md border-none bg-transparent pr-1 pl-2 shadow-none"
             aria-label={translation.hero.selectPackageManager}
           >
             <span className="flex items-center">{activeManager?.icon}</span>
@@ -112,18 +128,18 @@ const CommandBlock = ({ translation }: { translation: Translation }) => {
 export const Hero = ({ translation, lang }: HeroProps) => {
   return (
     <SectionContainer>
-      <SectionContent className="border-t-0 flex flex-col gap-8 px-4 py-8 md:flex-row md:items-center md:gap-12 md:px-12 md:py-24">
+      <SectionContent className="flex flex-col gap-8 border-t-0 px-4 py-8 md:flex-row md:items-center md:gap-12 md:px-12 md:py-24">
         <div className="flex flex-col items-center gap-6 text-center md:w-1/2 md:items-start md:text-left">
           <SkillsCommand translation={translation} />
 
           <div className="space-y-2">
-            <h1 className="text-4xl font-pixel font-bold tracking-tight text-fd-foreground sm:text-5xl md:text-6xl">
+            <h1 className="font-pixel text-fd-foreground text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
               {translation.hero.headingLine1}
               <br />
               {translation.hero.headingLine2}
             </h1>
 
-            <p className="text-base sm:text-lg text-fd-muted-foreground">
+            <p className="text-fd-muted-foreground text-base sm:text-lg">
               {translation.hero.subtitle}
             </p>
           </div>
@@ -147,8 +163,15 @@ export const Hero = ({ translation, lang }: HeroProps) => {
         </div>
 
         <div className="md:w-1/2">
-          <div className="aspect-video w-full overflow-hidden border border-fd-border bg-fd-muted/30 shadow-2xl">
-            <video src={LINK.DEMO_VIDEO} autoPlay loop muted playsInline className="w-full" />
+          <div className="border-fd-border bg-fd-muted/30 aspect-video w-full overflow-hidden border shadow-2xl">
+            <video
+              src={LINK.DEMO_VIDEO}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full"
+            />
           </div>
         </div>
       </SectionContent>

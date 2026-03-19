@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+
 import { main } from "knip";
 import { createOptions } from "knip/session";
+
 import { RULE_CATEGORY_NAMES } from "../rule-metadata.js";
 import type { Diagnostic, KnipIssueRecords, KnipResults } from "../types.js";
 
@@ -11,7 +13,12 @@ const KNIP_DEFAULT_SEVERITY: Diagnostic["severity"] = "warning";
 
 const KNIP_ISSUE_DETAILS: Record<
   string,
-  { category: string; message: string; severity: Diagnostic["severity"]; help: string }
+  {
+    category: string;
+    message: string;
+    severity: Diagnostic["severity"];
+    help: string;
+  }
 > = {
   files: {
     category: KNIP_DEFAULT_CATEGORY,
@@ -57,7 +64,9 @@ const createKnipDiagnostic = (
     plugin: "knip",
     rule: issueType,
     severity: issueDetails.severity,
-    message: symbol ? `${issueDetails.message}: ${symbol}` : issueDetails.message,
+    message: symbol
+      ? `${issueDetails.message}: ${symbol}`
+      : issueDetails.message,
     help: issueDetails.help,
     line: 0,
     column: 0,
@@ -76,7 +85,12 @@ const collectIssueRecords = (
   for (const issues of Object.values(records)) {
     for (const issue of Object.values(issues)) {
       diagnostics.push(
-        createKnipDiagnostic(rootDirectory, issueType, issue.filePath, issue.symbol),
+        createKnipDiagnostic(
+          rootDirectory,
+          issueType,
+          issue.filePath,
+          issue.symbol,
+        ),
       );
     }
   }
@@ -113,8 +127,13 @@ const findMonorepoRoot = (directory: string): string | null => {
       (() => {
         const packageJsonPath = path.join(currentDirectory, "package.json");
         if (!fs.existsSync(packageJsonPath)) return false;
-        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
-        return Array.isArray(packageJson.workspaces) || packageJson.workspaces?.packages;
+        const packageJson = JSON.parse(
+          fs.readFileSync(packageJsonPath, "utf-8"),
+        );
+        return (
+          Array.isArray(packageJson.workspaces) ||
+          packageJson.workspaces?.packages
+        );
       })();
 
     if (hasWorkspaceConfig) return currentDirectory;
@@ -164,13 +183,16 @@ const runKnipWithOptions = async (
 
 const hasNodeModules = (directory: string): boolean => {
   const nodeModulesPath = path.join(directory, "node_modules");
-  return fs.existsSync(nodeModulesPath) && fs.statSync(nodeModulesPath).isDirectory();
+  return (
+    fs.existsSync(nodeModulesPath) && fs.statSync(nodeModulesPath).isDirectory()
+  );
 };
 
 export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
   const monorepoRoot = findMonorepoRoot(rootDirectory);
   const hasInstalledDependencies =
-    hasNodeModules(rootDirectory) || (monorepoRoot !== null && hasNodeModules(monorepoRoot));
+    hasNodeModules(rootDirectory) ||
+    (monorepoRoot !== null && hasNodeModules(monorepoRoot));
 
   if (!hasInstalledDependencies) {
     return [];
@@ -204,7 +226,9 @@ export const runKnip = async (rootDirectory: string): Promise<Diagnostic[]> => {
   const recordTypes = ["exports", "types", "duplicates"] as const;
 
   for (const issueType of recordTypes) {
-    diagnostics.push(...collectIssueRecords(issues[issueType], issueType, rootDirectory));
+    diagnostics.push(
+      ...collectIssueRecords(issues[issueType], issueType, rootDirectory),
+    );
   }
 
   return diagnostics;

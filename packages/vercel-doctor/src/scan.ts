@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { performance } from "node:perf_hooks";
+
 import {
   JSX_FILE_PATTERN,
   MILLISECONDS_PER_SECOND,
@@ -17,44 +18,63 @@ import {
   VERCEL_DOCTOR_BRAND_NAME,
   VERCEL_DOCTOR_WEBSITE_LABEL,
 } from "./constants.js";
-import type { Diagnostic, ScanOptions, ScanResult, ScoreResult } from "./types.js";
+import type {
+  Diagnostic,
+  ScanOptions,
+  ScanResult,
+  ScoreResult,
+} from "./types.js";
 import { calculateScore } from "./utils/calculate-score.js";
 import {
   colorizeDiagnosticSeverity,
   DIAGNOSTIC_SEVERITY_ORDER,
   DIAGNOSTIC_SEVERITY_SYMBOLS,
 } from "./utils/diagnostic-severity.js";
-import { discoverProject, formatFrameworkName } from "./utils/discover-project.js";
+import {
+  discoverProject,
+  formatFrameworkName,
+} from "./utils/discover-project.js";
 import { filterIgnoredDiagnostics } from "./utils/filter-diagnostics.js";
-import { type FramedLine, createFramedLine, printFramedBox } from "./utils/framed-box.js";
+import {
+  type FramedLine,
+  createFramedLine,
+  printFramedBox,
+} from "./utils/framed-box.js";
 import { generateMarkdownReport } from "./utils/generate-report.js";
+import { getNextVersionCostGuidance } from "./utils/get-next-version-cost-guidance.js";
 import { groupBy } from "./utils/group-by.js";
 import { highlighter } from "./utils/highlighter.js";
 import { indentMultilineText } from "./utils/indent-multiline-text.js";
 import { loadConfig } from "./utils/load-config.js";
 import { logger } from "./utils/logger.js";
-import { getNextVersionCostGuidance } from "./utils/get-next-version-cost-guidance.js";
 import { runKnip } from "./utils/run-knip.js";
 import { runOxlint } from "./utils/run-oxlint.js";
 import { runVercelChecks } from "./utils/run-vercel-checks.js";
-import { summarizeDiagnostics } from "./utils/summarize-diagnostics.js";
 import { spinner } from "./utils/spinner.js";
+import { summarizeDiagnostics } from "./utils/summarize-diagnostics.js";
 
 interface ScoreBarSegments {
   filledSegment: string;
   emptySegment: string;
 }
 
-const sortBySeverity = (diagnosticGroups: [string, Diagnostic[]][]): [string, Diagnostic[]][] =>
+const sortBySeverity = (
+  diagnosticGroups: [string, Diagnostic[]][],
+): [string, Diagnostic[]][] =>
   diagnosticGroups.toSorted(([, diagnosticsA], [, diagnosticsB]) => {
     const severityA = DIAGNOSTIC_SEVERITY_ORDER[diagnosticsA[0].severity];
     const severityB = DIAGNOSTIC_SEVERITY_ORDER[diagnosticsB[0].severity];
     return severityA - severityB;
   });
 
-const getSortedRuleGroups = (diagnostics: Diagnostic[]): [string, Diagnostic[]][] =>
+const getSortedRuleGroups = (
+  diagnostics: Diagnostic[],
+): [string, Diagnostic[]][] =>
   sortBySeverity([
-    ...groupBy(diagnostics, (diagnostic) => `${diagnostic.plugin}/${diagnostic.rule}`).entries(),
+    ...groupBy(
+      diagnostics,
+      (diagnostic) => `${diagnostic.plugin}/${diagnostic.rule}`,
+    ).entries(),
   ]);
 
 const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
@@ -69,14 +89,23 @@ const buildFileLineMap = (diagnostics: Diagnostic[]): Map<string, number[]> => {
   return fileLines;
 };
 
-const printDiagnostics = (diagnostics: Diagnostic[], isVerbose: boolean): void => {
+const printDiagnostics = (
+  diagnostics: Diagnostic[],
+  isVerbose: boolean,
+): void => {
   for (const [, ruleDiagnostics] of getSortedRuleGroups(diagnostics)) {
     const firstDiagnostic = ruleDiagnostics[0];
-    const severitySymbol = DIAGNOSTIC_SEVERITY_SYMBOLS[firstDiagnostic.severity];
-    const icon = colorizeDiagnosticSeverity(severitySymbol, firstDiagnostic.severity);
+    const severitySymbol =
+      DIAGNOSTIC_SEVERITY_SYMBOLS[firstDiagnostic.severity];
+    const icon = colorizeDiagnosticSeverity(
+      severitySymbol,
+      firstDiagnostic.severity,
+    );
     const count = ruleDiagnostics.length;
     const countLabel =
-      count > 1 ? colorizeDiagnosticSeverity(` (${count})`, firstDiagnostic.severity) : "";
+      count > 1
+        ? colorizeDiagnosticSeverity(` (${count})`, firstDiagnostic.severity)
+        : "";
 
     logger.log(`  ${icon} ${firstDiagnostic.message}${countLabel}`);
     if (firstDiagnostic.help) {
@@ -103,7 +132,10 @@ const formatElapsedTime = (elapsedMilliseconds: number): string => {
   return `${(elapsedMilliseconds / MILLISECONDS_PER_SECOND).toFixed(1)}s`;
 };
 
-const formatRuleSummary = (ruleKey: string, ruleDiagnostics: Diagnostic[]): string => {
+const formatRuleSummary = (
+  ruleKey: string,
+  ruleDiagnostics: Diagnostic[],
+): string => {
   const firstDiagnostic = ruleDiagnostics[0];
   const fileLines = buildFileLineMap(ruleDiagnostics);
 
@@ -135,10 +167,16 @@ const writeDiagnosticsDirectory = (diagnostics: Diagnostic[]): string => {
 
   for (const [ruleKey, ruleDiagnostics] of getSortedRuleGroups(diagnostics)) {
     const fileName = ruleKey.replace(/\//g, "--") + ".txt";
-    writeFileSync(join(outputDirectory, fileName), formatRuleSummary(ruleKey, ruleDiagnostics));
+    writeFileSync(
+      join(outputDirectory, fileName),
+      formatRuleSummary(ruleKey, ruleDiagnostics),
+    );
   }
 
-  writeFileSync(join(outputDirectory, "diagnostics.json"), JSON.stringify(diagnostics, null, 2));
+  writeFileSync(
+    join(outputDirectory, "diagnostics.json"),
+    JSON.stringify(diagnostics, null, 2),
+  );
 
   return outputDirectory;
 };
@@ -150,7 +188,9 @@ const colorizeByScore = (text: string, score: number): string => {
 };
 
 const buildScoreBarSegments = (score: number): ScoreBarSegments => {
-  const filledCount = Math.round((score / PERFECT_SCORE) * SCORE_BAR_WIDTH_CHARS);
+  const filledCount = Math.round(
+    (score / PERFECT_SCORE) * SCORE_BAR_WIDTH_CHARS,
+  );
   const emptyCount = SCORE_BAR_WIDTH_CHARS - filledCount;
 
   return {
@@ -232,7 +272,9 @@ const runDiagnosticTask = async (
     return [];
   }
 
-  const taskSpinner = shouldRenderSpinner ? spinner(startMessage).start() : null;
+  const taskSpinner = shouldRenderSpinner
+    ? spinner(startMessage).start()
+    : null;
 
   try {
     const diagnostics = await runTask();
@@ -268,7 +310,8 @@ const buildShareUrl = (
   const params = new URLSearchParams();
   params.set("p", projectName);
   if (scoreResult) params.set("s", String(scoreResult.score));
-  if (diagnosticSummary.errorCount > 0) params.set("e", String(diagnosticSummary.errorCount));
+  if (diagnosticSummary.errorCount > 0)
+    params.set("e", String(diagnosticSummary.errorCount));
   if (diagnosticSummary.warningCount > 0) {
     params.set("w", String(diagnosticSummary.warningCount));
   }
@@ -316,13 +359,24 @@ const printSummary = (
   const summaryFramedLines: FramedLine[] = [];
   if (scoreResult) {
     const [eyes, mouth] = getDoctorFace(scoreResult.score);
-    const scoreColorizer = (text: string): string => colorizeByScore(text, scoreResult.score);
+    const scoreColorizer = (text: string): string =>
+      colorizeByScore(text, scoreResult.score);
 
-    summaryFramedLines.push(createFramedLine("┌─────┐", scoreColorizer("┌─────┐")));
-    summaryFramedLines.push(createFramedLine(`│ ${eyes} │`, scoreColorizer(`│ ${eyes} │`)));
-    summaryFramedLines.push(createFramedLine(`│ ${mouth} │`, scoreColorizer(`│ ${mouth} │`)));
-    summaryFramedLines.push(createFramedLine("└─────┘", scoreColorizer("└─────┘")));
-    summaryFramedLines.push(createFramedLine(VERCEL_DOCTOR_BRAND_LABEL, renderBrandLabel()));
+    summaryFramedLines.push(
+      createFramedLine("┌─────┐", scoreColorizer("┌─────┐")),
+    );
+    summaryFramedLines.push(
+      createFramedLine(`│ ${eyes} │`, scoreColorizer(`│ ${eyes} │`)),
+    );
+    summaryFramedLines.push(
+      createFramedLine(`│ ${mouth} │`, scoreColorizer(`│ ${mouth} │`)),
+    );
+    summaryFramedLines.push(
+      createFramedLine("└─────┘", scoreColorizer("└─────┘")),
+    );
+    summaryFramedLines.push(
+      createFramedLine(VERCEL_DOCTOR_BRAND_LABEL, renderBrandLabel()),
+    );
     summaryFramedLines.push(createFramedLine(""));
 
     const scoreLinePlainText = `${scoreResult.score} / ${PERFECT_SCORE}  ${scoreResult.label}`;
@@ -330,21 +384,33 @@ const printSummary = (
       String(scoreResult.score),
       scoreResult.score,
     )} / ${PERFECT_SCORE}  ${colorizeByScore(scoreResult.label, scoreResult.score)}`;
-    summaryFramedLines.push(createFramedLine(scoreLinePlainText, scoreLineRenderedText));
+    summaryFramedLines.push(
+      createFramedLine(scoreLinePlainText, scoreLineRenderedText),
+    );
     summaryFramedLines.push(createFramedLine(""));
     summaryFramedLines.push(
-      createFramedLine(buildPlainScoreBar(scoreResult.score), buildScoreBar(scoreResult.score)),
+      createFramedLine(
+        buildPlainScoreBar(scoreResult.score),
+        buildScoreBar(scoreResult.score),
+      ),
     );
     summaryFramedLines.push(createFramedLine(""));
   } else {
-    summaryFramedLines.push(createFramedLine(VERCEL_DOCTOR_BRAND_LABEL, renderBrandLabel()));
+    summaryFramedLines.push(
+      createFramedLine(VERCEL_DOCTOR_BRAND_LABEL, renderBrandLabel()),
+    );
     summaryFramedLines.push(createFramedLine(""));
-    summaryFramedLines.push(createFramedLine(noScoreMessage, highlighter.dim(noScoreMessage)));
+    summaryFramedLines.push(
+      createFramedLine(noScoreMessage, highlighter.dim(noScoreMessage)),
+    );
     summaryFramedLines.push(createFramedLine(""));
   }
 
   summaryFramedLines.push(
-    createFramedLine(summaryLinePartsPlain.join("  "), summaryLineParts.join("  ")),
+    createFramedLine(
+      summaryLinePartsPlain.join("  "),
+      summaryLineParts.join("  "),
+    ),
   );
   printFramedBox(summaryFramedLines);
 
@@ -388,21 +454,27 @@ export const scan = async (
 
   if (!options.scoreOnly) {
     const frameworkLabel = formatFrameworkName(projectInfo.framework);
-    const languageLabel = projectInfo.hasTypeScript ? "TypeScript" : "JavaScript";
+    const languageLabel = projectInfo.hasTypeScript
+      ? "TypeScript"
+      : "JavaScript";
     const nextVersionLabel = projectInfo.nextVersion
       ? `Next.js ${projectInfo.nextVersion}`
       : "Next.js version unknown";
     const projectStepMessages = [
       `Detecting framework. Found ${highlighter.info(frameworkLabel)}.`,
       ...(projectInfo.framework === "nextjs"
-        ? [`Detecting Next.js version. Found ${highlighter.info(nextVersionLabel)}.`]
+        ? [
+            `Detecting Next.js version. Found ${highlighter.info(nextVersionLabel)}.`,
+          ]
         : []),
       `Detecting React version. Found ${highlighter.info(`React ${projectInfo.reactVersion}`)}.`,
       `Detecting language. Found ${highlighter.info(languageLabel)}.`,
       isDiffMode
         ? `Scanning ${highlighter.info(`${includePaths.length}`)} changed source files.`
         : `Found ${highlighter.info(`${projectInfo.sourceFileCount}`)} source files.`,
-      ...(userConfig ? [`Loaded ${highlighter.info("vercel-doctor config")}.`] : []),
+      ...(userConfig
+        ? [`Loaded ${highlighter.info("vercel-doctor config")}.`]
+        : []),
     ];
 
     printCompletedSteps(projectStepMessages);
@@ -419,7 +491,13 @@ export const scan = async (
     "Running lint checks...",
     "Running lint checks.",
     "Lint checks failed (non-fatal, skipping).",
-    () => runOxlint(directory, projectInfo.hasTypeScript, projectInfo.framework, jsxIncludePaths),
+    () =>
+      runOxlint(
+        directory,
+        projectInfo.hasTypeScript,
+        projectInfo.framework,
+        jsxIncludePaths,
+      ),
     true,
   );
 
@@ -444,20 +522,25 @@ export const scan = async (
       }),
   );
 
-  const [lintDiagnostics, deadCodeDiagnostics, vercelDiagnostics] = await Promise.all([
-    lintPromise,
-    deadCodePromise,
-    vercelChecksPromise,
-  ]);
-  const allDiagnostics = [...lintDiagnostics, ...deadCodeDiagnostics, ...vercelDiagnostics];
+  const [lintDiagnostics, deadCodeDiagnostics, vercelDiagnostics] =
+    await Promise.all([lintPromise, deadCodePromise, vercelChecksPromise]);
+  const allDiagnostics = [
+    ...lintDiagnostics,
+    ...deadCodeDiagnostics,
+    ...vercelDiagnostics,
+  ];
   const diagnostics = userConfig
     ? filterIgnoredDiagnostics(allDiagnostics, userConfig)
     : allDiagnostics;
 
   const elapsedMilliseconds = performance.now() - startTime;
 
-  const scoreResult = options.offline ? null : await calculateScore(diagnostics);
-  const noScoreMessage = options.offline ? OFFLINE_FLAG_MESSAGE : OFFLINE_MESSAGE;
+  const scoreResult = options.offline
+    ? null
+    : await calculateScore(diagnostics);
+  const noScoreMessage = options.offline
+    ? OFFLINE_FLAG_MESSAGE
+    : OFFLINE_MESSAGE;
 
   if (options.scoreOnly) {
     if (scoreResult) {
@@ -486,7 +569,9 @@ export const scan = async (
     return { diagnostics, scoreResult };
   }
 
-  const displayedSourceFileCount = isDiffMode ? includePaths.length : projectInfo.sourceFileCount;
+  const displayedSourceFileCount = isDiffMode
+    ? includePaths.length
+    : projectInfo.sourceFileCount;
 
   // #1: "human" is the sole terminal format — printDiagnostics/printSummary only run here.
   // "markdown" to stdout is handled by cli.ts after scan() returns.
@@ -502,7 +587,10 @@ export const scan = async (
     );
   } else if (options.output === "markdown") {
     // Markdown to stdout — #4: file writes are handled by cli.ts
-    const markdownReport = generateMarkdownReport(diagnostics, projectInfo.projectName);
+    const markdownReport = generateMarkdownReport(
+      diagnostics,
+      projectInfo.projectName,
+    );
     logger.break();
     logger.log(markdownReport);
   }

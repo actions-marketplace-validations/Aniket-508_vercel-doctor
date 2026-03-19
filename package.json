@@ -25,7 +25,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
     "lefthook": "^2.1.4",
-    "oxfmt": "^0.32.0",
+    "oxfmt": "^0.41.0",
     "oxlint": "^1.47.0"
   },
   "packageManager": "pnpm@10.29.1"

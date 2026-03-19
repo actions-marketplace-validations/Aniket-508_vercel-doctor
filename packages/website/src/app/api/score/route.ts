@@ -1,6 +1,6 @@
 import { API_CORS_HEADERS } from "@/constants/api";
-import getScoreLabel from "@/utils/get-score-label";
 import { calculateScore } from "@/utils/calculate-score";
+import getScoreLabel from "@/utils/get-score-label";
 import { isValidDiagnostic } from "@/utils/validate-diagnostic";
 
 export const OPTIONS = (): Response =>
@@ -16,7 +16,9 @@ export const POST = async (request: Request): Promise<Response> => {
     );
   }
 
-  const isValidPayload = body.diagnostics.every((entry: unknown) => isValidDiagnostic(entry));
+  const isValidPayload = body.diagnostics.every((entry: unknown) =>
+    isValidDiagnostic(entry),
+  );
 
   if (!isValidPayload) {
     return Response.json(
@@ -30,5 +32,8 @@ export const POST = async (request: Request): Promise<Response> => {
 
   const score = calculateScore(body.diagnostics);
 
-  return Response.json({ score, label: getScoreLabel(score) }, { headers: API_CORS_HEADERS });
+  return Response.json(
+    { score, label: getScoreLabel(score) },
+    { headers: API_CORS_HEADERS },
+  );
 };

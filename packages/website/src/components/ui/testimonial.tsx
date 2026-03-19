@@ -4,21 +4,34 @@ import { cn } from "@/lib/utils";
 
 export function Testimonial({ className, ...props }: ComponentProps<"figure">) {
   return (
-    <figure data-slot="testimonial" className={cn("flex h-full flex-col", className)} {...props} />
-  );
-}
-
-export function TestimonialQuote({ className, ...props }: ComponentProps<"blockquote">) {
-  return (
-    <blockquote
-      data-slot="quote"
-      className={cn("grow px-4 py-3 text-base text-balance text-foreground", className)}
+    <figure
+      data-slot="testimonial"
+      className={cn("flex h-full flex-col", className)}
       {...props}
     />
   );
 }
 
-export function TestimonialAuthor({ className, ...props }: ComponentProps<"figcaption">) {
+export function TestimonialQuote({
+  className,
+  ...props
+}: ComponentProps<"blockquote">) {
+  return (
+    <blockquote
+      data-slot="quote"
+      className={cn(
+        "text-foreground grow px-4 py-3 text-base text-balance",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function TestimonialAuthor({
+  className,
+  ...props
+}: ComponentProps<"figcaption">) {
   return (
     <figcaption
       data-slot="author"
@@ -31,7 +44,10 @@ export function TestimonialAuthor({ className, ...props }: ComponentProps<"figca
   );
 }
 
-export function TestimonialAvatar({ className, ...props }: ComponentProps<"div">) {
+export function TestimonialAvatar({
+  className,
+  ...props
+}: ComponentProps<"div">) {
   return (
     <div
       data-slot="avatar"
@@ -41,7 +57,12 @@ export function TestimonialAvatar({ className, ...props }: ComponentProps<"div">
   );
 }
 
-export function TestimonialAvatarImg({ className, src, alt, ...props }: ComponentProps<"img">) {
+export function TestimonialAvatarImg({
+  className,
+  src,
+  alt,
+  ...props
+}: ComponentProps<"img">) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -54,7 +75,10 @@ export function TestimonialAvatarImg({ className, src, alt, ...props }: Componen
   );
 }
 
-export function TestimonialAvatarRing({ className, ...props }: ComponentProps<"div">) {
+export function TestimonialAvatarRing({
+  className,
+  ...props
+}: ComponentProps<"div">) {
   return (
     <div
       data-slot="avatar-ring"
@@ -67,31 +91,49 @@ export function TestimonialAvatarRing({ className, ...props }: ComponentProps<"d
   );
 }
 
-export function TestimonialAuthorName({ className, ...props }: ComponentProps<"div">) {
+export function TestimonialAuthorName({
+  className,
+  ...props
+}: ComponentProps<"div">) {
   return (
     <div
       data-slot="author-name"
-      className={cn("text-sm leading-4 font-semibold text-foreground", className)}
+      className={cn(
+        "text-foreground text-sm leading-4 font-semibold",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-export function TestimonialAuthorTagline({ className, ...props }: ComponentProps<"div">) {
+export function TestimonialAuthorTagline({
+  className,
+  ...props
+}: ComponentProps<"div">) {
   return (
     <div
       data-slot="author-tagline"
-      className={cn("text-xs leading-4 text-balance text-muted-foreground", className)}
+      className={cn(
+        "text-muted-foreground text-xs leading-4 text-balance",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-export function TestimonialVerifiedBadge({ className, ...props }: ComponentProps<"svg">) {
+export function TestimonialVerifiedBadge({
+  className,
+  ...props
+}: ComponentProps<"svg">) {
   return (
     <svg
       data-slot="verified-badge"
-      className={cn("ml-1.5 inline-block size-3 -translate-y-px text-info", className)}
+      className={cn(
+        "text-info ml-1.5 inline-block size-3 -translate-y-px",
+        className,
+      )}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

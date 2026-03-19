@@ -1,13 +1,20 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+
 import { afterAll, describe, expect, it } from "vitest";
+
 import { STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES } from "../src/constants.js";
 import { runVercelChecks } from "../src/utils/run-vercel-checks.js";
 
-const testProjectDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "vercel-doctor-vercel-checks-"));
+const testProjectDirectory = fs.mkdtempSync(
+  path.join(os.tmpdir(), "vercel-doctor-vercel-checks-"),
+);
 
-const writeTestFile = (relativeFilePath: string, fileContent: string | Buffer): void => {
+const writeTestFile = (
+  relativeFilePath: string,
+  fileContent: string | Buffer,
+): void => {
   const absoluteFilePath = path.join(testProjectDirectory, relativeFilePath);
   fs.mkdirSync(path.dirname(absoluteFilePath), { recursive: true });
   fs.writeFileSync(absoluteFilePath, fileContent);
@@ -52,7 +59,10 @@ export default nextConfig;
 `,
 );
 
-writeTestFile("public/hero-video.mp4", Buffer.alloc(STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES + 1));
+writeTestFile(
+  "public/hero-video.mp4",
+  Buffer.alloc(STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES + 1),
+);
 
 writeTestFile(
   "app/page.tsx",
@@ -177,7 +187,9 @@ afterAll(() => {
 describe("runVercelChecks", () => {
   it("reports Vercel-focused optimization diagnostics", () => {
     const diagnostics = runVercelChecks(testProjectDirectory);
-    const reportedRules = new Set(diagnostics.map((diagnostic) => diagnostic.rule));
+    const reportedRules = new Set(
+      diagnostics.map((diagnostic) => diagnostic.rule),
+    );
 
     expect(reportedRules).toContain("vercel-large-static-asset");
     expect(reportedRules).toContain("vercel-no-force-dynamic");
@@ -216,12 +228,16 @@ describe("runVercelChecks", () => {
     const diagnostics = runVercelChecks(testProjectDirectory, {
       includePaths: ["app/page.tsx"],
     });
-    const reportedRules = new Set(diagnostics.map((diagnostic) => diagnostic.rule));
+    const reportedRules = new Set(
+      diagnostics.map((diagnostic) => diagnostic.rule),
+    );
 
     expect(reportedRules).toContain("vercel-no-force-dynamic");
     expect(reportedRules).toContain("vercel-no-no-store-fetch");
     expect(reportedRules).not.toContain("vercel-consider-bun-runtime");
     expect(reportedRules).not.toContain("vercel-avoid-platform-cron");
-    expect(diagnostics.every((diagnostic) => diagnostic.filePath === "app/page.tsx")).toBe(true);
+    expect(
+      diagnostics.every((diagnostic) => diagnostic.filePath === "app/page.tsx"),
+    ).toBe(true);
   });
 });

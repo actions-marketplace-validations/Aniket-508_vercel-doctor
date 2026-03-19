@@ -1,5 +1,8 @@
-import { RULE_CATEGORY_DETAILS, RULE_FIX_STRATEGIES } from "../rule-metadata.js";
 import { PLUGIN_RULE_IDS, VERCEL_RULE_IDS } from "../rule-ids.js";
+import {
+  RULE_CATEGORY_DETAILS,
+  RULE_FIX_STRATEGIES,
+} from "../rule-metadata.js";
 import type { Diagnostic } from "../types.js";
 import {
   DIAGNOSTIC_SEVERITY_MARKDOWN_SYMBOLS,
@@ -34,8 +37,12 @@ const BETTER_ALL_CODEMOD_TRIGGER_RULE_IDS = new Set([
   VERCEL_RULE_IDS.SEQUENTIAL_DATABASE_AWAIT,
 ]);
 
-const shouldIncludeBetterAllCodemodPrompt = (diagnostics: Diagnostic[]): boolean =>
-  diagnostics.some((diagnostic) => BETTER_ALL_CODEMOD_TRIGGER_RULE_IDS.has(diagnostic.rule));
+const shouldIncludeBetterAllCodemodPrompt = (
+  diagnostics: Diagnostic[],
+): boolean =>
+  diagnostics.some((diagnostic) =>
+    BETTER_ALL_CODEMOD_TRIGGER_RULE_IDS.has(diagnostic.rule),
+  );
 
 const createBetterAllCodemodPrompt =
   (): string => `Create a migration plan to replace Promise.all with better-all across the repository.
@@ -58,7 +65,9 @@ const formatDiagnosticForReport = (diagnostic: Diagnostic): string => {
 };
 
 const buildDiagnosticLocation = (diagnostic: Diagnostic): string =>
-  diagnostic.line > 0 ? `${diagnostic.filePath}:${diagnostic.line}` : diagnostic.filePath;
+  diagnostic.line > 0
+    ? `${diagnostic.filePath}:${diagnostic.line}`
+    : diagnostic.filePath;
 
 const createAIPromptContext = (diagnostic: Diagnostic): AIPromptContext => ({
   rule: diagnostic.rule,
@@ -103,7 +112,9 @@ Instructions:
 4. Test that the change works as expected`;
 };
 
-export const groupDiagnosticsByCategory = (diagnostics: Diagnostic[]): ReportSection[] => {
+export const groupDiagnosticsByCategory = (
+  diagnostics: Diagnostic[],
+): ReportSection[] => {
   const grouped = new Map<string, Diagnostic[]>();
 
   for (const diagnostic of diagnostics) {
@@ -114,7 +125,8 @@ export const groupDiagnosticsByCategory = (diagnostics: Diagnostic[]): ReportSec
   }
 
   return [...grouped.entries()].map(([category, categoryDiagnostics]) => {
-    const categoryInfo = RULE_CATEGORY_DETAILS[category] ?? RULE_CATEGORY_DETAILS.Other;
+    const categoryInfo =
+      RULE_CATEGORY_DETAILS[category] ?? RULE_CATEGORY_DETAILS.Other;
 
     return {
       title: category,
@@ -125,7 +137,9 @@ export const groupDiagnosticsByCategory = (diagnostics: Diagnostic[]): ReportSec
   });
 };
 
-export const generateHumanReadableReport = (diagnostics: Diagnostic[]): string => {
+export const generateHumanReadableReport = (
+  diagnostics: Diagnostic[],
+): string => {
   if (diagnostics.length === 0) {
     return `
 ✅ No Vercel optimization issues found!
@@ -170,8 +184,11 @@ export const generateAIPromptsMarkdown = (
   // #9: optional timestamp param for deterministic snapshot testing
   timestamp = new Date().toISOString(),
 ): string => {
-  const fixableDiagnostics = diagnostics.filter((d) => RULE_FIX_STRATEGIES[d.rule]);
-  const shouldAddBetterAllCodemodPrompt = shouldIncludeBetterAllCodemodPrompt(diagnostics);
+  const fixableDiagnostics = diagnostics.filter(
+    (d) => RULE_FIX_STRATEGIES[d.rule],
+  );
+  const shouldAddBetterAllCodemodPrompt =
+    shouldIncludeBetterAllCodemodPrompt(diagnostics);
 
   if (fixableDiagnostics.length === 0 && !shouldAddBetterAllCodemodPrompt) {
     return "# AI Fix Prompts\n\nNo auto-fixable issues detected.\n";
@@ -218,7 +235,9 @@ export interface AIPromptEntry {
   prompt: string;
 }
 
-export const generateAIPrompts = (diagnostics: Diagnostic[]): AIPromptEntry[] => {
+export const generateAIPrompts = (
+  diagnostics: Diagnostic[],
+): AIPromptEntry[] => {
   const aiPromptEntries = diagnostics
     .filter((d) => RULE_FIX_STRATEGIES[d.rule])
     .map((diagnostic) => ({
@@ -253,7 +272,8 @@ export const generateMarkdownReport = (
   report += `- **Warnings:** ${diagnosticSummary.warningCount}\n\n`;
 
   if (diagnostics.length === 0) {
-    report += "✅ No issues found! Your project follows Vercel best practices.\n";
+    report +=
+      "✅ No issues found! Your project follows Vercel best practices.\n";
     return report;
   }
 

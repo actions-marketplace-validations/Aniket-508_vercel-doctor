@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+
 import {
   BYTES_PER_KILOBYTE,
   BYTES_PER_MEGABYTE,
@@ -62,19 +63,27 @@ const STATIC_ASSET_EXTENSIONS = new Set([
 ]);
 
 const SOURCE_CODE_FILE_PATTERN = /\.(?:[cm]?[jt]sx?)$/;
-const APP_PAGE_OR_LAYOUT_FILE_PATTERN = /(?:^|\/)app\/(?:.*\/)?(?:page|layout)\.(?:[cm]?[jt]sx?)$/;
-const PAGES_ROUTE_FILE_PATTERN = /(?:^|\/)pages\/(?!api\/).+\.(?:[cm]?[jt]sx?)$/;
-const APP_API_ROUTE_FILE_PATTERN = /(?:^|\/)app\/api\/(?:.*\/)?route\.(?:[cm]?[jt]sx?)$/;
-const PAGES_API_ROUTE_FILE_PATTERN = /(?:^|\/)pages\/api\/.+\.(?:[cm]?[jt]sx?)$/;
+const APP_PAGE_OR_LAYOUT_FILE_PATTERN =
+  /(?:^|\/)app\/(?:.*\/)?(?:page|layout)\.(?:[cm]?[jt]sx?)$/;
+const PAGES_ROUTE_FILE_PATTERN =
+  /(?:^|\/)pages\/(?!api\/).+\.(?:[cm]?[jt]sx?)$/;
+const APP_API_ROUTE_FILE_PATTERN =
+  /(?:^|\/)app\/api\/(?:.*\/)?route\.(?:[cm]?[jt]sx?)$/;
+const PAGES_API_ROUTE_FILE_PATTERN =
+  /(?:^|\/)pages\/api\/.+\.(?:[cm]?[jt]sx?)$/;
 const MIDDLEWARE_FILE_PATTERN = /(?:^|\/)middleware\.(?:[cm]?[jt]sx?)$/;
 const NEXT_CONFIG_FILE_PATTERN = /(?:^|\/)next\.config\.(?:[cm]?[jt]s)$/;
 
-const EDGE_RUNTIME_EXPORT_PATTERN = /export\s+const\s+runtime\s*=\s*["']edge["']/;
-const FORCE_DYNAMIC_EXPORT_PATTERN = /export\s+const\s+dynamic\s*=\s*["']force-dynamic["']/;
+const EDGE_RUNTIME_EXPORT_PATTERN =
+  /export\s+const\s+runtime\s*=\s*["']edge["']/;
+const FORCE_DYNAMIC_EXPORT_PATTERN =
+  /export\s+const\s+dynamic\s*=\s*["']force-dynamic["']/;
 const NO_STORE_FETCH_PATTERN = /cache\s*:\s*["']no-store["']/;
 const ZERO_REVALIDATE_PATTERN = /revalidate\s*:\s*0\b/;
-const GET_SERVER_SIDE_PROPS_PATTERN = /export\s+(?:const|async\s+function)\s+getServerSideProps\b/;
-const GET_STATIC_PROPS_PATTERN = /export\s+(?:const|async\s+function)\s+getStaticProps\b/;
+const GET_SERVER_SIDE_PROPS_PATTERN =
+  /export\s+(?:const|async\s+function)\s+getServerSideProps\b/;
+const GET_STATIC_PROPS_PATTERN =
+  /export\s+(?:const|async\s+function)\s+getStaticProps\b/;
 const REVALIDATE_IN_RETURN_PATTERN = /\brevalidate\s*[:=]/;
 const TURBOPACK_CACHE_PATTERN = /\bturbopackFileSystemCacheForBuild\s*:/;
 const APP_ROUTE_GET_HANDLER_PATTERN =
@@ -94,13 +103,17 @@ const NEXT_IMAGE_IMPORT_PATTERN = /from\s+["']next\/image["']/;
 const IMAGE_TAG_PATTERN = /<Image\b[\s\S]*?\/>/g;
 const IMAGE_SRC_SVG_PATTERN =
   /src\s*=\s*(?:["']([^"']*\.svg)["']|\{\s*["']([^"']*\.svg)["']\s*\})/i;
-const IMAGE_HAS_UNOPTIMIZED_PATTERN = /\bunoptimized(?:\s*=\s*(?:\{\s*true\s*\}|["']true["']))?/;
+const IMAGE_HAS_UNOPTIMIZED_PATTERN =
+  /\bunoptimized(?:\s*=\s*(?:\{\s*true\s*\}|["']true["']))?/;
 const NEXT_CONFIG_UNOPTIMIZED_IMAGE_PATTERN =
   /\bimages\s*:\s*\{[\s\S]*?\bunoptimized\s*:\s*true\b[\s\S]*?\}/m;
-const NEXT_IMAGE_REMOTE_PATTERNS_PATTERN = /\bremotePatterns\s*:\s*\[([\s\S]*?)\]/m;
+const NEXT_IMAGE_REMOTE_PATTERNS_PATTERN =
+  /\bremotePatterns\s*:\s*\[([\s\S]*?)\]/m;
 const NEXT_IMAGE_REMOTE_PATTERN_OBJECT_PATTERN = /\{[\s\S]*?\}/g;
-const NEXT_IMAGE_REMOTE_PATTERN_HOSTNAME_PATTERN = /\bhostname\s*:\s*["'][^"']+["']/;
-const NEXT_IMAGE_REMOTE_PATTERN_PATHNAME_PATTERN = /\bpathname\s*:\s*["']([^"']+)["']/;
+const NEXT_IMAGE_REMOTE_PATTERN_HOSTNAME_PATTERN =
+  /\bhostname\s*:\s*["'][^"']+["']/;
+const NEXT_IMAGE_REMOTE_PATTERN_PATHNAME_PATTERN =
+  /\bpathname\s*:\s*["']([^"']+)["']/;
 const NEXT_IMAGE_BROAD_PATHNAME_PATTERN = /^\/?\*\*$/;
 const SEQUENTIAL_DATABASE_AWAIT_PATTERN =
   /await\s+[A-Za-z0-9_$.]*?(?:prisma|db)[A-Za-z0-9_$.]*\.(?:findUnique|findFirst|findMany|create|update|upsert|delete|count|aggregate|groupBy|queryRaw|executeRaw)\s*\(/g;
@@ -138,7 +151,8 @@ const shouldInspectPath = (
   relativeFilePath: string,
   includedPathSet: Set<string> | null,
 ): boolean =>
-  includedPathSet === null || includedPathSet.has(normalizeProjectPath(relativeFilePath));
+  includedPathSet === null ||
+  includedPathSet.has(normalizeProjectPath(relativeFilePath));
 
 const collectProjectFilePaths = (rootDirectory: string): string[] => {
   const discoveredFilePaths: string[] = [];
@@ -150,13 +164,18 @@ const collectProjectFilePaths = (rootDirectory: string): string[] => {
 
     let directoryEntries: fs.Dirent[] = [];
     try {
-      directoryEntries = fs.readdirSync(currentDirectory, { withFileTypes: true });
+      directoryEntries = fs.readdirSync(currentDirectory, {
+        withFileTypes: true,
+      });
     } catch {
       continue;
     }
 
     for (const directoryEntry of directoryEntries) {
-      const entryAbsolutePath = path.join(currentDirectory, directoryEntry.name);
+      const entryAbsolutePath = path.join(
+        currentDirectory,
+        directoryEntry.name,
+      );
       const entryRelativePath = normalizeProjectPath(
         path.relative(rootDirectory, entryAbsolutePath),
       );
@@ -173,7 +192,9 @@ const collectProjectFilePaths = (rootDirectory: string): string[] => {
     }
   }
 
-  return discoveredFilePaths.toSorted((filePathA, filePathB) => filePathA.localeCompare(filePathB));
+  return discoveredFilePaths.toSorted((filePathA, filePathB) =>
+    filePathA.localeCompare(filePathB),
+  );
 };
 
 const isStaticAssetPath = (relativeFilePath: string): boolean =>
@@ -186,8 +207,12 @@ const isApiRoutePath = (relativeFilePath: string): boolean =>
   APP_API_ROUTE_FILE_PATTERN.test(relativeFilePath) ||
   PAGES_API_ROUTE_FILE_PATTERN.test(relativeFilePath);
 
-const isEdgeRuntimeFile = (relativeFilePath: string, fileContent: string): boolean =>
-  MIDDLEWARE_FILE_PATTERN.test(relativeFilePath) || EDGE_RUNTIME_EXPORT_PATTERN.test(fileContent);
+const isEdgeRuntimeFile = (
+  relativeFilePath: string,
+  fileContent: string,
+): boolean =>
+  MIDDLEWARE_FILE_PATTERN.test(relativeFilePath) ||
+  EDGE_RUNTIME_EXPORT_PATTERN.test(fileContent);
 
 const readTextFileSafely = (absoluteFilePath: string): string | null => {
   try {
@@ -197,13 +222,19 @@ const readTextFileSafely = (absoluteFilePath: string): string | null => {
   }
 };
 
-const getLineNumberForPattern = (fileContent: string, pattern: RegExp): number => {
+const getLineNumberForPattern = (
+  fileContent: string,
+  pattern: RegExp,
+): number => {
   const matchedIndex = fileContent.search(pattern);
   if (matchedIndex < 0) return 0;
   return fileContent.slice(0, matchedIndex).split("\n").length;
 };
 
-const getLineNumberForCharacterIndex = (fileContent: string, characterIndex: number): number => {
+const getLineNumberForCharacterIndex = (
+  fileContent: string,
+  characterIndex: number,
+): number => {
   if (characterIndex < 0) return 0;
   return fileContent.slice(0, characterIndex).split("\n").length;
 };
@@ -266,10 +297,14 @@ const readVercelConfig = (rootDirectory: string): VercelConfig | null => {
   const functionsField = parsedConfig.functions;
   if (isObjectRecord(functionsField)) {
     const parsedFunctions: Record<string, VercelConfigFunctionConfig> = {};
-    for (const [functionGlob, functionConfigValue] of Object.entries(functionsField)) {
+    for (const [functionGlob, functionConfigValue] of Object.entries(
+      functionsField,
+    )) {
       if (!isObjectRecord(functionConfigValue)) continue;
       const runtimeValue =
-        typeof functionConfigValue.runtime === "string" ? functionConfigValue.runtime : undefined;
+        typeof functionConfigValue.runtime === "string"
+          ? functionConfigValue.runtime
+          : undefined;
       const maxDurationValue =
         typeof functionConfigValue.maxDuration === "number"
           ? functionConfigValue.maxDuration
@@ -297,7 +332,9 @@ const readNextVersion = (rootDirectory: string): string | null => {
     const dependencies = packageJson.dependencies ?? {};
     const devDependencies = packageJson.devDependencies ?? {};
     const peerDependencies = packageJson.peerDependencies ?? {};
-    return dependencies.next ?? devDependencies.next ?? peerDependencies.next ?? null;
+    return (
+      dependencies.next ?? devDependencies.next ?? peerDependencies.next ?? null
+    );
   } catch {
     return null;
   }
@@ -315,7 +352,9 @@ const buildNoStoreFetchHelp = (nextMajorVersion: number | null): string => {
   return "Use cacheable fetches (`force-cache`) or incremental revalidation when real-time data is not required.";
 };
 
-const buildMissingCachePolicyHelp = (nextMajorVersion: number | null): string => {
+const buildMissingCachePolicyHelp = (
+  nextMajorVersion: number | null,
+): string => {
   if (nextMajorVersion !== null && nextMajorVersion >= NEXT_MAJOR_VERSION_16) {
     return `For cacheable GET routes on Next.js ${NEXT_MAJOR_VERSION_16}+, add \`Cache-Control\` headers or adopt \`"use cache"\` + cache tags to avoid repeated origin work.`;
   }
@@ -353,7 +392,8 @@ const collectLargeStaticAssetCandidates = (
       continue;
     }
 
-    if (staticAssetSizeBytes < STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES) continue;
+    if (staticAssetSizeBytes < STATIC_ASSET_CDN_WARNING_THRESHOLD_BYTES)
+      continue;
     largeStaticAssetCandidates.push({
       filePath: relativeFilePath,
       sizeBytes: staticAssetSizeBytes,
@@ -361,7 +401,9 @@ const collectLargeStaticAssetCandidates = (
   }
 
   return largeStaticAssetCandidates
-    .toSorted((candidateA, candidateB) => candidateB.sizeBytes - candidateA.sizeBytes)
+    .toSorted(
+      (candidateA, candidateB) => candidateB.sizeBytes - candidateA.sizeBytes,
+    )
     .slice(0, MAX_STATIC_ASSET_CDN_DIAGNOSTICS_COUNT);
 };
 
@@ -525,7 +567,8 @@ const collectBuildOptimizationDiagnostics = (
   diagnostics: Diagnostic[],
 ): void => {
   if (!NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath)) return;
-  if (nextMajorVersion !== null && nextMajorVersion < NEXT_MAJOR_VERSION_16) return;
+  if (nextMajorVersion !== null && nextMajorVersion < NEXT_MAJOR_VERSION_16)
+    return;
 
   const hasExperimental = /\bexperimental\s*:\s*\{/m.test(fileContent);
   const hasTurbopackCache = TURBOPACK_CACHE_PATTERN.test(fileContent);
@@ -557,30 +600,42 @@ const collectImageOptimizationDiagnostics = (
         VERCEL_RULE_IDS.IMAGE_GLOBAL_UNOPTIMIZED,
         "next.config enables `images.unoptimized: true` — this disables Vercel Image Optimization globally",
         "Keep optimization enabled and configure image domains/remotePatterns as needed: https://vercel.com/docs/image-optimization",
-        getLineNumberForPattern(fileContent, NEXT_CONFIG_UNOPTIMIZED_IMAGE_PATTERN),
+        getLineNumberForPattern(
+          fileContent,
+          NEXT_CONFIG_UNOPTIMIZED_IMAGE_PATTERN,
+        ),
       ),
     );
   }
 
   if (NEXT_CONFIG_FILE_PATTERN.test(relativeFilePath)) {
-    const remotePatternsMatch = fileContent.match(NEXT_IMAGE_REMOTE_PATTERNS_PATTERN);
+    const remotePatternsMatch = fileContent.match(
+      NEXT_IMAGE_REMOTE_PATTERNS_PATTERN,
+    );
     if (remotePatternsMatch) {
       const remotePatternsBlockContent = remotePatternsMatch[1] ?? "";
-      const remotePatternsStartCharacterIndex = fileContent.indexOf(remotePatternsBlockContent);
+      const remotePatternsStartCharacterIndex = fileContent.indexOf(
+        remotePatternsBlockContent,
+      );
 
       if (remotePatternsStartCharacterIndex >= 0) {
         for (const remotePatternMatch of remotePatternsBlockContent.matchAll(
           NEXT_IMAGE_REMOTE_PATTERN_OBJECT_PATTERN,
         )) {
           const matchedRemotePatternObject = remotePatternMatch[0];
-          if (!NEXT_IMAGE_REMOTE_PATTERN_HOSTNAME_PATTERN.test(matchedRemotePatternObject))
+          if (
+            !NEXT_IMAGE_REMOTE_PATTERN_HOSTNAME_PATTERN.test(
+              matchedRemotePatternObject,
+            )
+          )
             continue;
 
           const pathnameMatch = matchedRemotePatternObject.match(
             NEXT_IMAGE_REMOTE_PATTERN_PATHNAME_PATTERN,
           );
           const hasBroadPathname =
-            pathnameMatch && NEXT_IMAGE_BROAD_PATHNAME_PATTERN.test(pathnameMatch[1].trim());
+            pathnameMatch &&
+            NEXT_IMAGE_BROAD_PATHNAME_PATTERN.test(pathnameMatch[1].trim());
           const isPathnameMissing = !pathnameMatch;
 
           if (!hasBroadPathname && !isPathnameMissing) continue;
@@ -593,7 +648,8 @@ const collectImageOptimizationDiagnostics = (
               "Restrict `images.remotePatterns.pathname` to app-specific prefixes instead of `/**`, and avoid patterns that omit pathname entirely: https://vercel.com/docs/image-optimization",
               getLineNumberForCharacterIndex(
                 fileContent,
-                remotePatternsStartCharacterIndex + (remotePatternMatch.index ?? 0),
+                remotePatternsStartCharacterIndex +
+                  (remotePatternMatch.index ?? 0),
               ),
             ),
           );
@@ -636,8 +692,12 @@ const collectDatabaseAwaitDiagnostics = (
   if (!isApiRoutePath(relativeFilePath)) return;
   if (PROMISE_ALL_PATTERN.test(fileContent)) return;
 
-  const sequentialDatabaseAwaitMatches = fileContent.match(SEQUENTIAL_DATABASE_AWAIT_PATTERN) ?? [];
-  if (sequentialDatabaseAwaitMatches.length < SEQUENTIAL_DATABASE_AWAIT_WARNING_THRESHOLD_COUNT)
+  const sequentialDatabaseAwaitMatches =
+    fileContent.match(SEQUENTIAL_DATABASE_AWAIT_PATTERN) ?? [];
+  if (
+    sequentialDatabaseAwaitMatches.length <
+    SEQUENTIAL_DATABASE_AWAIT_WARNING_THRESHOLD_COUNT
+  )
     return;
 
   diagnostics.push(
@@ -646,13 +706,20 @@ const collectDatabaseAwaitDiagnostics = (
       VERCEL_RULE_IDS.SEQUENTIAL_DATABASE_AWAIT,
       "API route appears to run multiple database calls sequentially — this can inflate function duration and cost",
       buildSequentialDatabaseAwaitHelp(),
-      getLineNumberForPattern(fileContent, SEQUENTIAL_DATABASE_AWAIT_LINE_PATTERN),
+      getLineNumberForPattern(
+        fileContent,
+        SEQUENTIAL_DATABASE_AWAIT_LINE_PATTERN,
+      ),
     ),
   );
 };
 
-const shouldRunConfigCheck = (includedPathSet: Set<string> | null, configPath: string): boolean =>
-  includedPathSet === null || includedPathSet.has(normalizeProjectPath(configPath));
+const shouldRunConfigCheck = (
+  includedPathSet: Set<string> | null,
+  configPath: string,
+): boolean =>
+  includedPathSet === null ||
+  includedPathSet.has(normalizeProjectPath(configPath));
 
 const collectBunDiagnostic = (
   rootDirectory: string,
@@ -678,7 +745,8 @@ const collectBunDiagnostic = (
 
   const packageManagerField = packageJson.packageManager;
   const usesBunPackageManager =
-    typeof packageManagerField === "string" && packageManagerField.startsWith("bun@");
+    typeof packageManagerField === "string" &&
+    packageManagerField.startsWith("bun@");
   const hasBunLockfile =
     fs.existsSync(path.join(rootDirectory, BUN_LOCK_PATH)) ||
     fs.existsSync(path.join(rootDirectory, BUN_LOCK_BINARY_PATH));
@@ -737,7 +805,10 @@ export const runVercelChecks = (
   options: VercelCheckOptions = {},
 ): Diagnostic[] => {
   const diagnostics: Diagnostic[] = [];
-  const includedPathSet = buildIncludedPathSet(rootDirectory, options.includePaths);
+  const includedPathSet = buildIncludedPathSet(
+    rootDirectory,
+    options.includePaths,
+  );
   const projectFilePaths = collectProjectFilePaths(rootDirectory);
   const nextVersion = readNextVersion(rootDirectory);
   const nextMajorVersion = getSemverMajorVersion(nextVersion);
@@ -767,10 +838,24 @@ export const runVercelChecks = (
     const fileContent = readTextFileSafely(absoluteFilePath);
     if (!fileContent) continue;
 
-    collectSsgDiagnostics(relativeFilePath, fileContent, nextMajorVersion, diagnostics);
+    collectSsgDiagnostics(
+      relativeFilePath,
+      fileContent,
+      nextMajorVersion,
+      diagnostics,
+    );
     collectEdgeDiagnostics(relativeFilePath, fileContent, diagnostics);
-    collectCachingDiagnostics(relativeFilePath, fileContent, nextMajorVersion, diagnostics);
-    collectImageOptimizationDiagnostics(relativeFilePath, fileContent, diagnostics);
+    collectCachingDiagnostics(
+      relativeFilePath,
+      fileContent,
+      nextMajorVersion,
+      diagnostics,
+    );
+    collectImageOptimizationDiagnostics(
+      relativeFilePath,
+      fileContent,
+      diagnostics,
+    );
     collectBuildOptimizationDiagnostics(
       relativeFilePath,
       fileContent,
@@ -787,7 +872,11 @@ export const runVercelChecks = (
   collectBunDiagnostic(rootDirectory, includedPathSet, diagnostics);
   const vercelConfig = readVercelConfig(rootDirectory);
   collectCronDiagnostic(includedPathSet, vercelConfig, diagnostics);
-  collectFluidComputeDiagnostic(apiRouteFilePaths.length, apiRouteFilePaths, diagnostics);
+  collectFluidComputeDiagnostic(
+    apiRouteFilePaths.length,
+    apiRouteFilePaths,
+    diagnostics,
+  );
 
   if (projectFilePaths.length >= LARGE_PROJECT_FILE_COUNT_THRESHOLD) {
     diagnostics.push(

@@ -1,8 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import { ImageResponse } from "next/og";
+
 import { PERFECT_SCORE } from "@/constants/score";
-import getScoreLabel from "@/utils/get-score-label";
 import getScoreHexColor from "@/utils/get-score-hex-color";
+import getScoreLabel from "@/utils/get-score-label";
 
 const IMAGE_WIDTH_PX = 1200;
 const IMAGE_HEIGHT_PX = 630;
@@ -13,7 +14,10 @@ export const GET = (request: Request): ImageResponse => {
   const { searchParams } = new URL(request.url);
 
   const projectName = searchParams.get("p") ?? null;
-  const score = Math.max(0, Math.min(PERFECT_SCORE, Number(searchParams.get("s")) || 0));
+  const score = Math.max(
+    0,
+    Math.min(PERFECT_SCORE, Number(searchParams.get("s")) || 0),
+  );
   const errorCount = Math.max(0, Number(searchParams.get("e")) || 0);
   const warningCount = Math.max(0, Number(searchParams.get("w")) || 0);
   const fileCount = Math.max(0, Number(searchParams.get("f")) || 0);
@@ -36,7 +40,12 @@ export const GET = (request: Request): ImageResponse => {
     >
       <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <img src={logoUrl} width={OG_ICON_SIZE_PX} height={OG_ICON_SIZE_PX} alt="" />
+          <img
+            src={logoUrl}
+            width={OG_ICON_SIZE_PX}
+            height={OG_ICON_SIZE_PX}
+            alt=""
+          />
           <span
             style={{
               fontSize: "28px",
@@ -79,7 +88,9 @@ export const GET = (request: Request): ImageResponse => {
         >
           {score}
         </span>
-        <span style={{ fontSize: "40px", color: "#525252", lineHeight: 1 }}>/ {PERFECT_SCORE}</span>
+        <span style={{ fontSize: "40px", color: "#525252", lineHeight: 1 }}>
+          / {PERFECT_SCORE}
+        </span>
         <span
           style={{
             fontSize: "40px",

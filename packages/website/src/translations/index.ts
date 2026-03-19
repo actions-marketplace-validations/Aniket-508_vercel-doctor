@@ -1,21 +1,22 @@
+import { i18n } from "@/i18n/config";
+
+import { ar } from "./ar";
+import { da } from "./da";
+import { de } from "./de";
 import { en } from "./en";
 import { es } from "./es";
-import { zh } from "./zh";
-import { ja } from "./ja";
 import { fr } from "./fr";
-import { de } from "./de";
+import { hi } from "./hi";
+import { id } from "./id";
+import { it } from "./it";
+import { ja } from "./ja";
+import { ko } from "./ko";
 import { pt } from "./pt";
 import { ptBr } from "./pt-br";
-import { ko } from "./ko";
-import { ar } from "./ar";
-import { hi } from "./hi";
-import { it } from "./it";
-import { id } from "./id";
-import { tr } from "./tr";
 import { ru } from "./ru";
-import { da } from "./da";
+import { tr } from "./tr";
 import { uk } from "./uk";
-import { i18n } from "@/i18n/config";
+import { zh } from "./zh";
 
 export interface Translation {
   nav: {

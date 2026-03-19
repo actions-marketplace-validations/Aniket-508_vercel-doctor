@@ -1,37 +1,61 @@
 import path from "node:path";
+
 import { describe, expect, it } from "vitest";
-import { discoverProject, formatFrameworkName } from "../src/utils/discover-project.js";
+
+import {
+  discoverProject,
+  formatFrameworkName,
+} from "../src/utils/discover-project.js";
 
 const FIXTURES_DIRECTORY = path.resolve(import.meta.dirname, "fixtures");
-const VALID_FRAMEWORKS = ["nextjs", "vite", "cra", "remix", "gatsby", "unknown"];
+const VALID_FRAMEWORKS = [
+  "nextjs",
+  "vite",
+  "cra",
+  "remix",
+  "gatsby",
+  "unknown",
+];
 
 describe("discoverProject", () => {
   it("detects React version from package.json", () => {
-    const projectInfo = discoverProject(path.join(FIXTURES_DIRECTORY, "basic-react"));
+    const projectInfo = discoverProject(
+      path.join(FIXTURES_DIRECTORY, "basic-react"),
+    );
     expect(projectInfo.reactVersion).toBe("^19.0.0");
   });
 
   it("returns a valid framework", () => {
-    const projectInfo = discoverProject(path.join(FIXTURES_DIRECTORY, "basic-react"));
+    const projectInfo = discoverProject(
+      path.join(FIXTURES_DIRECTORY, "basic-react"),
+    );
     expect(VALID_FRAMEWORKS).toContain(projectInfo.framework);
   });
 
   it("detects TypeScript when tsconfig.json exists", () => {
-    const projectInfo = discoverProject(path.join(FIXTURES_DIRECTORY, "basic-react"));
+    const projectInfo = discoverProject(
+      path.join(FIXTURES_DIRECTORY, "basic-react"),
+    );
     expect(projectInfo.hasTypeScript).toBe(true);
   });
 
   it("detects React version from peerDependencies", () => {
-    const projectInfo = discoverProject(path.join(FIXTURES_DIRECTORY, "component-library"));
+    const projectInfo = discoverProject(
+      path.join(FIXTURES_DIRECTORY, "component-library"),
+    );
     expect(projectInfo.reactVersion).toBe("^18.0.0 || ^19.0.0");
   });
 
   it("throws when package.json is missing", () => {
-    expect(() => discoverProject("/nonexistent/path")).toThrow("No package.json found");
+    expect(() => discoverProject("/nonexistent/path")).toThrow(
+      "No package.json found",
+    );
   });
 
   it("detects Next.js version metadata when available", () => {
-    const projectInfo = discoverProject(path.join(FIXTURES_DIRECTORY, "nextjs-app"));
+    const projectInfo = discoverProject(
+      path.join(FIXTURES_DIRECTORY, "nextjs-app"),
+    );
     expect(projectInfo.nextVersion).toBe("^15.0.0");
     expect(projectInfo.nextMajorVersion).toBe(15);
   });

@@ -1,4 +1,5 @@
 import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from "remotion";
+
 import {
   AFFECTED_FILE_COUNT,
   BACKGROUND_COLOR,
@@ -20,9 +21,13 @@ import {
   TEXT_COLOR,
   TOTAL_ERROR_COUNT,
 } from "../constants";
-import { getBottomOverlayGradient } from "../utils/get-bottom-overlay-gradient";
 import { fontFamily } from "../utils/font";
-import { getDoctorFace, getScoreColor, getScoreLabel } from "../utils/score-display";
+import { getBottomOverlayGradient } from "../utils/get-bottom-overlay-gradient";
+import {
+  getDoctorFace,
+  getScoreColor,
+  getScoreLabel,
+} from "../utils/score-display";
 
 const HERO_FACE_FONT_SIZE_PX = 80;
 const HERO_NUMBER_FONT_SIZE_PX = 96;
@@ -49,7 +54,10 @@ const OVERLAY_FADE_IN_FRAMES = 15;
 const OVERLAY_HOLD_FRAMES = 35;
 const OVERLAY_FADE_OUT_FRAMES = 15;
 const OVERLAY_END_FRAME =
-  OVERLAY_START_FRAME + OVERLAY_FADE_IN_FRAMES + OVERLAY_HOLD_FRAMES + OVERLAY_FADE_OUT_FRAMES;
+  OVERLAY_START_FRAME +
+  OVERLAY_FADE_IN_FRAMES +
+  OVERLAY_HOLD_FRAMES +
+  OVERLAY_FADE_OUT_FRAMES;
 const OVERLAY_TITLE_FONT_SIZE_PX = 88;
 
 const lerpSize = (heroSize: number, smallSize: number, progress: number) =>
@@ -58,43 +66,77 @@ const lerpSize = (heroSize: number, smallSize: number, progress: number) =>
 export const Diagnostics = () => {
   const frame = useCurrentFrame();
 
-  const scoreBlockOpacity = interpolate(frame, [0, SCORE_FADE_IN_FRAMES], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
+  const scoreBlockOpacity = interpolate(
+    frame,
+    [0, SCORE_FADE_IN_FRAMES],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.cubic),
+    },
+  );
 
-  const scoreProgress = interpolate(frame, [0, SCORE_ANIMATION_FRAMES], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
+  const scoreProgress = interpolate(
+    frame,
+    [0, SCORE_ANIMATION_FRAMES],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.cubic),
+    },
+  );
   const currentScore = Math.round(scoreProgress * TARGET_SCORE);
   const scoreColor = getScoreColor(currentScore);
   const [eyes, mouth] = getDoctorFace(currentScore);
-  const filledBarCount = Math.round((currentScore / PERFECT_SCORE) * SCORE_BAR_WIDTH);
+  const filledBarCount = Math.round(
+    (currentScore / PERFECT_SCORE) * SCORE_BAR_WIDTH,
+  );
   const emptyBarCount = SCORE_BAR_WIDTH - filledBarCount;
 
-  const shrinkProgress = interpolate(frame, [SHRINK_START_FRAME, SHRINK_END_FRAME], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.quad),
-  });
+  const shrinkProgress = interpolate(
+    frame,
+    [SHRINK_START_FRAME, SHRINK_END_FRAME],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.inOut(Easing.quad),
+    },
+  );
 
-  const faceFontSize = lerpSize(HERO_FACE_FONT_SIZE_PX, SMALL_FACE_FONT_SIZE_PX, shrinkProgress);
+  const faceFontSize = lerpSize(
+    HERO_FACE_FONT_SIZE_PX,
+    SMALL_FACE_FONT_SIZE_PX,
+    shrinkProgress,
+  );
   const numberFontSize = lerpSize(
     HERO_NUMBER_FONT_SIZE_PX,
     SMALL_NUMBER_FONT_SIZE_PX,
     shrinkProgress,
   );
-  const labelFontSize = lerpSize(HERO_LABEL_FONT_SIZE_PX, SMALL_LABEL_FONT_SIZE_PX, shrinkProgress);
-  const barFontSize = lerpSize(HERO_BAR_FONT_SIZE_PX, SMALL_BAR_FONT_SIZE_PX, shrinkProgress);
+  const labelFontSize = lerpSize(
+    HERO_LABEL_FONT_SIZE_PX,
+    SMALL_LABEL_FONT_SIZE_PX,
+    shrinkProgress,
+  );
+  const barFontSize = lerpSize(
+    HERO_BAR_FONT_SIZE_PX,
+    SMALL_BAR_FONT_SIZE_PX,
+    shrinkProgress,
+  );
 
-  const summaryOpacity = interpolate(frame, [SHRINK_END_FRAME, SHRINK_END_FRAME + 10], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
+  const summaryOpacity = interpolate(
+    frame,
+    [SHRINK_END_FRAME, SHRINK_END_FRAME + 10],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.cubic),
+    },
+  );
 
   const diagnosticsStartFrame = ERRORS_START_DELAY_FRAMES;
 
@@ -201,8 +243,12 @@ export const Diagnostics = () => {
                 fontFamily,
               }}
             >
-              <span style={{ color: scoreColor }}>{"█".repeat(filledBarCount)}</span>
-              <span style={{ color: "#525252" }}>{"░".repeat(emptyBarCount)}</span>
+              <span style={{ color: scoreColor }}>
+                {"█".repeat(filledBarCount)}
+              </span>
+              <span style={{ color: "#525252" }}>
+                {"░".repeat(emptyBarCount)}
+              </span>
             </div>
           </div>
         </div>
@@ -224,7 +270,8 @@ export const Diagnostics = () => {
         </div>
 
         {DIAGNOSTICS.map((diagnostic, index) => {
-          const diagnosticStartFrame = diagnosticsStartFrame + index * FRAMES_PER_DIAGNOSTIC;
+          const diagnosticStartFrame =
+            diagnosticsStartFrame + index * FRAMES_PER_DIAGNOSTIC;
           const localFrame = frame - diagnosticStartFrame;
           const diagnosticOpacity = interpolate(
             localFrame,

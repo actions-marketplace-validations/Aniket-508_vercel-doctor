@@ -1,27 +1,38 @@
 import { PlusIcon } from "lucide-react";
-import { SectionContainer, SectionContent } from "@/components/landing/section-layout";
+
 import { Footer } from "@/components/landing/footer";
+import {
+  SectionContainer,
+  SectionContent,
+} from "@/components/landing/section-layout";
+import { Button } from "@/components/ui/button";
 import { LINK } from "@/constants/links";
 import { SHOWCASE_PROJECTS } from "@/constants/showcase";
-import { Button } from "@/components/ui/button";
 import { i18n } from "@/i18n/config";
 import { getTranslation } from "@/translations";
 
-export const generateStaticParams = () => i18n.languages.map((lang) => ({ lang }));
+export const generateStaticParams = () =>
+  i18n.languages.map((lang) => ({ lang }));
 
-const ShowcasePage = async ({ params }: { params: Promise<{ lang: string }> }) => {
+const ShowcasePage = async ({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) => {
   const { lang } = await params;
   const translation = getTranslation(lang);
 
   return (
     <>
-      <SectionContainer className="flex-1 flex flex-col">
+      <SectionContainer className="flex flex-1 flex-col">
         <SectionContent className="w-full flex-1">
-          <div className="flex flex-col border-b border-fd-border items-center px-6 py-16 text-center">
-            <h1 className="text-3xl font-pixel font-bold text-fd-foreground sm:text-4xl mb-2">
+          <div className="border-fd-border flex flex-col items-center border-b px-6 py-16 text-center">
+            <h1 className="font-pixel text-fd-foreground mb-2 text-3xl font-bold sm:text-4xl">
               {translation.showcasePage.heading}
             </h1>
-            <p className="text-fd-muted-foreground mb-6">{translation.showcasePage.description}</p>
+            <p className="text-fd-muted-foreground mb-6">
+              {translation.showcasePage.description}
+            </p>
             <Button asChild>
               <a
                 href={`${LINK.GITHUB}/issues/new?title=Showcase+submission&body=Project+name:%0AProject+URL:`}
@@ -42,14 +53,14 @@ const ShowcasePage = async ({ params }: { params: Promise<{ lang: string }> }) =
                   href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center border-b border-r border-fd-border px-6 py-5 text-sm font-medium text-fd-foreground transition-colors hover:bg-fd-accent/20"
+                  className="border-fd-border text-fd-foreground hover:bg-fd-accent/20 flex items-center border-r border-b px-6 py-5 text-sm font-medium transition-colors"
                 >
                   {project.name}
                 </a>
               ))}
             </div>
           ) : (
-            <div className="flex flex-col flex-1 items-center gap-2 px-6 py-24 text-center text-fd-muted-foreground">
+            <div className="text-fd-muted-foreground flex flex-1 flex-col items-center gap-2 px-6 py-24 text-center">
               <p className="text-sm">{translation.showcasePage.empty}</p>
             </div>
           )}

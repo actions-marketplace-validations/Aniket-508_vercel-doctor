@@ -1,13 +1,17 @@
+import { ImageResponse } from "@takumi-rs/image-response";
+import { notFound } from "next/navigation";
+
 import DocsOgImage from "@/components/og/docs-og-image";
 import { i18n } from "@/i18n/config";
 import { getPageImage, source } from "@/lib/source";
 import { loadFontsForLocale } from "@/utils/load-og-fonts";
-import { ImageResponse } from "@takumi-rs/image-response";
-import { notFound } from "next/navigation";
 
 export const revalidate = false;
 
-export async function GET(_req: Request, { params }: RouteContext<"/og/docs/[...slug]">) {
+export async function GET(
+  _req: Request,
+  { params }: RouteContext<"/og/docs/[...slug]">,
+) {
   const { slug } = await params;
   const slugWithoutExt = slug.slice(0, -1);
   const firstSegment = slugWithoutExt[0];
