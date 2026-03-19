@@ -2,11 +2,8 @@
 # https://github.com/evilmartians/lefthook
 
 pre-commit:
-  parallel: true
   jobs:
-    - name: lint
-      run: pnpm lint {staged_files}
-      stage_fixed: true
-    - name: format
-      run: pnpm format {staged_files}
+    - run: pnpm exec ultracite fix {staged_files}
+      glob:
+        - "**/*.{js,jsx,ts,tsx,json,jsonc,css}"
       stage_fixed: true
