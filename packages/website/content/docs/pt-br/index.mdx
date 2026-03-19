@@ -4,6 +4,8 @@ description: Reduza sua conta da Vercel escaneando seu código Next.js em busca 
 icon: CircleQuestionMark
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
 Vercel Doctor é uma ferramenta especializada de verificação de saúde para projetos Next.js implantados na Vercel. Ele escaneia seu código em busca de padrões que inflam sua conta — duração de funções, rotas sem cache, imagens não otimizadas e mais — e então atribui uma pontuação de 0 a 100 com correções práticas. A orientação se ajusta à versão major detectada do Next.js.
@@ -52,14 +54,14 @@ O Vercel Doctor executa duas passagens de análise em paralelo:
 
 ### Categorias de regras
 
-| Categoria                                               | Regras | O que detecta                                                                                        |
-| ------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
-| [Duração de Funções](/docs/rules/function-duration)     | 3      | Awaits sequenciais, logging bloqueante, I/O não paralelo                                             |
-| [Cache](/docs/rules/caching)                            | 6      | `force-dynamic`, políticas de cache ausentes, fetches `no-store`, efeitos colaterais em handlers GET |
-| [Invocações](/docs/rules/invocations)                   | 2      | Fetch no lado do cliente em páginas, prefetching agressivo de links                                  |
-| [Otimização de Imagens](/docs/rules/image-optimization) | 4      | `unoptimized` global, `sizes` ausente, padrões remotos amplos demais, SVG sem `unoptimized`          |
-| [Plataforma](/docs/rules/platform)                      | 8      | Imports pesados no Edge, cron jobs, runtime Bun, Fluid Compute, arquivo de deploy, cache Turbopack   |
-| [Código Morto](/docs/rules/dead-code)                   | 4      | Arquivos, exports, tipos não utilizados e duplicados                                                 |
+| Categoria                                                                                     | Regras | O que detecta                                                                                        |
+| --------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| <DynamicLink href="/[lang]/docs/rules/function-duration">Duração de Funções</DynamicLink>     | 3      | Awaits sequenciais, logging bloqueante, I/O não paralelo                                             |
+| <DynamicLink href="/[lang]/docs/rules/caching">Cache</DynamicLink>                            | 6      | `force-dynamic`, políticas de cache ausentes, fetches `no-store`, efeitos colaterais em handlers GET |
+| <DynamicLink href="/[lang]/docs/rules/invocations">Invocações</DynamicLink>                   | 2      | Fetch no lado do cliente em páginas, prefetching agressivo de links                                  |
+| <DynamicLink href="/[lang]/docs/rules/image-optimization">Otimização de Imagens</DynamicLink> | 4      | `unoptimized` global, `sizes` ausente, padrões remotos amplos demais, SVG sem `unoptimized`          |
+| <DynamicLink href="/[lang]/docs/rules/platform">Plataforma</DynamicLink>                      | 8      | Imports pesados no Edge, cron jobs, runtime Bun, Fluid Compute, arquivo de deploy, cache Turbopack   |
+| <DynamicLink href="/[lang]/docs/rules/dead-code">Código Morto</DynamicLink>                   | 4      | Arquivos, exports, tipos não utilizados e duplicados                                                 |
 
 ## Funcionalidades
 

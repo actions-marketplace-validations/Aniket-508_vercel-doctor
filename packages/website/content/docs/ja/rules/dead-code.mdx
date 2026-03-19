@@ -3,6 +3,8 @@ title: Dead Code
 description: コードベース内の未使用ファイル、エクスポート、型を検出するルール。
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 Dead code検出は[Knip](https://knip.dev)で動作しています。未使用コードはバンドルを肥大化させ、コールドスタートを遅くし、デプロイサイズを増やします。これらはすべてVercelのコスト上昇につながります。
 
 `--no-dead-code` または設定ファイルの `"deadCode": false` で、dead code検出を完全に無効化できます。

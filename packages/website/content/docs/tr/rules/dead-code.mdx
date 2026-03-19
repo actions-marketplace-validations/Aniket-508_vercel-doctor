@@ -3,6 +3,8 @@ title: Ölü Kod
 description: Kod tabanınızdaki kullanılmayan dosyaları, export'ları ve tipleri tespit eden kurallar.
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 Ölü kod tespiti [Knip](https://knip.dev) tarafından desteklenir. Kullanılmayan kod bundle'ınızı şişirir, cold start'ları yavaşlatır ve dağıtım boyutunu artırır — bunların hepsi daha yüksek Vercel maliyetlerine dönüşür.
 
 Ölü kod tespitini tamamen devre dışı bırakmak için `--no-dead-code` veya yapılandırma dosyanızda `"deadCode": false` kullanabilirsiniz.

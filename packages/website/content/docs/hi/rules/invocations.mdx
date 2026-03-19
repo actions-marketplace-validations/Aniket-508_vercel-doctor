@@ -3,6 +3,8 @@ title: Invocations
 description: Unnecessary serverless function invocations का कारण बनने वाले patterns का पता लगाने वाले rules।
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 ये rules उन patterns को पकड़ते हैं जो extra serverless function invocations trigger करते हैं, additional compute cycles के माध्यम से आपके Vercel बिल को बढ़ाते हैं।
 
 ## nextjs-no-client-fetch-for-server-data

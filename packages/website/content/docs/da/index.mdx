@@ -4,6 +4,8 @@ description: Reducer din Vercel-regning ved at scanne din Next.js-kodebase for d
 icon: CircleQuestionMark
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
 Vercel Doctor er et specialiseret sundhedstjek-værktøj til Next.js-projekter deployeret på Vercel. Det scanner din kodebase for mønstre, der blæser din regning op — funktionsvarighed, ucachede ruter, uoptimerede billeder og mere — og giver dig derefter en score ud af 100 med konkrete løsningsforslag. Vejledningen tilpasser sig din registrerede Next.js-hovedversion.
@@ -52,14 +54,14 @@ Vercel Doctor kører to analysepas parallelt:
 
 ### Regelkategorier
 
-| Kategori                                           | Regler | Hvad det fanger                                                                              |
-| -------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------- |
-| [Funktionsvarighed](/docs/rules/function-duration) | 3      | Sekventielle awaits, blokerende logning, ikke-parallel I/O                                   |
-| [Caching](/docs/rules/caching)                     | 6      | `force-dynamic`, manglende cache-politikker, `no-store` fetches, sideeffekter i GET-handlere |
-| [Invokationer](/docs/rules/invocations)            | 2      | Klientsidehentning på sider, aggressiv link-prefetching                                      |
-| [Billedoptimering](/docs/rules/image-optimization) | 4      | Global `unoptimized`, manglende `sizes`, brede remote-mønstre, SVG uden `unoptimized`        |
-| [Platform](/docs/rules/platform)                   | 8      | Edge tunge imports, cron-jobs, Bun-runtime, Fluid Compute, deploy-arkiv, Turbopack-cache     |
-| [Død kode](/docs/rules/dead-code)                  | 4      | Ubrugte filer, exports, typer og duplikater                                                  |
+| Kategori                                                                                 | Regler | Hvad det fanger                                                                              |
+| ---------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------- |
+| <DynamicLink href="/[lang]/docs/rules/function-duration">Funktionsvarighed</DynamicLink> | 3      | Sekventielle awaits, blokerende logning, ikke-parallel I/O                                   |
+| <DynamicLink href="/[lang]/docs/rules/caching">Caching</DynamicLink>                     | 6      | `force-dynamic`, manglende cache-politikker, `no-store` fetches, sideeffekter i GET-handlere |
+| <DynamicLink href="/[lang]/docs/rules/invocations">Invokationer</DynamicLink>            | 2      | Klientsidehentning på sider, aggressiv link-prefetching                                      |
+| <DynamicLink href="/[lang]/docs/rules/image-optimization">Billedoptimering</DynamicLink> | 4      | Global `unoptimized`, manglende `sizes`, brede remote-mønstre, SVG uden `unoptimized`        |
+| <DynamicLink href="/[lang]/docs/rules/platform">Platform</DynamicLink>                   | 8      | Edge tunge imports, cron-jobs, Bun-runtime, Fluid Compute, deploy-arkiv, Turbopack-cache     |
+| <DynamicLink href="/[lang]/docs/rules/dead-code">Død kode</DynamicLink>                  | 4      | Ubrugte filer, exports, typer og duplikater                                                  |
 
 ## Funktioner
 

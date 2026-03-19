@@ -4,6 +4,8 @@ description: Next.js kod tabanınızı maliyetli kalıplar için tarayarak Verce
 icon: CircleQuestionMark
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
 Vercel Doctor, Vercel üzerinde dağıtılan Next.js projeleri için özel bir sağlık kontrolü aracıdır. Faturanızı şişiren kalıpları tarar — fonksiyon süresi, önbelleğe alınmamış rotalar, optimize edilmemiş görseller ve daha fazlası — ardından uygulanabilir düzeltmelerle 100 üzerinden bir puan verir. Rehberlik algılanan Next.js major sürümüne göre uyarlanır.
@@ -52,14 +54,14 @@ Vercel Doctor paralel olarak iki analiz geçişi çalıştırır:
 
 ### Kural kategorileri
 
-| Kategori                                               | Kurallar | Neleri yakalar                                                                                        |
-| ------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------- |
-| [Fonksiyon Süresi](/docs/rules/function-duration)      | 3        | Sıralı await'ler, engelleyici loglama, paralel olmayan I/O                                            |
-| [Önbellek](/docs/rules/caching)                        | 6        | `force-dynamic`, eksik önbellek politikaları, `no-store` fetch'ler, GET handler'lardaki yan etkiler   |
-| [Çağrılar](/docs/rules/invocations)                    | 2        | Sayfalarda istemci taraflı fetch, agresif link prefetch'i                                             |
-| [Görsel Optimizasyonu](/docs/rules/image-optimization) | 4        | Global `unoptimized`, eksik `sizes`, geniş uzak kalıplar, `unoptimized` olmadan SVG                   |
-| [Platform](/docs/rules/platform)                       | 8        | Edge'de ağır import'lar, cron job'lar, Bun runtime, Fluid Compute, deploy arşivi, Turbopack önbelleği |
-| [Ölü Kod](/docs/rules/dead-code)                       | 4        | Kullanılmayan dosyalar, export'lar, tipler ve tekrarlar                                               |
+| Kategori                                                                                     | Kurallar | Neleri yakalar                                                                                        |
+| -------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| <DynamicLink href="/[lang]/docs/rules/function-duration">Fonksiyon Süresi</DynamicLink>      | 3        | Sıralı await'ler, engelleyici loglama, paralel olmayan I/O                                            |
+| <DynamicLink href="/[lang]/docs/rules/caching">Önbellek</DynamicLink>                        | 6        | `force-dynamic`, eksik önbellek politikaları, `no-store` fetch'ler, GET handler'lardaki yan etkiler   |
+| <DynamicLink href="/[lang]/docs/rules/invocations">Çağrılar</DynamicLink>                    | 2        | Sayfalarda istemci taraflı fetch, agresif link prefetch'i                                             |
+| <DynamicLink href="/[lang]/docs/rules/image-optimization">Görsel Optimizasyonu</DynamicLink> | 4        | Global `unoptimized`, eksik `sizes`, geniş uzak kalıplar, `unoptimized` olmadan SVG                   |
+| <DynamicLink href="/[lang]/docs/rules/platform">Platform</DynamicLink>                       | 8        | Edge'de ağır import'lar, cron job'lar, Bun runtime, Fluid Compute, deploy arşivi, Turbopack önbelleği |
+| <DynamicLink href="/[lang]/docs/rules/dead-code">Ölü Kod</DynamicLink>                       | 4        | Kullanılmayan dosyalar, export'lar, tipler ve tekrarlar                                               |
 
 ## Özellikler
 

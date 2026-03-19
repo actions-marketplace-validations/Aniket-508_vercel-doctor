@@ -3,6 +3,8 @@ title: Código muerto
 description: Reglas que detectan archivos, exportaciones y tipos no usados en tu código.
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 La detección de código muerto está impulsada por [Knip](https://knip.dev). El código no usado infla tu bundle, ralentiza los cold starts y aumenta el tamaño de despliegue — todo lo cual se traduce en mayores costos de Vercel.
 
 Puedes desactivar completamente la detección de código muerto con `--no-dead-code` o `"deadCode": false` en tu archivo de configuración.

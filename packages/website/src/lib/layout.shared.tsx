@@ -18,6 +18,7 @@ export const baseOptions = (locale: string): BaseLayoutProps => {
           Vercel Doctor
         </>
       ),
+      url: withLocalePrefix(locale, ROUTES.HOME),
     },
     links: [
       { text: translation.nav.docs, url: withLocalePrefix(locale, ROUTES.DOCS) },

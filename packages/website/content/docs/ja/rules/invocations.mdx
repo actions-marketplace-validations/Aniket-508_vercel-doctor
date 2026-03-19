@@ -3,6 +3,8 @@ title: Invocations
 description: 不要なserverless関数呼び出しを引き起こすパターンを検出するルール。
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 これらのルールは、追加の serverless 関数 invocation を引き起こし、コンピュートサイクルの増加を通じて Vercel の請求額を増やすパターンを検出します。
 
 ## nextjs-no-client-fetch-for-server-data

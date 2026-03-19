@@ -3,6 +3,8 @@ title: 死代码
 description: 检测代码库中未使用的文件、导出和类型的规则。
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 死代码检测由 [Knip](https://knip.dev) 提供支持。未使用的代码会增大 bundle、拖慢冷启动、增加部署体积，进而推高 Vercel 成本。
 
 可通过 `--no-dead-code` 或在配置中设置 `"deadCode": false` 完全关闭死代码检测。

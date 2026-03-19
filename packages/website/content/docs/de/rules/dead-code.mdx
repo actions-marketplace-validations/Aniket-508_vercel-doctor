@@ -3,6 +3,8 @@ title: Dead Code
 description: Regeln, die ungenutzte Dateien, Exports und Typen in deiner Codebasis erkennen.
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 Die Dead-Code-Erkennung wird von [Knip](https://knip.dev) unterstützt. Ungenutzter Code bläht dein Bundle auf, verlangsamt Cold Starts und erhöht die Deployment-Größe — all das schlägt sich in höheren Vercel-Kosten nieder.
 
 Du kannst die Dead-Code-Erkennung vollständig mit `--no-dead-code` oder `"deadCode": false` in deiner Config-Datei deaktivieren.

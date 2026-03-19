@@ -3,6 +3,8 @@ title: Kode Mati
 description: Aturan yang mendeteksi file, export, dan tipe yang tidak digunakan dalam codebase Anda.
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 Deteksi kode mati didukung oleh [Knip](https://knip.dev). Kode yang tidak digunakan memperbesar bundle, memperlambat cold start, dan meningkatkan ukuran deployment — semuanya berdampak pada biaya Vercel yang lebih tinggi.
 
 Anda dapat menonaktifkan deteksi kode mati sepenuhnya dengan `--no-dead-code` atau `"deadCode": false` di file konfigurasi Anda.

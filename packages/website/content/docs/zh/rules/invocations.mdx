@@ -3,6 +3,8 @@ title: 调用次数
 description: 检测会导致不必要 serverless 函数调用的规则。
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 这些规则会捕获会触发额外 serverless 函数调用、从而增加 Vercel 账单的做法。
 
 ## nextjs-no-client-fetch-for-server-data

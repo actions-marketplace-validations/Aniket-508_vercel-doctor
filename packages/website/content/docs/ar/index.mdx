@@ -4,6 +4,8 @@ description: قلّل فاتورة Vercel عبر فحص قاعدة كود Next.j
 icon: CircleQuestionMark
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 import { Step, Steps } from "fumadocs-ui/components/steps";
 
 Vercel Doctor هو أداة فحص صحة متخصصة لمشاريع Next.js المُنشورة على Vercel. يفحص قاعدة الكود بحثاً عن أنماط تزيد فاتورتك — مدة تنفيذ الدوال، والمسارات غير المخزنة مؤقتاً، والصور غير المحسّنة، والمزيد — ثم يعطيك درجة من 100 مع إصلاحات قابلة للتطبيق. كما تتكيّف الإرشادات مع الإصدار الرئيسي المكتشف من Next.js.
@@ -52,14 +54,14 @@ npx -y vercel-doctor@latest . --diff
 
 ### فئات القواعد
 
-| Category                                             | Rules | ما يلتقطه                                                                                         |
-| ---------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- |
-| [Function Duration](/docs/rules/function-duration)   | 3     | awaits متتابعة، تسجيل حجب، I/O غير متوازي                                                         |
-| [Caching](/docs/rules/caching)                       | 6     | `force-dynamic`، سياسات cache مفقودة، fetch مع `no-store`، آثار جانبية في معالجات GET             |
-| [Invocations](/docs/rules/invocations)               | 2     | جلب من جانب العميل في الصفحات، prefetch عدواني للروابط                                            |
-| [Image Optimization](/docs/rules/image-optimization) | 4     | `unoptimized` عام، `sizes` مفقود، أنماط remote واسعة، SVG بدون `unoptimized`                      |
-| [Platform](/docs/rules/platform)                     | 8     | استيرادات ثقيلة للـ Edge، وظائف cron، runtime لـ Bun، Fluid Compute، أرشيف النشر، cache Turbopack |
-| [Dead Code](/docs/rules/dead-code)                   | 4     | ملفات غير مستخدمة، صادرات، أنواع، وتكرارات                                                        |
+| Category                                                                                   | Rules | ما يلتقطه                                                                                         |
+| ------------------------------------------------------------------------------------------ | ----- | ------------------------------------------------------------------------------------------------- |
+| <DynamicLink href="/[lang]/docs/rules/function-duration">Function Duration</DynamicLink>   | 3     | awaits متتابعة، تسجيل حجب، I/O غير متوازي                                                         |
+| <DynamicLink href="/[lang]/docs/rules/caching">Caching</DynamicLink>                       | 6     | `force-dynamic`، سياسات cache مفقودة، fetch مع `no-store`، آثار جانبية في معالجات GET             |
+| <DynamicLink href="/[lang]/docs/rules/invocations">Invocations</DynamicLink>               | 2     | جلب من جانب العميل في الصفحات، prefetch عدواني للروابط                                            |
+| <DynamicLink href="/[lang]/docs/rules/image-optimization">Image Optimization</DynamicLink> | 4     | `unoptimized` عام، `sizes` مفقود، أنماط remote واسعة، SVG بدون `unoptimized`                      |
+| <DynamicLink href="/[lang]/docs/rules/platform">Platform</DynamicLink>                     | 8     | استيرادات ثقيلة للـ Edge، وظائف cron، runtime لـ Bun، Fluid Compute، أرشيف النشر، cache Turbopack |
+| <DynamicLink href="/[lang]/docs/rules/dead-code">Dead Code</DynamicLink>                   | 4     | ملفات غير مستخدمة، صادرات، أنواع، وتكرارات                                                        |
 
 ## الميزات
 

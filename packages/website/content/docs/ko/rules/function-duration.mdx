@@ -3,6 +3,8 @@ title: 함수 실행 시간
 description: 서버리스 함수 실행 시간을 늘리는 패턴을 감지하는 규칙.
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 이 규칙들은 서버리스 함수의 실제 실행 시간을 늘리는 패턴을 포착합니다. 실행 시간이 짧을수록 비용이 낮아집니다 — Vercel은 실행 시간당 GB-초로 청구합니다.
 
 ## async-parallel

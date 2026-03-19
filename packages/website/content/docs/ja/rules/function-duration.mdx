@@ -3,6 +3,8 @@ title: Function Duration
 description: serverless関数の実行時間を増加させるパターンを検出するルール。
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 これらのルールは、serverless関数の実行時間を膨らませるパターンを検出します。実行時間が短いほど請求額は下がります。VercelはGB秒あたりの実行時間で課金します。
 
 ## async-parallel

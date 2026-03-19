@@ -3,6 +3,8 @@ title: Function Duration
 description: Serverless function execution time बढ़ाने वाले patterns का पता लगाने वाले rules।
 ---
 
+import { DynamicLink } from "fumadocs-core/dynamic-link";
+
 ये rules उन patterns को पकड़ते हैं जो आपकी serverless functions के wall-clock time को बढ़ाते हैं। कम duration वाली functions का मतलब lower bills — Vercel execution time के प्रति GB-second चार्ज करता है।
 
 ## async-parallel
