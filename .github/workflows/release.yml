@@ -18,17 +18,22 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: 20
-          cache: pnpm
-          registry-url: "https://registry.npmjs.org"
+          version: "10.29.1"
 
-      - run: pnpm install --frozen-lockfile
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22.20.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Create release PR or publish
         id: changesets

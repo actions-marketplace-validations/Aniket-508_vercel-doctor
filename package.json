@@ -13,10 +13,9 @@
     "dev": "pnpm --filter vercel-doctor run dev",
     "build": "pnpm --filter vercel-doctor run build",
     "test": "pnpm --filter vercel-doctor run test",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "format": "oxfmt",
-    "format:check": "oxfmt --check",
+    "typecheck": "pnpm --filter vercel-doctor run typecheck",
+    "check": "ultracite check",
+    "fix": "ultracite fix",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "pnpm build && changeset publish --no-git-tag",
@@ -26,7 +25,8 @@
     "@changesets/cli": "^2.27.0",
     "lefthook": "^2.1.4",
     "oxfmt": "^0.41.0",
-    "oxlint": "^1.47.0"
+    "oxlint": "^1.47.0",
+    "ultracite": "^7.3.2"
   },
   "packageManager": "pnpm@10.29.1"
 }
