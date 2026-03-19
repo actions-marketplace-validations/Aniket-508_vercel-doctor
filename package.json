@@ -20,11 +20,11 @@
     "changeset": "changeset",
     "version": "changeset version",
     "release": "pnpm build && changeset publish --no-git-tag",
-    "prepare": "husky"
+    "prepare": "lefthook install"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
-    "husky": "^9.1.7",
+    "lefthook": "^2.1.4",
     "oxfmt": "^0.32.0",
     "oxlint": "^1.47.0"
   },
