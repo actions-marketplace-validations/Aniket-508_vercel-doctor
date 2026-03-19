@@ -53,9 +53,7 @@ export const generateMetadata = async ({
   }
   const description =
     descriptionParts.length > 0
-      ? `${descriptionParts.join(
-          ", ",
-        )} found. ${SITE.DESCRIPTION.SHARE}`
+      ? `${descriptionParts.join(", ")} found. ${SITE.DESCRIPTION.SHARE}`
       : SITE.DESCRIPTION.SHARE;
 
   return createMetadata({
