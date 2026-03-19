@@ -27,7 +27,7 @@ export const zh: Translation = {
   },
   nav: {
     docs: "文档",
-    showcase: "案例展示",
+    showcase: "案例集锦",
     sponsors: "赞助者",
   },
   notFound: {

@@ -28,7 +28,7 @@ export const tr: Translation = {
   },
   nav: {
     docs: "Belgeler",
-    showcase: "Vitrin",
+    showcase: "Vitrinler",
     sponsors: "Sponsorlar",
   },
   notFound: {

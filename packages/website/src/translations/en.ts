@@ -27,7 +27,7 @@ export const en: Translation = {
   },
   nav: {
     docs: "Docs",
-    showcase: "Showcase",
+    showcase: "Showcases",
     sponsors: "Sponsors",
   },
   notFound: {

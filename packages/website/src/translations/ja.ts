@@ -27,7 +27,7 @@ export const ja: Translation = {
   },
   nav: {
     docs: "ドキュメント",
-    showcase: "ショーケース",
+    showcase: "ショーケース一覧",
     sponsors: "スポンサー",
   },
   notFound: {

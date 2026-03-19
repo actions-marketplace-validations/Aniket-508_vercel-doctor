@@ -28,7 +28,7 @@ export const uk: Translation = {
   },
   nav: {
     docs: "Документація",
-    showcase: "Вітрина",
+    showcase: "Вітрини",
     sponsors: "Спонсори",
   },
   notFound: {

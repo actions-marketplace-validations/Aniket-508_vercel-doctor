@@ -27,7 +27,7 @@ export const hi: Translation = {
   },
   nav: {
     docs: "डॉक्स",
-    showcase: "शोकेस",
+    showcase: "प्रदर्शनियाँ",
     sponsors: "स्पॉन्सर",
   },
   notFound: {

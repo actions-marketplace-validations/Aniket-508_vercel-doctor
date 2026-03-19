@@ -28,7 +28,7 @@ export const ptBr: Translation = {
   },
   nav: {
     docs: "Documentação",
-    showcase: "Vitrine",
+    showcase: "Vitrines",
     sponsors: "Patrocinadores",
   },
   notFound: {

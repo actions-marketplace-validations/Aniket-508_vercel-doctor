@@ -27,7 +27,7 @@ export const ar: Translation = {
   },
   nav: {
     docs: "التوثيق",
-    showcase: "العروض",
+    showcase: "المعارض",
     sponsors: "الرعاة",
   },
   notFound: {

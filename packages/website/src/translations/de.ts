@@ -28,7 +28,7 @@ export const de: Translation = {
   },
   nav: {
     docs: "Dokumentation",
-    showcase: "Galerie",
+    showcase: "Galerien",
     sponsors: "Sponsoren",
   },
   notFound: {

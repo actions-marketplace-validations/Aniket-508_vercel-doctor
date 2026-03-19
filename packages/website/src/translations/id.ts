@@ -28,7 +28,7 @@ export const id: Translation = {
   },
   nav: {
     docs: "Dokumentasi",
-    showcase: "Etalase",
+    showcase: "Etalase unggulan",
     sponsors: "Sponsor",
   },
   notFound: {

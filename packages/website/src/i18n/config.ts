@@ -1,5 +1,7 @@
 import { defineI18n } from "fumadocs-core/i18n";
 
+const RTL_LANGUAGES = new Set(["ar"]);
+
 export const i18n = defineI18n({
   defaultLanguage: "en",
   hideLocale: "default-locale",
@@ -29,3 +31,6 @@ export type Locale = (typeof i18n.languages)[number];
 
 export const isLocale = (value: string): value is Locale =>
   i18n.languages.includes(value as Locale);
+
+export const isRtlLocale = (locale: Locale): boolean =>
+  RTL_LANGUAGES.has(locale);

@@ -27,7 +27,7 @@ export const ko: Translation = {
   },
   nav: {
     docs: "문서",
-    showcase: "쇼케이스",
+    showcase: "쇼케이스 모음",
     sponsors: "스폰서",
   },
   notFound: {
