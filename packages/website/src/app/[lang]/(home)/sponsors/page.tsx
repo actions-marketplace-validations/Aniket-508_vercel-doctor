@@ -1,4 +1,5 @@
 import { HeartHandshakeIcon } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
 
 import { Footer } from "@/components/landing/footer";
@@ -8,13 +9,31 @@ import {
 } from "@/components/landing/section-layout";
 import { Button } from "@/components/ui/button";
 import { LINK } from "@/constants/links";
+import { ROUTES } from "@/constants/routes";
 import { SPONSORS } from "@/constants/sponsors";
 import type { Sponsor } from "@/constants/sponsors";
 import { i18n } from "@/i18n/config";
+import { withLocalePrefix } from "@/i18n/navigation";
+import { createMetadata } from "@/seo/metadata";
 import { getTranslation } from "@/translations";
 
 export const generateStaticParams = () =>
   i18n.languages.map((lang) => ({ lang }));
+
+export const generateMetadata = async ({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> => {
+  const { lang } = await params;
+  const translation = getTranslation(lang);
+
+  return createMetadata({
+    canonical: withLocalePrefix(lang, ROUTES.SPONSORS),
+    description: translation.sponsorsPage.description,
+    title: translation.sponsorsPage.heading,
+  });
+};
 
 const SponsorCard = ({ sponsor }: { sponsor: Sponsor }) => (
   <a

@@ -32,5 +32,5 @@ export type Locale = (typeof i18n.languages)[number];
 export const isLocale = (value: string): value is Locale =>
   i18n.languages.includes(value as Locale);
 
-export const isRtlLocale = (locale: Locale): boolean =>
+export const isRtlLocale = (locale: string): boolean =>
   RTL_LANGUAGES.has(locale);

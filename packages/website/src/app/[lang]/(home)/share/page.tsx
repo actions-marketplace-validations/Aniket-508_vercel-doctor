@@ -7,21 +7,21 @@ import {
   SectionContainer,
   SectionContent,
 } from "@/components/landing/section-layout";
+import AnimatedScore from "@/components/share/animated-score";
+import BadgeSnippet from "@/components/share/badge-snippet";
 import { Button } from "@/components/ui/button";
 import { COMMAND } from "@/constants/command";
 import { ROUTES } from "@/constants/routes";
 import { PERFECT_SCORE } from "@/constants/score";
 import { SITE } from "@/constants/site";
 import { withLocalePrefix } from "@/i18n/navigation";
+import { createMetadata } from "@/seo/metadata";
 import { getTranslation } from "@/translations";
 import getScoreColorClass from "@/utils/get-score-color-class";
 import getScoreLabel from "@/utils/get-score-label";
 import { getSharePageData } from "@/utils/get-share-page-data";
 import type { ShareSearchParams } from "@/utils/get-share-page-data";
 import getTranslatedScoreLabel from "@/utils/get-translated-score-label";
-
-import AnimatedScore from "./animated-score";
-import BadgeSnippet from "./badge-snippet";
 
 const getShareBaseUrl = (lang: string) =>
   `${SITE.URL}${withLocalePrefix(lang, ROUTES.SHARE)}`;
@@ -33,14 +33,15 @@ export const generateMetadata = async ({
   params: Promise<{ lang: string }>;
   searchParams: Promise<ShareSearchParams>;
 }): Promise<Metadata> => {
-  await params;
+  const { lang } = await params;
   const sharePageData = getSharePageData(await searchParams);
   const { projectName, score, errorCount, warningCount, searchParamsString } =
     sharePageData;
-  const label = getScoreLabel(score);
 
+  const label = getScoreLabel(score);
   const titlePrefix = projectName ? `${projectName} - ` : "";
-  const title = `Vercel Doctor - ${titlePrefix}Score: ${score}/${PERFECT_SCORE} (${label})`;
+  const title = `${titlePrefix}Score: ${score}/${PERFECT_SCORE} (${label})`;
+
   const descriptionParts: string[] = [];
   if (errorCount > 0) {
     descriptionParts.push(`${errorCount} error${errorCount === 1 ? "" : "s"}`);
@@ -54,25 +55,19 @@ export const generateMetadata = async ({
     descriptionParts.length > 0
       ? `${descriptionParts.join(
           ", ",
-        )} found. Run vercel-doctor on your codebase to reduce your Vercel bill.`
-      : "Run vercel-doctor on your codebase to reduce your Vercel bill.";
+        )} found. ${SITE.DESCRIPTION.SHARE}`
+      : SITE.DESCRIPTION.SHARE;
 
-  const ogImageUrl = `/share/og?${searchParamsString}`;
-
-  return {
+  return createMetadata({
+    canonical: withLocalePrefix(lang, ROUTES.SHARE),
     description,
-    openGraph: { description, images: [ogImageUrl], title },
+    ogImageAlt: `${SITE.NAME} - Score preview`,
+    ogImageUrl: `/share/og?${searchParamsString}`,
     title,
-    twitter: {
-      card: "summary_large_image",
-      description,
-      images: [ogImageUrl],
-      title,
-    },
-  };
+  });
 };
 
-const SharePage = async ({
+export const SharePage = async ({
   params,
   searchParams,
 }: {
@@ -80,7 +75,7 @@ const SharePage = async ({
   searchParams: Promise<ShareSearchParams>;
 }) => {
   const { lang } = await params;
-  const sharePageData = getSharePageData(await searchParams);
+
   const {
     projectName,
     score,
@@ -88,7 +83,7 @@ const SharePage = async ({
     warningCount,
     fileCount,
     searchParamsString,
-  } = sharePageData;
+  } = getSharePageData(await searchParams);
   const colorClass = getScoreColorClass(score);
   const shareBaseUrl = getShareBaseUrl(lang);
   const shareUrl = `${shareBaseUrl}?${searchParamsString}`;

@@ -1,4 +1,5 @@
 import { PlusIcon } from "lucide-react";
+import type { Metadata } from "next";
 
 import { Footer } from "@/components/landing/footer";
 import {
@@ -7,12 +8,30 @@ import {
 } from "@/components/landing/section-layout";
 import { Button } from "@/components/ui/button";
 import { LINK } from "@/constants/links";
+import { ROUTES } from "@/constants/routes";
 import { SHOWCASE_PROJECTS } from "@/constants/showcase";
 import { i18n } from "@/i18n/config";
+import { withLocalePrefix } from "@/i18n/navigation";
+import { createMetadata } from "@/seo/metadata";
 import { getTranslation } from "@/translations";
 
 export const generateStaticParams = () =>
   i18n.languages.map((lang) => ({ lang }));
+
+export const generateMetadata = async ({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}): Promise<Metadata> => {
+  const { lang } = await params;
+  const translation = getTranslation(lang);
+
+  return createMetadata({
+    canonical: withLocalePrefix(lang, ROUTES.SHOWCASE),
+    description: translation.showcasePage.description,
+    title: translation.showcasePage.heading,
+  });
+};
 
 const ShowcasePage = async ({
   params,

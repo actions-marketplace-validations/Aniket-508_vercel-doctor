@@ -9,6 +9,8 @@ interface CreateMetadataOptions {
   canonical?: string;
   ogTitle?: string;
   ogDescription?: string;
+  ogImageUrl?: string;
+  ogImageAlt?: string;
   noIndex?: boolean;
 }
 
@@ -19,8 +21,13 @@ const createMetadata = (options: CreateMetadataOptions = {}): Metadata => {
     canonical,
     ogTitle,
     ogDescription,
+    ogImageUrl,
+    ogImageAlt,
     noIndex = false,
   } = options;
+
+  const previewImageUrl = ogImageUrl ?? SITE.OG_IMAGE;
+  const previewImageAlt = ogImageAlt ?? `${SITE.NAME} - Optimize Next.js costs`;
 
   return {
     ...(title && { title }),
@@ -34,9 +41,9 @@ const createMetadata = (options: CreateMetadataOptions = {}): Metadata => {
       description: ogDescription || description,
       images: [
         {
-          alt: `${SITE.NAME} - Optimize Next.js costs`,
+          alt: previewImageAlt,
           height: 630,
-          url: SITE.OG_IMAGE,
+          url: previewImageUrl,
           width: 1200,
         },
       ],
@@ -47,7 +54,7 @@ const createMetadata = (options: CreateMetadataOptions = {}): Metadata => {
     twitter: {
       card: "summary_large_image",
       description: ogDescription || description,
-      images: [SITE.OG_IMAGE],
+      images: [previewImageUrl],
       title: ogTitle || title || SITE.NAME,
     },
     ...(noIndex && {

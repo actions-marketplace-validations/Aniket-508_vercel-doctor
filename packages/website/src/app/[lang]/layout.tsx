@@ -1,8 +1,7 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
 
+import { isRtlLocale } from "@/i18n/config";
 import { provider } from "@/i18n/ui";
-
-const RTL_LANGUAGES = new Set(["ar"]);
 
 const LangLayout = async ({
   params,
@@ -12,7 +11,7 @@ const LangLayout = async ({
   children: React.ReactNode;
 }) => {
   const { lang } = await params;
-  const isRtl = RTL_LANGUAGES.has(lang);
+  const isRtl = isRtlLocale(lang);
 
   return (
     <RootProvider i18n={provider(lang)} dir={isRtl ? "rtl" : "ltr"}>

@@ -61,6 +61,10 @@ const config = {
           destination: "/install-skill",
           source: "/install-skill.sh",
         },
+        {
+          destination: "/en/share",
+          source: "/share",
+        },
       ],
     };
   },

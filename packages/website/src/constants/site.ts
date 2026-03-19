@@ -6,6 +6,7 @@ export const SITE = {
   },
   DESCRIPTION: {
     LONG: "Reduce your Vercel bill by optimizing function duration, caching, and platform usage. A specialized health check tool for Next.js projects on Vercel.",
+    SHARE: "Run vercel-doctor on your codebase to reduce your Vercel bill.",
     SHORT: "Optimize Next.js projects to reduce Vercel costs.",
   },
   KEYWORDS: [
