@@ -1,5 +1,5 @@
 import { RootProvider } from "fumadocs-ui/provider/next";
-import { provider } from "@/lib/i18n";
+import { provider } from "@/i18n/ui";
 
 const RTL_LANGUAGES = new Set(["ar"]);
 

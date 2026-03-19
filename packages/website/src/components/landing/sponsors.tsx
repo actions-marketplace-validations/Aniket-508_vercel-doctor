@@ -5,7 +5,7 @@ import { LINK } from "@/constants/links";
 import { SPONSORS } from "@/constants/sponsors";
 import type { Sponsor } from "@/constants/sponsors";
 import { getTranslation } from "@/translations";
-import { i18n } from "@/lib/i18n";
+import { i18n } from "@/i18n/config";
 
 const GRID_SIZE = 16;
 

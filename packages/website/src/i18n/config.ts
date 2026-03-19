@@ -1,0 +1,31 @@
+import { defineI18n } from "fumadocs-core/i18n";
+
+export const i18n = defineI18n({
+  defaultLanguage: "en",
+  languages: [
+    "en",
+    "es",
+    "zh",
+    "ja",
+    "fr",
+    "de",
+    "pt",
+    "pt-br",
+    "ko",
+    "ar",
+    "hi",
+    "it",
+    "id",
+    "tr",
+    "ru",
+    "da",
+    "uk",
+  ],
+  hideLocale: "default-locale",
+  parser: "dir",
+});
+
+export type Locale = (typeof i18n.languages)[number];
+
+export const isLocale = (value: string): value is Locale =>
+  i18n.languages.includes(value as Locale);

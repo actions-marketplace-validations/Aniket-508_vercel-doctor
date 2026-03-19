@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { RootProvider } from "fumadocs-ui/provider/next";
-import { i18n, provider } from "@/lib/i18n";
+import { i18n } from "@/i18n/config";
+import { provider } from "@/i18n/ui";
 import { baseOptions } from "@/lib/layout.shared";
 import {
   getShareSearchParamsFromRecord,

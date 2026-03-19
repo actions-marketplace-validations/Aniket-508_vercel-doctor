@@ -1,7 +1,9 @@
 import { LogoMark } from "@/components/logo";
 import { LINK } from "@/constants/links";
-import { i18n } from "@/lib/i18n";
-import { getTranslation, getLocalizedPath } from "@/translations";
+import { i18n } from "@/i18n/config";
+import { ROUTES } from "@/constants/routes";
+import { withLocalePrefix } from "@/i18n/navigation";
+import { getTranslation } from "@/translations";
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
 export const baseOptions = (locale: string): BaseLayoutProps => {
@@ -18,9 +20,9 @@ export const baseOptions = (locale: string): BaseLayoutProps => {
       ),
     },
     links: [
-      { text: translation.nav.docs, url: getLocalizedPath(locale, "/docs") },
-      { text: translation.nav.showcase, url: getLocalizedPath(locale, "/showcase") },
-      { text: translation.nav.sponsors, url: getLocalizedPath(locale, "/sponsors") },
+      { text: translation.nav.docs, url: withLocalePrefix(locale, ROUTES.DOCS) },
+      { text: translation.nav.showcase, url: withLocalePrefix(locale, ROUTES.SHOWCASE) },
+      { text: translation.nav.sponsors, url: withLocalePrefix(locale, ROUTES.SPONSORS) },
     ],
     githubUrl: LINK.GITHUB,
   };

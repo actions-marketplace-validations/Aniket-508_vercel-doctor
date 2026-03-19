@@ -5,7 +5,7 @@ import { GeistPixelGrid } from "geist/font/pixel";
 import { baseMetadata } from "@/seo/metadata";
 import { JsonLdScripts } from "@/seo/json-ld";
 import "./global.css";
-import { i18n } from "@/lib/i18n";
+import { i18n } from "@/i18n/config";
 
 const fontClassNames = [GeistSans.variable, GeistMono.variable, GeistPixelGrid.variable].join(" ");
 

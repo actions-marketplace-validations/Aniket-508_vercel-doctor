@@ -1,7 +1,9 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { getTranslation, getLocalizedPath } from "@/translations";
+import { ROUTES } from "@/constants/routes";
+import { withLocalePrefix } from "@/i18n/navigation";
+import { getTranslation } from "@/translations";
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { EmptyContent } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
@@ -32,7 +34,7 @@ const NotFoundPage = () => {
           </Button>
 
           <Button variant="outline" asChild>
-            <Link href={getLocalizedPath(lang, "/docs")}>
+            <Link href={withLocalePrefix(lang, ROUTES.DOCS)}>
               <BookOpenIcon />
               {translation.notFound.explore}
             </Link>

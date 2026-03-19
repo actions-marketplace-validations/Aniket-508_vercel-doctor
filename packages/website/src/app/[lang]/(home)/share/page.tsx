@@ -9,13 +9,15 @@ import DoctorFace from "@/components/doctor-face";
 import { Button } from "@/components/ui/button";
 import { SectionContainer, SectionContent } from "@/components/landing/section-layout";
 import { Footer } from "@/components/landing/footer";
-import { getTranslation, getLocalizedPath } from "@/translations";
+import { ROUTES } from "@/constants/routes";
+import { withLocalePrefix } from "@/i18n/navigation";
+import { getTranslation } from "@/translations";
 import getTranslatedScoreLabel from "@/utils/get-translated-score-label";
 import AnimatedScore from "./animated-score";
 import BadgeSnippet from "./badge-snippet";
 import { LinkedInIcon, XIcon } from "@/components/icons";
 
-const getShareBaseUrl = (lang: string) => `${SITE.URL}${getLocalizedPath(lang, "/share")}`;
+const getShareBaseUrl = (lang: string) => `${SITE.URL}${withLocalePrefix(lang, ROUTES.SHARE)}`;
 
 export const generateMetadata = async ({
   params,

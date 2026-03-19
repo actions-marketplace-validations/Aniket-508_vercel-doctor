@@ -1,5 +1,5 @@
 import { LINK } from "@/constants/links";
-import { i18n } from "@/lib/i18n";
+import { i18n } from "@/i18n/config";
 import { getPageImage, source } from "@/lib/source";
 import {
   DocsBody,
@@ -13,7 +13,7 @@ import { getMDXComponents } from "@/mdx-components";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LLMCopyButton, ViewOptions } from "@/components/ai/page-actions";
-import { getLocalizedPath } from "@/translations";
+import { withLocalePrefix } from "@/i18n/navigation";
 import { SquarePen } from "lucide-react";
 
 interface DocsPageProps {
@@ -67,12 +67,12 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
   const page = source.getPage(slug, lang);
   if (!page) notFound();
 
-  const docPath = `/docs/${page.slugs.join("/")}`;
-  const canonical = getLocalizedPath(lang, docPath);
+  const docPath = `/docs/${page.slugs.join("/")}` as `/${string}`;
+  const canonical = withLocalePrefix(lang, docPath);
   const languages: Record<string, string> = Object.fromEntries(
-    i18n.languages.map((locale) => [locale, getLocalizedPath(locale, docPath)]),
+    i18n.languages.map((locale) => [locale, withLocalePrefix(locale, docPath)]),
   );
-  languages["x-default"] = getLocalizedPath(i18n.defaultLanguage, docPath);
+  languages["x-default"] = withLocalePrefix(i18n.defaultLanguage, docPath);
 
   const ogLocale = lang.replace("-", "_");
 

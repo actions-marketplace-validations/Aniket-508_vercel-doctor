@@ -15,7 +15,7 @@ import { tr } from "./tr";
 import { ru } from "./ru";
 import { da } from "./da";
 import { uk } from "./uk";
-import { i18n } from "@/lib/i18n";
+import { i18n } from "@/i18n/config";
 
 export interface Translation {
   nav: {
@@ -128,8 +128,3 @@ const translations: Record<string, Translation> = {
 
 export const getTranslation = (locale: string): Translation =>
   translations[locale] ?? translations[i18n.defaultLanguage];
-
-export const getLocalizedPath = (locale: string, path: string): string => {
-  if (locale === i18n.defaultLanguage) return path;
-  return `/${locale}${path}`;
-};

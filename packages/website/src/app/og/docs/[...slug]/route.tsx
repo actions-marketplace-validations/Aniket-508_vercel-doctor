@@ -1,5 +1,5 @@
 import DocsOgImage from "@/components/og/docs-og-image";
-import { i18n } from "@/lib/i18n";
+import { i18n } from "@/i18n/config";
 import { getPageImage, source } from "@/lib/source";
 import { loadFontsForLocale } from "@/utils/load-og-fonts";
 import { ImageResponse } from "@takumi-rs/image-response";

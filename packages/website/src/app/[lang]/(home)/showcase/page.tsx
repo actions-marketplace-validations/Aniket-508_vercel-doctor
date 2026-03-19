@@ -4,7 +4,7 @@ import { Footer } from "@/components/landing/footer";
 import { LINK } from "@/constants/links";
 import { SHOWCASE_PROJECTS } from "@/constants/showcase";
 import { Button } from "@/components/ui/button";
-import { i18n } from "@/lib/i18n";
+import { i18n } from "@/i18n/config";
 import { getTranslation } from "@/translations";
 
 export const generateStaticParams = () => i18n.languages.map((lang) => ({ lang }));

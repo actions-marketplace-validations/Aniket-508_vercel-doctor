@@ -3,7 +3,7 @@ import { Hero } from "@/components/landing/hero";
 import { Testimonials } from "@/components/landing/testimonials";
 import { PreFooter } from "@/components/landing/pre-footer";
 import { Footer } from "@/components/landing/footer";
-import { i18n } from "@/lib/i18n";
+import { i18n } from "@/i18n/config";
 import { getTranslation } from "@/translations";
 
 export const generateStaticParams = () => i18n.languages.map((lang) => ({ lang }));

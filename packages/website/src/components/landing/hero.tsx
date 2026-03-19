@@ -11,7 +11,8 @@ import { SKILLS_COMMAND } from "@/constants/command";
 import { PACKAGE_MANAGERS } from "@/constants/package-managers";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import type { Translation } from "@/translations";
-import { getLocalizedPath } from "@/translations";
+import { ROUTES } from "@/constants/routes";
+import { withLocalePrefix } from "@/i18n/navigation";
 
 interface HeroProps {
   translation: Translation;
@@ -131,7 +132,7 @@ export const Hero = ({ translation, lang }: HeroProps) => {
 
           <div className="flex items-center gap-4">
             <Button asChild>
-              <Link href={getLocalizedPath(lang, "/docs")}>
+              <Link href={withLocalePrefix(lang, ROUTES.DOCS)}>
                 {translation.hero.fixCosts}
                 <ArrowRightIcon />
               </Link>

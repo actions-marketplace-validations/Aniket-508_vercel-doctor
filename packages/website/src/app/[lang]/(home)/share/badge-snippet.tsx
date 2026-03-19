@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { SITE } from "@/constants/site";
 import { Button } from "@/components/ui/button";
-import { getLocalizedPath } from "@/translations";
+import { ROUTES } from "@/constants/routes";
+import { withLocalePrefix } from "@/i18n/navigation";
 import type { Translation } from "@/translations";
 
 const COPY_FEEDBACK_DURATION_MS = 2000;
@@ -17,7 +18,7 @@ interface BadgeSnippetProps {
 const BadgeSnippet = ({ searchParamsString, lang, translation }: BadgeSnippetProps) => {
   const [didCopy, setDidCopy] = useState(false);
 
-  const sharePath = getLocalizedPath(lang, "/share");
+  const sharePath = withLocalePrefix(lang, ROUTES.SHARE);
   const badgePath = "/share/badge";
   const badgeFullUrl = `${SITE.URL}${badgePath}?${searchParamsString}`;
   const shareFullUrl = `${SITE.URL}${sharePath}?${searchParamsString}`;

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { GithubIcon } from "@/components/icons";
 import { SectionContainer, SectionContent, SectionFiller, SectionHelper } from "./section-layout";
 import type { Translation } from "@/translations";
-import { getLocalizedPath } from "@/translations";
+import { ROUTES } from "@/constants/routes";
+import { withLocalePrefix } from "@/i18n/navigation";
 
 interface PreFooterProps {
   translation: Translation;
@@ -38,7 +39,7 @@ export const PreFooter = ({ translation, lang }: PreFooterProps) => {
 
           <div className="flex items-center gap-4">
             <Button asChild>
-              <Link href={getLocalizedPath(lang, "/docs")}>
+              <Link href={withLocalePrefix(lang, ROUTES.DOCS)}>
                 {translation.preFooter.getStarted}
                 <ArrowRightIcon />
               </Link>
