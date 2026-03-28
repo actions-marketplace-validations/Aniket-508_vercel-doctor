@@ -29,33 +29,7 @@ const config = {
       beforeFiles: [
         {
           destination: "/llms.txt",
-          has: [
-            {
-              key: "accept",
-              type: "header",
-              value: "(.*)text/markdown(.*)",
-            },
-          ],
-          source: "/",
-        },
-        {
-          destination: "/llms.txt",
           source: "/llm.txt",
-        },
-        {
-          destination: "/llms.mdx/docs/:path*",
-          has: [
-            {
-              key: "accept",
-              type: "header",
-              value: "(.*)text/markdown(.*)",
-            },
-          ],
-          source: "/docs/:path*",
-        },
-        {
-          destination: "/llms.mdx/docs/:path*",
-          source: "/docs/:path*\\.mdx",
         },
         {
           destination: "/install-skill",
